@@ -49,18 +49,28 @@ void print_frog(Item *frog){
 }
 
 void print_crocodile(Item *crocodile){
-	static const char* sprite_matrix[CROCCODILE_DIM_Y][CROCCODILE_DIM_X] = {
+	static const char* sprite_matrix[CROCODILE_DIM_Y][CROCODILE_DIM_X] = {
         {"", "", "", "", "▀", "▀", "▀", "█", "█", "█", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "█", "█", "▀", "▀", "▀", "", "", ""},
         {"▄", "▄", "▄", "▄", " ", "▄", " ", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", " ", "▀", "█", "▄", "▄", "▄"},
         {"▀", "▀", "▀", "▀", " ", "▀", " ", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", " ", "▄", "█", "▀", "▀", "▀"},
         {"", "", "", "", "▄", "▄", "▄", "█", "█", "█", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "█", "█", "▄", "▄", "▄", "", "", ""},
     };
 	attron(COLOR_PAIR(4));  
-	for (int i = 0; i < CROCCODILE_DIM_Y; i++) {
-		for (int j = 0; j < CROCCODILE_DIM_X; j++) {
+	for (int i = 0; i < CROCODILE_DIM_Y; i++) {
+		for (int j = 0; j < CROCODILE_DIM_X; j++) {
 			mvprintw(crocodile->y+i, crocodile->x+j, "%s", sprite_matrix[i][j]);
 		}
 	}
 	attroff(COLOR_PAIR(4));
 }
+
+void print_bullets(Item *bullets){
+	static const char* sprite_matrix[BULLETS_DIM] = {"▄"};
+	attron(COLOR_PAIR(5));
+	for (int i = 0; i < BULLETS_DIM; i++) {
+		mvprintw(bullets->y+i, bullets->x, "%s", sprite_matrix[i]);
+	}
+	attroff(COLOR_PAIR(5));
+}
+	
 
