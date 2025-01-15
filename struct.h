@@ -1,5 +1,5 @@
 typedef struct {
-    int ID;
+    int id;
     int y;
     int x;
 } Item;

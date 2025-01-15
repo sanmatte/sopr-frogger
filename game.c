@@ -108,10 +108,10 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right) {
 void Crocodile(int *pipe_fds, Item *crocodile, int random_number){
     close(pipe_fds[0]);
     while(manche>0){
-        if (random_number == 1 && crocodile->x < COLS) {
+        if (random_number == 0 && crocodile->x < COLS) {
             crocodile->x += 1;
         }
-        else if (random_number == 0 && crocodile->x > CROCODILE_DIM_X * -1) {
+        else if (random_number == 1 && crocodile->x > -CROCODILE_DIM_X) {
             crocodile->x -= 1;
         }
         if (pipe_fds != NULL) {
@@ -121,58 +121,12 @@ void Crocodile(int *pipe_fds, Item *crocodile, int random_number){
     }
 }
 
-void ReadAndPrint(int *pipe_fds, Item *frog, Item *crocodiles, Item *bullets_left, Item *bullets_right) {
-    close(pipe_fds[1]);
-    Item msg;
-
-    while (manche > 0) {
-        if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
-            if (msg.ID == FROG_ID) {
-                *frog = msg;
-            } else if (msg.ID == CROCODILE_ID) {
-                for (int i = 0; i < CROCODILE_MAX_NUMBER; i++) {
-                    if (msg.y == crocodiles[i].y) {
-                        crocodiles[i] = msg;
-                        break;
-                    }
-                }
-            } else if (msg.ID == BULLETS_ID) {
-                if (msg.x > frog->x) {
-                    *bullets_right = msg;
-                } else {
-                    *bullets_left = msg;
-                }
-            }
-
-            print_background();
-            // Stampa tutti i coccodrilli
-            for (int i = 0; i < CROCODILE_MAX_NUMBER; i++) {
-                print_crocodile(&crocodiles[i]);
-            }
-            print_frog(frog);
-            print_bullets(bullets_left);
-            print_bullets(bullets_right);
-            
-            refresh();
-        }
-    }
-}
-
 int main(){
     setlocale(LC_ALL, "");
-    initscr();start_color();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);
+    initscr();start_color();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
 
     Item frog = {FROG_ID, LINES-4, 0};
-    Item crocodiles[CROCODILE_MAX_NUMBER];
-    for (int i = 0; i < CROCODILE_MAX_NUMBER; i++) {
-        crocodiles[i].ID = CROCODILE_ID;
-        crocodiles[i].y = SIDEWALK_HEIGHT_2 - CROCODILE_DIM_Y + 1 - (i * CROCODILE_DIM_Y);  
-        if (i % 2 == 0) {
-            crocodiles[i].x = -CROCODILE_DIM_X;  // Da sinistra verso destra
-        } else {
-            crocodiles[i].x = COLS - 1;         // Da destra verso sinistra
-        }
-    }
+    Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
     Item bullet_right = {BULLETS_ID, -1, -1};
     Item bullet_left = {BULLETS_ID, -1, -1};
 
@@ -189,11 +143,24 @@ int main(){
     // Definizione variabili
     int pipe_fds[2], direction = rand() % 2;
     
+    for (int i = 0; i < STREAM_NUMBER; i++) {
+        for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
+            crocodiles[i][j].id = CROCODILE_MIN_ID + (i * CROCODILE_STREAM_MAX_NUMBER) + j;
+            crocodiles[i][j].y = SIDEWALK_HEIGHT_2 - CROCODILE_DIM_Y + 1 - (i * CROCODILE_DIM_Y);  
+            if (direction == 0) {
+                crocodiles[i][j].x = -CROCODILE_DIM_X;  // Da sinistra verso destra
+            } else {
+                crocodiles[i][j].x = COLS - 1;         // Da destra verso sinistra
+            }
+        }
+        direction= 1 - direction;
+    }
+
     if(pipe(pipe_fds) != 0){
         exit(0);
     }
     
-    pid_t child_pids[CROCODILE_MAX_NUMBER + 1];
+    pid_t child_pids[(STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1];
 
     // Creazione del processo Frog
     pid_t pid_frog = fork();
@@ -209,28 +176,77 @@ int main(){
     }
 
     // Creazione dei processi Crocodile
-    for (int i = 0; i < CROCODILE_MAX_NUMBER; i++) {
-        pid_t pid_croc = fork();
-        if (pid_croc < 0) {
-            perror("Errore nella fork del coccodrillo");
-            endwin();
-            exit(EXIT_FAILURE);
-        } else if (pid_croc == 0) {
-            direction = (i % 2 == 0) ? 1 : 0;
-            Crocodile(pipe_fds, &crocodiles[i], direction);
-            exit(0);
-        } else {
-            child_pids[i + 1] = pid_croc;
+    for (int i = 0; i < STREAM_NUMBER; i++) {
+        for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
+            pid_t pid_croc = fork();
+            if (pid_croc < 0) {
+                perror("Errore nella fork del coccodrillo");
+                endwin();
+                exit(EXIT_FAILURE);
+            } else if (pid_croc == 0) {
+                Crocodile(pipe_fds, &crocodiles[i][j], direction);
+                exit(0);
+            } else {
+                child_pids[i + 1] = pid_croc;
+            }
+        }
+        direction = 1 - direction;
+    }
+
+    Item msg;
+
+    while (manche > 0) {
+        if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
+            switch(msg.id){
+                //FROG case
+                case FROG_ID:
+                    frog = msg;
+                    break;
+                
+                //BULLETS case
+                case BULLETS_ID:
+                    if(msg.x < frog.x){
+                        bullet_left = msg;
+                    }else{
+                        bullet_right = msg;
+                    }
+                    break;
+                
+                //CROCODILE case
+                default:
+                    if(msg.id >= CROCODILE_MIN_ID && msg.id <= CROCODILE_MAX_ID){
+                        for(int i = 0; i < STREAM_NUMBER; i++){
+                            for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
+                                if(crocodiles[i][j].id == msg.id){
+                                    crocodiles[i][j] = msg;
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+
+            print_background();
+
+            for(int i = 0; i < STREAM_NUMBER; i++){
+                for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
+                    print_crocodile(&crocodiles[i][j]);
+                }
+            }
+
+            print_frog(&frog);
+            print_bullets(&bullet_left);
+            print_bullets(&bullet_right);
+            
+            refresh();
         }
     }
 
-    ReadAndPrint(pipe_fds, &frog, crocodiles, &bullet_left, &bullet_right);
-
-    for (int i = 0; i < CROCODILE_MAX_NUMBER + 1; i++) {
+    for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
         kill(child_pids[i], SIGTERM);  // Invia il segnale di terminazione
     }
 
-    for (int i = 0; i < CROCODILE_MAX_NUMBER + 1; i++) {
+    for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
         waitpid(child_pids[i], NULL, 0);
     }
     endwin();

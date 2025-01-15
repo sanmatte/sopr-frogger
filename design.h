@@ -17,14 +17,16 @@
 #define FROG_DIM_X 10
 
 // define crocodile
-#define CROCODILE_ID 2
+#define CROCODILE_MIN_ID 2
+#define CROCODILE_MAX_ID 25
 #define CROCODILE_DIM_Y 4
 #define CROCODILE_DIM_X 30
+#define STREAM_NUMBER 8
 #define CROCODILE_SPEED_MAX 200000
-#define CROCODILE_MAX_NUMBER 8
+#define CROCODILE_STREAM_MAX_NUMBER 1
 
 // define bullets
-#define BULLETS_ID 3
+#define BULLETS_ID 26
 #define BULLETS_DIM 1
 #define BULLETS_SPEED 20000
 
