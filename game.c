@@ -17,6 +17,7 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right) {
     int projectile_active = 0;
     pid_t bullet_pid_right = -1;
     pid_t bullet_pid_left = -1;
+    bool has_moved = TRUE;
 
     getmaxyx(stdscr, max_y, max_x);
 
@@ -25,15 +26,19 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right) {
         switch (ch) {
             case KEY_UP:
                 if (frog->y > SCORE_HEIGHT + 1) frog->y -= FROG_DIM_Y;
+                has_moved = TRUE;
                 break;
             case KEY_DOWN:
                 if (frog->y < max_y - FROG_DIM_Y) frog->y += FROG_DIM_Y;
+                has_moved = TRUE;
                 break;
             case KEY_LEFT:
                 if (frog->x > 0) frog->x -= 1;
+                has_moved = TRUE;
                 break;
             case KEY_RIGHT:
                 if (frog->x < max_x - FROG_DIM_X) frog->x += 1;
+                has_moved = TRUE;
                 break;
             case ' ':
                 if (projectile_active == 0) {
@@ -48,6 +53,8 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right) {
                         while (bullet_right->x < max_x) {
                             bullet_right->x += 1;
                             if (pipe_fds != NULL) {
+                                srand(time(0)+1);
+                                usleep(1000*(rand() % (3)));
                                 write(pipe_fds[1], bullet_right, sizeof(Item));
                             }
                             usleep(BULLETS_SPEED);
@@ -63,6 +70,8 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right) {
                         while (bullet_left->x > -1) {
                             bullet_left->x -= 1;
                             if (pipe_fds != NULL) {
+                                srand(time(0)+2);
+                                usleep(1000*(rand() % (3)));
                                 write(pipe_fds[1], bullet_left, sizeof(Item));
                             }
                             usleep(BULLETS_SPEED);  
@@ -72,8 +81,7 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right) {
                 }
                 break;
             case 'q': 
-                endwin();
-                return;
+            endwin();
         }
 
         // Controlla se i proiettili sono terminati
@@ -97,11 +105,37 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right) {
         if (bullet_pid_right == -1 && bullet_pid_left == -1) {
             projectile_active = 0;
         }
-
-        // Scrive la posizione della rana nella pipe
-        if (pipe_fds != NULL) {
-            write(pipe_fds[1], frog, sizeof(Item));
+        if(has_moved){
+            // Scrive la posizione della rana nella pipe
+            if (pipe_fds != NULL) {
+                write(pipe_fds[1], frog, sizeof(Item));
+            }
         }
+        has_moved = FALSE;
+    }
+    usleep(50000);
+}
+
+void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], int direction, int stream_speed[STREAM_NUMBER]){
+    int position, min=1, max=3;
+    for (int i = 0; i < STREAM_NUMBER; i++) {
+        for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
+            if (crocodiles[i][j].free == 0){
+                position = (rand() % (max - min + 1)) + min;
+                crocodiles[i][j].id = CROCODILE_MIN_ID + (i * CROCODILE_STREAM_MAX_NUMBER) + j;
+                crocodiles[i][j].y = SIDEWALK_HEIGHT_2 - CROCODILE_DIM_Y + 1 - (i * CROCODILE_DIM_Y);  
+                if (direction == 0) {
+                    crocodiles[i][j].x = (-CROCODILE_DIM_X * position);  // Da sinistra verso destra
+                } else {
+                    crocodiles[i][j].x = ((COLS - 1) + (CROCODILE_DIM_X * (position-1)));  // Da destra verso sinistra
+                }
+                crocodiles[i][j].speed = stream_speed[i];
+                crocodiles[i][j].free = 1;
+                min+=2; max+=2;
+            }
+        }
+        min=1; max=3;
+        direction= 1 - direction;
     }
 }
 
@@ -114,21 +148,28 @@ void Crocodile(int *pipe_fds, Item *crocodile, int random_number){
         else if (random_number == 1 && crocodile->x > -CROCODILE_DIM_X) {
             crocodile->x -= 1;
         }
+        usleep(crocodile->speed);
         if (pipe_fds != NULL) {
             write(pipe_fds[1], crocodile, sizeof(Item));
         }
-        usleep(CROCODILE_SPEED_MAX);
     }
 }
+
+
 
 int main(){
     setlocale(LC_ALL, "");
     initscr();start_color();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
 
-    Item frog = {FROG_ID, LINES-4, 0};
+    Item frog = {FROG_ID, LINES-4, (COLS/2)-FROG_DIM_X, 0, 1};
     Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
-    Item bullet_right = {BULLETS_ID, -1, -1};
-    Item bullet_left = {BULLETS_ID, -1, -1};
+    for (int i = 0; i < STREAM_NUMBER; i++) {
+        for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
+            crocodiles[i][j].free = 0;
+        }
+    }
+    Item bullet_right = {BULLETS_ID, -1, -1, 0, 0};
+    Item bullet_left = {BULLETS_ID, -1, -1, 0, 0};
 
     init_color(COLOR_DARKGREEN, 0, 400, 0);
     init_color(COLOR_GREY, 600, 600, 600);
@@ -137,24 +178,18 @@ int main(){
     init_pair(1, COLOR_GREEN, COLOR_GREEN);
     init_pair(2, COLOR_BLACK, COLOR_GREY);  
     init_pair(3, COLOR_BLACK, COLOR_BLUE);
-    init_pair(4, COLOR_DARKGREEN, COLOR_DARKGREEN);
+    init_pair(4, COLOR_DARKGREEN, COLOR_BLUE);
     init_pair(5, COLOR_RED, COLOR_RED);
 
     // Definizione variabili
     int pipe_fds[2], direction = rand() % 2;
-    
-    for (int i = 0; i < STREAM_NUMBER; i++) {
-        for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
-            crocodiles[i][j].id = CROCODILE_MIN_ID + (i * CROCODILE_STREAM_MAX_NUMBER) + j;
-            crocodiles[i][j].y = SIDEWALK_HEIGHT_2 - CROCODILE_DIM_Y + 1 - (i * CROCODILE_DIM_Y);  
-            if (direction == 0) {
-                crocodiles[i][j].x = -CROCODILE_DIM_X;  // Da sinistra verso destra
-            } else {
-                crocodiles[i][j].x = COLS - 1;         // Da destra verso sinistra
-            }
-        }
-        direction= 1 - direction;
+    int stream_speed[STREAM_NUMBER];
+
+    for(int i=0; i<STREAM_NUMBER; i++){
+        stream_speed[i] = rand() % (CROCODILE_SPEED_MAX - CROCODILE_SPEED_MIN) + CROCODILE_SPEED_MIN;
     }
+    
+    InitializeCrocodile(crocodiles, direction, stream_speed);
 
     if(pipe(pipe_fds) != 0){
         exit(0);
@@ -176,25 +211,25 @@ int main(){
     }
 
     // Creazione dei processi Crocodile
-    for (int i = 0; i < STREAM_NUMBER; i++) {
-        for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
+    for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
+        for(int i = 0; i < STREAM_NUMBER; i++){
             pid_t pid_croc = fork();
             if (pid_croc < 0) {
                 perror("Errore nella fork del coccodrillo");
                 endwin();
                 exit(EXIT_FAILURE);
-            } else if (pid_croc == 0) {
+            } else if (pid_croc == 0) {      
                 Crocodile(pipe_fds, &crocodiles[i][j], direction);
                 exit(0);
             } else {
-                child_pids[i + 1] = pid_croc;
+                child_pids[j + 1] = pid_croc;
             }
+            direction = 1 - direction;
         }
-        direction = 1 - direction;
     }
-
+    
     Item msg;
-
+    
     while (manche > 0) {
         if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
             switch(msg.id){
