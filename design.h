@@ -15,7 +15,7 @@
 #define FROG_ID 1
 #define FROG_DIM_Y 4
 #define FROG_DIM_X 10
-#define FROG_ON_CROCODILE_SIG 302
+#define FROG_ON_CROCODILE_SIG SIGUSR1
 //#define FROG_ON_CROCODILE_SIG_RIGHT 301
 
 // define crocodile
