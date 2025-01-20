@@ -1,27 +1,53 @@
 #include "frog.h"
 #include "utils.h"
 
-void move_on_c(int sig){
+int newmanche = FALSE; 
+
+void signal_handler(int sig){
     if(sig == FROG_ON_CROCODILE_SIG){
         frog_on_crocodile = TRUE;
     }
+    if (sig == RESET_MANCHE_SIG)
+    {
+        newmanche = TRUE;
+    }
+    
+}
+
+void reset_manche(Item *frog){
+    frog->y = LINES-4;
+    frog->x = (COLS/2)-FROG_DIM_X;
+    newmanche = FALSE;
+    debuglog("Reset manche\n", 0);
 }
 void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right, int stream_speed[STREAM_NUMBER]){
-    close(pipe_fds[0]);  
+    close(pipe_fds[0]); 
     int max_y, max_x, ch;
     int projectile_active = 0;
     pid_t bullet_pid_right = -1;
     pid_t bullet_pid_left = -1;
     bool has_moved = TRUE;
     getmaxyx(stdscr, max_y, max_x);
-    signal(FROG_ON_CROCODILE_SIG, move_on_c);
+    signal(FROG_ON_CROCODILE_SIG, signal_handler);
+    signal(RESET_MANCHE_SIG, signal_handler);
+
+    for (size_t i = 0; i < STREAM_NUMBER; i++)
+    {
+        debuglog("Stream speed %d\n", stream_speed[i]);
+    }
+    
 
     while (manche > 0) {
+        if (newmanche)
+        {
+            reset_manche(frog);
+        }
+        
         ch = getch(); 
         switch (ch) {
             case KEY_UP:
                 if (frog->y > SCORE_HEIGHT + 1) frog->y -= FROG_DIM_Y;
-                has_moved = TRUE;
+                has_moved = TRUE; //! move inside if
                 break;
             case KEY_DOWN:
                 if (frog->y < max_y - FROG_DIM_Y) frog->y += FROG_DIM_Y;
@@ -101,21 +127,44 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right, int 
             projectile_active = 0;
         }
         
-        int stream = (frog->y - SIDEWALK_HEIGHT_1) / FROG_DIM_Y;
-        if (frog_on_crocodile) {
-            if (frog->x + 1 < max_x - FROG_DIM_X) { 
-                frog->x += 1;
-                has_moved = TRUE;
-                frog_on_crocodile = FALSE;
-                debuglog("Frog on crocodile %d\n", stream_speed[stream]);
-                usleep(stream_speed[stream]);
-            }
+        int stream = ((SIDEWALK_HEIGHT_2 + 1 - frog->y) / FROG_DIM_Y) -1;
+        // if (frog_on_crocodile) {
+        //     if (frog->x + 1 < max_x - FROG_DIM_X) { 
+        //         frog->x += 1;
+        //         frog_on_crocodile = FALSE;
+        //         debuglog("Frog on crocodile %d\n", stream_speed[stream]);
+        //         write(pipe_fds[1], frog, sizeof(Item));
+        //     }
             
+        // }
+        
+ int speed = 100000;
+if (frog_on_crocodile) {
+    if (frog->x + 1 < max_x - FROG_DIM_X) { 
+        frog->x += 1;
+        frog_on_crocodile = FALSE;
+        has_moved = TRUE;
+        for(int i = 0; i < STREAM_NUMBER; i++)
+            debuglog("Frog on crocodile %d\n", stream_speed[stream]);
+        // Use nanosleep for precise sleep handling
+        struct timespec req, rem;
+        req.tv_sec = stream_speed[stream] / 1000000;               // Convert microseconds to seconds
+        req.tv_nsec = (stream_speed[stream] % 1000000) * 1000;     // Convert remaining microseconds to nanoseconds
+
+        while (nanosleep(&req, &rem) == -1 && errno == EINTR) {
+            req = rem; // Retry with remaining time if interrupted
         }
+    }
+}
+
 
         if(has_moved){
             // Scrive la posizione della rana nella pipe
             if (pipe_fds != NULL) {
+                debuglog("Stream %d\n", stream);
+                debuglog("LINES %d\n", LINES - 1 );
+                debuglog("Sidewalk %d\n", SIDEWALK_HEIGHT_2);
+                debuglog("Frog y %d\n", frog->y);
                 write(pipe_fds[1], frog, sizeof(Item));
             }
         }

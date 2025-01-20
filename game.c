@@ -14,7 +14,11 @@
 
 int manche = 3;
 bool frog_on_crocodile = FALSE;
-
+void handlesigs(int sig){
+    if(sig == FROG_ON_CROCODILE_SIG){
+        frog_on_crocodile = TRUE;
+    }
+}
 int main(){
     setlocale(LC_ALL, "");
     initscr();start_color();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
@@ -89,6 +93,7 @@ int main(){
     }
     
     Item msg;
+    signal(FROG_ON_CROCODILE_SIG, handlesigs);
     while (manche > 0) {
         if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
             switch(msg.id){
@@ -97,7 +102,7 @@ int main(){
                     frog = msg;
                     break;
                 
-                //BULLETS case
+                //BULLETS cas
                 case BULLETS_ID:
                     if(msg.x < frog.x){
                         bullet_left = msg;
@@ -119,13 +124,35 @@ int main(){
                     }
                     break;
             }
-
+            int stream = ((SIDEWALK_HEIGHT_2 + 1 - frog.y) / FROG_DIM_Y) -1;
             //int stream = ((LINES-1-frog.y+1) / FROG_DIM_Y)+1;
-            for(int i = 0; i < STREAM_NUMBER; i++){
                 for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
-                    if(crocodiles[i][j].y >= 0 && frog.y == crocodiles[i][j].y && frog.x >= crocodiles[i][j].x && frog.x <= crocodiles[i][j].x + CROCODILE_DIM_X - FROG_DIM_X) {
-                        kill(child_pids[0], FROG_ON_CROCODILE_SIG);
+                    if(crocodiles[stream][j].y >= 0 && frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X) {
+
                     }
+                }
+            
+            // collisions with background
+            if(frog.y > SIDEWALK_HEIGHT_1 || frog.y < SIDEWALK_HEIGHT_2){
+                for (size_t j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++)
+                {
+                    if ( stream >= 0 && stream < STREAM_NUMBER)
+                    {
+                        if(frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X){
+                            if(frog_on_crocodile == FALSE){
+                                kill(child_pids[0], FROG_ON_CROCODILE_SIG);
+                                debuglog("cock %d\n", crocodiles[stream][j].speed);
+                            }
+                        }
+                        else
+                        {
+                            manche--;
+                            frog.y = LINES-4;
+                            frog.x = (COLS/2)-FROG_DIM_X;
+                            kill(child_pids[0], RESET_MANCHE_SIG);
+                        }
+                    }
+
                 }
             }
 
@@ -155,3 +182,7 @@ int main(){
     endwin();
     return 0;
 }
+
+// void start_game(){
+    
+// }
