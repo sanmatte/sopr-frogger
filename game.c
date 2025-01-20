@@ -91,7 +91,14 @@ int main(){
             direction = 1 - direction;
         }
     }
-    
+    int even, odd;
+    if (direction == 0) {
+        even = 1;
+        odd = -1;
+    } else {
+        odd = 1;
+        even = -1;
+    }
     Item msg;
     signal(FROG_ON_CROCODILE_SIG, handlesigs);
     while (manche > 0) {
@@ -99,7 +106,9 @@ int main(){
             switch(msg.id){
                 //FROG case
                 case FROG_ID:
-                    frog = msg;
+                    frog.y += msg.y;
+                    debuglog("frog.x %d\n", frog.x);
+                    frog.x += msg.x;
                     break;
                 
                 //BULLETS cas
@@ -118,38 +127,44 @@ int main(){
                             for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
                                 if(crocodiles[i][j].id == msg.id){
                                     crocodiles[i][j] = msg;
-                                }
+                                    int stream = i;
+                                    if(frog.y > SIDEWALK_HEIGHT_1 && frog.y < SIDEWALK_HEIGHT_2){ 
+                                        if ( stream >= 0 && stream < STREAM_NUMBER)
+                                        {
+                                            if(frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X){
+                                                    if (stream % 2 != 0)
+                                                    {
+                                                        frog.x += odd;
+                                                    }
+                                                    else
+                                                    {
+                                                        frog.x += even;
+                                                    }
+                                                    
+                                                    
+                                                    
+                                                    print_frog(&frog);
+                                                    //refresh();
+                                                    debuglog("cock %d\n", crocodiles[stream][j].speed);
+                                            }
+                                        }
+                                    }
                             }
                         }
                     }
                     break;
+                }
             }
             int stream = ((SIDEWALK_HEIGHT_2 + 1 - frog.y) / FROG_DIM_Y) -1;
-            //int stream = ((LINES-1-frog.y+1) / FROG_DIM_Y)+1;
-                for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
-                    if(crocodiles[stream][j].y >= 0 && frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X) {
-
-                    }
-                }
-            
-            // collisions with background
             if(frog.y > SIDEWALK_HEIGHT_1 || frog.y < SIDEWALK_HEIGHT_2){
                 for (size_t j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++)
                 {
                     if ( stream >= 0 && stream < STREAM_NUMBER)
                     {
-                        if(frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X){
-                            if(frog_on_crocodile == FALSE){
-                                kill(child_pids[0], FROG_ON_CROCODILE_SIG);
-                                debuglog("cock %d\n", crocodiles[stream][j].speed);
-                            }
-                        }
-                        else
-                        {
+                        if( !(frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X)){
                             manche--;
                             frog.y = LINES-4;
                             frog.x = (COLS/2)-FROG_DIM_X;
-                            kill(child_pids[0], RESET_MANCHE_SIG);
                         }
                     }
 

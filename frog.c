@@ -18,7 +18,6 @@ void reset_manche(Item *frog){
     frog->y = LINES-4;
     frog->x = (COLS/2)-FROG_DIM_X;
     newmanche = FALSE;
-    debuglog("Reset manche\n", 0);
 }
 void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right, int stream_speed[STREAM_NUMBER]){
     close(pipe_fds[0]); 
@@ -30,11 +29,7 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right, int 
     getmaxyx(stdscr, max_y, max_x);
     signal(FROG_ON_CROCODILE_SIG, signal_handler);
     signal(RESET_MANCHE_SIG, signal_handler);
-
-    for (size_t i = 0; i < STREAM_NUMBER; i++)
-    {
-        debuglog("Stream speed %d\n", stream_speed[i]);
-    }
+    Item frogtest = {FROG_ID, 0, 0, 0, 1};
     
 
     while (manche > 0) {
@@ -46,19 +41,23 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right, int 
         ch = getch(); 
         switch (ch) {
             case KEY_UP:
-                if (frog->y > SCORE_HEIGHT + 1) frog->y -= FROG_DIM_Y;
+                frogtest.y = -FROG_DIM_Y;
+                frogtest.x = 0;
                 has_moved = TRUE; //! move inside if
                 break;
             case KEY_DOWN:
-                if (frog->y < max_y - FROG_DIM_Y) frog->y += FROG_DIM_Y;
+                frogtest.y = +FROG_DIM_Y;
+                frogtest.x = 0;
                 has_moved = TRUE;
                 break;
             case KEY_LEFT:
-                if (frog->x > 0) frog->x -= 1;
+                frogtest.y = 0;
+                frogtest.x = -1;
                 has_moved = TRUE;
                 break;
             case KEY_RIGHT:
-                if (frog->x < max_x - FROG_DIM_X) frog->x += 1;
+                frogtest.y = 0;
+                frogtest.x = +1;
                 has_moved = TRUE;
                 break;
             case ' ':
@@ -144,8 +143,6 @@ if (frog_on_crocodile) {
         frog->x += 1;
         frog_on_crocodile = FALSE;
         has_moved = TRUE;
-        for(int i = 0; i < STREAM_NUMBER; i++)
-            debuglog("Frog on crocodile %d\n", stream_speed[stream]);
         // Use nanosleep for precise sleep handling
         struct timespec req, rem;
         req.tv_sec = stream_speed[stream] / 1000000;               // Convert microseconds to seconds
@@ -161,11 +158,7 @@ if (frog_on_crocodile) {
         if(has_moved){
             // Scrive la posizione della rana nella pipe
             if (pipe_fds != NULL) {
-                debuglog("Stream %d\n", stream);
-                debuglog("LINES %d\n", LINES - 1 );
-                debuglog("Sidewalk %d\n", SIDEWALK_HEIGHT_2);
-                debuglog("Frog y %d\n", frog->y);
-                write(pipe_fds[1], frog, sizeof(Item));
+                write(pipe_fds[1], &frogtest, sizeof(Item));
             }
         }
         has_moved = FALSE;
