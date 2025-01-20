@@ -1,2 +1,4 @@
 output
 a.out
+.vscode
+*.log

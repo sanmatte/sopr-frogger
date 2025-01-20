@@ -5,7 +5,7 @@ CFLAGS = -Wall -Wextra
 # Libraries
 LIBS = -lncursesw
 
-SRC = design.c game.c
+SRC = $(wildcard *.c) # compile all .c files in the directory
 TARGET = output
 
 all: $(TARGET)

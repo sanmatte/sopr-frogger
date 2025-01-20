@@ -1,6 +1,7 @@
 #include <locale.h>
 #include "design.h"
-
+#include "frog.h"
+#include "crocodile.h"
 
 
 void print_background(){
