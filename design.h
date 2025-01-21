@@ -16,6 +16,10 @@
 //colours define
 #define COLOR_GREY 10
 #define COLOR_DARKGREEN 11
+#define COLOR_LIGHTDARKGREEN 12
+#define COLOR_SAND 13
+
+#define DENS_NUMBER 5
 
 // define game zones
 #define SCORE_HEIGHT 1
@@ -30,12 +34,15 @@
 #define BULLETS_DIM 1
 #define BULLETS_SPEED 20000
 
+#define TIMER_ID 27
 
 // function prototipes
 
-void print_background();
+void print_score(int manche, int timer);
+void print_background(bool *dens);
 void print_frog(Item *frog);
-void print_crocodile(Item *crocodile);
+void print_crocodile_right(Item *crocodile);
+void print_crocodile_left(Item *crocodile);
 void print_bullets(Item *bullet);
 
 #endif

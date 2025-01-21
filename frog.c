@@ -137,7 +137,7 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right, int 
             
         // }
         
- int speed = 100000;
+
 if (frog_on_crocodile) {
     if (frog->x + 1 < max_x - FROG_DIM_X) { 
         frog->x += 1;

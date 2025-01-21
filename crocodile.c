@@ -26,14 +26,14 @@ void Crocodile(int *pipe_fds, Item *crocodile, int random_number){
             crocodile->x += 1;
             if(crocodile->x == COLS){
                 crocodile->x = -CROCODILE_DIM_X;
-                sleep(2);
+                sleep(rand() % 3);
             }
         }
         else if (random_number == 1 && crocodile->x > -CROCODILE_DIM_X) {
             crocodile->x -= 1;
             if(crocodile->x == -CROCODILE_DIM_X){
                 crocodile->x = COLS;
-                sleep(2);
+                sleep(rand() % 3);
             }
         }
         if (pipe_fds != NULL) {
