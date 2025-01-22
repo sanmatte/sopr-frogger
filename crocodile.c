@@ -19,19 +19,70 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
     }
 }
 
-void Crocodile(int *pipe_fds, Item *crocodile, int random_number){
+void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodiles_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]) {
     close(pipe_fds[0]);
-    while(manche>0){
+    pid_t bullet_pid[STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER];
+    int random_shot, shotted_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER] = {0};
+    
+    while (manche > 0) {
         if (random_number == 0 && crocodile->x < COLS) {
             crocodile->x += 1;
-            if(crocodile->x == COLS){
+            random_shot = rand() % 100;
+            if (random_shot == 1) {
+                for (int i = 0; i < STREAM_NUMBER; i++) {
+                    for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
+                        if (shotted_bullets[i][j] == 0) {
+                            crocodiles_bullets[i][j].y = crocodile->y + 1;
+                            crocodiles_bullets[i][j].x = crocodile->x + CROCODILE_DIM_X;
+                            shotted_bullets[i][j] = 1;
+                            bullet_pid[i * CROCODILE_STREAM_MAX_NUMBER + j] = fork();
+                            if (bullet_pid[i * CROCODILE_STREAM_MAX_NUMBER + j] == 0) {
+                                while (crocodiles_bullets[i][j].x < COLS) {
+                                    crocodiles_bullets[i][j].x += 1;
+                                    if (pipe_fds != NULL) {
+                                        usleep(crocodiles_bullets[i][j].speed);
+                                        write(pipe_fds[1], &crocodiles_bullets[i][j], sizeof(Item));
+                                    }
+                                }
+                                // Reset bullet state after it exits the screen
+                                shotted_bullets[i][j] = 0;
+                                exit(0);
+                            }
+                        }
+                    }
+                }
+            }
+            if (crocodile->x == COLS) {
                 crocodile->x = -CROCODILE_DIM_X;
                 sleep(rand() % 3);
             }
-        }
-        else if (random_number == 1 && crocodile->x > -CROCODILE_DIM_X) {
+        } else if (random_number == 1 && crocodile->x > -CROCODILE_DIM_X) {
             crocodile->x -= 1;
-            if(crocodile->x == -CROCODILE_DIM_X){
+            random_shot = rand() % 100;
+            if (random_shot == 1) {
+                for (int i = 0; i < STREAM_NUMBER; i++) {
+                    for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
+                        if (shotted_bullets[i][j] == 0) {
+                            crocodiles_bullets[i][j].y = crocodile->y + 1;
+                            crocodiles_bullets[i][j].x = crocodile->x - 1;
+                            shotted_bullets[i][j] = 1;
+                            bullet_pid[i * CROCODILE_STREAM_MAX_NUMBER + j] = fork();
+                            if (bullet_pid[i * CROCODILE_STREAM_MAX_NUMBER + j] == 0) {
+                                while (crocodiles_bullets[i][j].x > -1) {
+                                    crocodiles_bullets[i][j].x -= 1;
+                                    if (pipe_fds != NULL) {
+                                        usleep(crocodiles_bullets[i][j].speed);
+                                        write(pipe_fds[1], &crocodiles_bullets[i][j], sizeof(Item));
+                                    }
+                                }
+                                shotted_bullets[i][j] = 0;
+                                exit(0);
+                            }
+                        }
+                    }
+                }
+            }
+            if (crocodile->x == -CROCODILE_DIM_X) {
                 crocodile->x = COLS;
                 sleep(rand() % 3);
             }

@@ -3,6 +3,7 @@
 
 #include <ncurses.h>
 #include "struct.h"
+#include "design.h"
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -19,7 +20,15 @@
 #define COLOR_LIGHTDARKGREEN 12
 #define COLOR_SAND 13
 
+//dens
 #define DENS_NUMBER 5
+#define DENS_HEIGHT 6
+#define DENS_DIM 10
+#define DENS_1 10
+#define DENS_2 40
+#define DENS_3 70
+#define DENS_4 100
+#define DENS_5 130
 
 // define game zones
 #define SCORE_HEIGHT 1
@@ -38,7 +47,7 @@
 
 // function prototipes
 
-void print_score(int manche, int timer);
+void print_score(int manche, int timer, int score);
 void print_background(bool *dens);
 void print_frog(Item *frog);
 void print_crocodile_right(Item *crocodile);

@@ -6,7 +6,7 @@ typedef struct {
     int y;
     int x;
     int speed;
-    bool free;
+    int free;
 } Item;
 
 #endif

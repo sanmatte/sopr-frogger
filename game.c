@@ -12,7 +12,7 @@
 #include "crocodile.h"
 #include "frog.h"
 
-int manche = 3;
+int manche = 3, score = 0;
 bool dens[DENS_NUMBER] = {TRUE, TRUE, TRUE, TRUE, TRUE};
 
 void game_timer(int *pipe_fds){
@@ -37,6 +37,17 @@ int main(){
     Item bullet_right = {BULLETS_ID, -1, -1, 0, 0};
     Item bullet_left = {BULLETS_ID, -1, -1, 0, 0};
     Item timer = {TIMER_ID, 0, 60, 0, 0};
+    
+    Item crocodiles_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
+    for (int i = 0; i < STREAM_NUMBER; i++) {
+        for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
+            crocodiles_bullets[i][j].id = CROCODILE_MIN_BULLETS_ID+i+j;
+            crocodiles_bullets[i][j].x = -1;
+            crocodiles_bullets[i][j].y = -1;
+            crocodiles_bullets[i][j].speed = CROCODILE_BULLET_SPEED;
+            crocodiles_bullets[i][j].free = 1;
+        }
+    }
 
     init_color(COLOR_DARKGREEN, 0, 400, 0);
     init_color(COLOR_GREY, 600, 600, 600);
@@ -54,6 +65,7 @@ int main(){
     init_pair(8, COLOR_DARKGREEN, COLOR_DARKGREEN);
     init_pair(9, COLOR_BLACK, COLOR_GREEN);
     init_pair(10, COLOR_SAND, COLOR_SAND);
+    init_pair(11, COLOR_DARKGREEN, COLOR_BLACK);
     
     // Definizione variabili
     int pipe_fds[2], direction = rand() % 2;
@@ -88,7 +100,7 @@ int main(){
         endwin();
         exit(EXIT_FAILURE);
     } else if (pid_frog == 0) {
-        Frog(pipe_fds, &frog, &bullet_left, &bullet_right, stream_speed);
+        Frog(pipe_fds, &frog, &bullet_left, &bullet_right);
         exit(0);
     } else {
         child_pids[0] = pid_frog;
@@ -105,7 +117,7 @@ int main(){
             } else if (pid_croc == 0) { 
                 srand(timestamp() + crocodiles[i][j].id + getpid());   
                 usleep((rand() % 3000000) + 1000000); 
-                Crocodile(pipe_fds, &crocodiles[i][j], direction);
+                Crocodile(pipe_fds, &crocodiles[i][j], direction, crocodiles_bullets);
                 exit(0);
             } else {
                 child_pids[i * CROCODILE_STREAM_MAX_NUMBER + j + 1] = pid_croc;
@@ -124,6 +136,7 @@ int main(){
     }
 
     Item msg;
+
     while (manche > 0) {
         if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
             switch(msg.id){
@@ -152,7 +165,15 @@ int main(){
                         timer.x = 60;   
                     }
                     break;
-
+                case CROCODILE_MIN_BULLETS_ID ... CROCODILE_MAX_BULLETS_ID:
+                    for(int i = 0; i < STREAM_NUMBER; i++){
+                        for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
+                            if(crocodiles_bullets[i][j].id == msg.id){
+                                crocodiles_bullets[i][j] = msg;
+                            }
+                        }
+                    }
+                    break;
                 //CROCODILE case
                 default:
                     if(msg.id >= CROCODILE_MIN_ID && msg.id <= CROCODILE_MAX_ID){
@@ -195,28 +216,65 @@ int main(){
                     {
                         if( (frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X)){
                             frog_on_crocodile = TRUE;
-                            // manche--;
-                            // frog.y = LINES-4;
-                            // frog.x = rand() % (COLS - FROG_DIM_X);
-                            // timer.x = 60;
                         }
                     }
 
                 }
                 if (frog_on_crocodile == FALSE)
                 {
-                    manche--;
-                    frog.y = LINES-4;
-                    frog.x = rand() % (COLS - FROG_DIM_X);
-                    timer.x = 60;
-                    //print_death();
-                    //refresh();
-                    sleep(10);
+                    // manche--;
+                    // frog.y = LINES-4;
+                    // frog.x = rand() % (COLS - FROG_DIM_X);
+                    // timer.x = 60;
+                    // erase();
+                    // print_death();
+                    // refresh();
+                    // sleep(5);
+                }
+            }
+
+            if(frog.y < DENS_HEIGHT){
+                switch(frog.x){
+                    case DENS_1:
+                        score += 20;
+                        frog.x = rand() % (COLS - FROG_DIM_X);
+                        frog.y = LINES-4;
+                        dens[0] = FALSE;
+                        break;
+                    case DENS_2:
+                        score += 20;
+                        frog.x = rand() % (COLS - FROG_DIM_X);
+                        frog.y = LINES-4;
+                        dens[1] = FALSE;
+                        break;
+                    case DENS_3:
+                        score += 20;
+                        frog.x = rand() % (COLS - FROG_DIM_X);
+                        frog.y = LINES-4;
+                        dens[2] = FALSE;
+                        break;
+                    case DENS_4:
+                        score += 20;
+                        frog.x = rand() % (COLS - FROG_DIM_X);
+                        frog.y = LINES-4;
+                        dens[3] = FALSE;
+                        break;
+                    case DENS_5:
+                        score += 20;
+                        frog.x = rand() % (COLS - FROG_DIM_X);
+                        frog.y = LINES-4;
+                        dens[4] = FALSE;
+                        break;
+                    default:
+                        manche--;
+                        frog.y = LINES-4;
+                        frog.x = rand() % (COLS - FROG_DIM_X);
+                        timer.x = 60;
                 }
             }
 
             
-            print_score(manche, timer.x);
+            print_score(manche, timer.x, score);
             print_background(dens);
 
             for(int i = 0; i < STREAM_NUMBER; i++){
@@ -232,11 +290,15 @@ int main(){
                     
                 }
             }
-            
+            for(int i=0; i<STREAM_NUMBER; i++){
+                for(int j=0; j<CROCODILE_STREAM_MAX_NUMBER; j++){
+                    print_bullets(&crocodiles_bullets[i][j]);
+                }
+            }
             print_frog(&frog);
             print_bullets(&bullet_left);
             print_bullets(&bullet_right);
-            
+
             refresh();
         }
     }

@@ -3,7 +3,7 @@
 #include "frog.h"
 #include "crocodile.h"
 
-void print_score(int manche, int timer){
+void print_score(int manche, int timer, int score){
 	//lives counter
 	mvprintw(0, 1, "                  ");
 	attron(COLOR_PAIR(6));
@@ -23,11 +23,13 @@ void print_score(int manche, int timer){
 		default:
 			break;
 	}
-	attroff(COLOR_PAIR(6));
-
+	attroff(COLOR_PAIR(2));
+	
 	//score counter
+	attron(COLOR_PAIR(11));
 	mvprintw(0, COLS/2-20, "                  ");
-	mvprintw(0, COLS/2-20, "Score: %d", timer);
+	mvprintw(0, COLS/2-20, "Score: %d", score);
+	attroff(COLOR_PAIR(11));
 
 	//timer
 	for(int i = 0; i < 60; i++){
@@ -54,8 +56,8 @@ void print_background(bool *dens){
 			if(dens[i] == TRUE){
 				switch(i){
 					case 0:
-						for (int j = 10 ; j < 20; j++){
-							for (int h=2; h < 6; h++){
+						for (int j = DENS_1 ; j < DENS_1 + DENS_DIM; j++){
+							for (int h=2; h < DENS_HEIGHT; h++){
 								attron(COLOR_PAIR(10));
 								mvprintw(h, j, " ");
 								attroff(COLOR_PAIR(10));
@@ -63,8 +65,8 @@ void print_background(bool *dens){
 						}
 						break;
 					case 1:
-						for (int j = 40 ; j < 50; j++){
-							for (int h=2; h < 6; h++){
+						for (int j = DENS_2 ; j < DENS_2 + DENS_DIM; j++){
+							for (int h=2; h < DENS_HEIGHT; h++){
 								attron(COLOR_PAIR(10));
 								mvprintw(h, j, " ");
 								attroff(COLOR_PAIR(10));
@@ -72,8 +74,8 @@ void print_background(bool *dens){
 						}
 						break;
 					case 2:
-						for (int j = 70 ; j < 80; j++){
-							for (int h=2; h < 6; h++){
+						for (int j = DENS_3 ; j < DENS_3 + DENS_DIM; j++){
+							for (int h=2; h < DENS_HEIGHT; h++){
 								attron(COLOR_PAIR(10));
 								mvprintw(h, j, " ");
 								attroff(COLOR_PAIR(10));
@@ -81,8 +83,8 @@ void print_background(bool *dens){
 						}
 						break;
 					case 3:
-						for (int j = 100 ; j < 110; j++){
-							for (int h=2; h < 6; h++){
+						for (int j = DENS_4 ; j < DENS_4 + DENS_DIM; j++){
+							for (int h=2; h < DENS_HEIGHT; h++){
 								attron(COLOR_PAIR(10));
 								mvprintw(h, j, " ");
 								attroff(COLOR_PAIR(10));
@@ -90,7 +92,7 @@ void print_background(bool *dens){
 						}
 						break;
 					case 4:
-						for (int j = 130 ; j < 140; j++){
+						for (int j = DENS_5 ; j < DENS_5 + DENS_DIM; j++){
 							for (int h=2; h < 6; h++){
 								attron(COLOR_PAIR(10));
 								mvprintw(h, j, " ");

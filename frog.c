@@ -8,7 +8,7 @@ void reset_manche(Item *frog){
     frog->x = (COLS/2)-FROG_DIM_X;
     newmanche = FALSE;
 }
-void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right, int stream_speed[STREAM_NUMBER]){
+void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right){
     close(pipe_fds[0]); 
     int max_y, max_x, ch;
     int projectile_active = 0;
@@ -115,7 +115,7 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right, int 
             projectile_active = 0;
         }
         
-        int stream = ((SIDEWALK_HEIGHT_2 + 1 - frog->y) / FROG_DIM_Y) -1;
+        //int stream = ((SIDEWALK_HEIGHT_2 + 1 - frog->y) / FROG_DIM_Y) -1;
         // if (frog_on_crocodile) {
         //     if (frog->x + 1 < max_x - FROG_DIM_X) { 
         //         frog->x += 1;
