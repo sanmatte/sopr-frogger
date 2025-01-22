@@ -3,17 +3,6 @@
 
 int newmanche = FALSE; 
 
-void signal_handler(int sig){
-    if(sig == FROG_ON_CROCODILE_SIG){
-        frog_on_crocodile = TRUE;
-    }
-    if (sig == RESET_MANCHE_SIG)
-    {
-        newmanche = TRUE;
-    }
-    
-}
-
 void reset_manche(Item *frog){
     frog->y = LINES-4;
     frog->x = (COLS/2)-FROG_DIM_X;
@@ -27,8 +16,8 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right, int 
     pid_t bullet_pid_left = -1;
     bool has_moved = TRUE;
     getmaxyx(stdscr, max_y, max_x);
-    signal(FROG_ON_CROCODILE_SIG, signal_handler);
-    signal(RESET_MANCHE_SIG, signal_handler);
+    //signal(FROG_ON_CROCODILE_SIG, signal_handler);
+    //signal(RESET_MANCHE_SIG, signal_handler);
     Item frogtest = {FROG_ID, 0, 0, 0, 1};
     
 
@@ -138,21 +127,21 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right, int 
         // }
         
 
-if (frog_on_crocodile) {
-    if (frog->x + 1 < max_x - FROG_DIM_X) { 
-        frog->x += 1;
-        frog_on_crocodile = FALSE;
-        has_moved = TRUE;
-        // Use nanosleep for precise sleep handling
-        struct timespec req, rem;
-        req.tv_sec = stream_speed[stream] / 1000000;               // Convert microseconds to seconds
-        req.tv_nsec = (stream_speed[stream] % 1000000) * 1000;     // Convert remaining microseconds to nanoseconds
+// if (frog_on_crocodile) {
+//     if (frog->x + 1 < max_x - FROG_DIM_X) { 
+//         frog->x += 1;
+//         frog_on_crocodile = FALSE;
+//         has_moved = TRUE;
+//         // Use nanosleep for precise sleep handling
+//         struct timespec req, rem;
+//         req.tv_sec = stream_speed[stream] / 1000000;               // Convert microseconds to seconds
+//         req.tv_nsec = (stream_speed[stream] % 1000000) * 1000;     // Convert remaining microseconds to nanoseconds
 
-        while (nanosleep(&req, &rem) == -1 && errno == EINTR) {
-            req = rem; // Retry with remaining time if interrupted
-        }
-    }
-}
+//         while (nanosleep(&req, &rem) == -1 && errno == EINTR) {
+//             req = rem; // Retry with remaining time if interrupted
+//         }
+//     }
+// }
 
 
         if(has_moved){

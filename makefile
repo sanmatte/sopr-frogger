@@ -6,12 +6,13 @@ CFLAGS = -Wall -Wextra
 LIBS = -lncursesw
 
 SRC = $(wildcard *.c) # compile all .c files in the directory
+HEADERS = $(wildcard *.h)
 TARGET = output
 
 all: $(TARGET)
 
 # Build the target
-$(TARGET):$(SRC)
+$(TARGET):$(SRC) $(HEADERS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(LIBS)
 
 # Clean up build files
