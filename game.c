@@ -27,6 +27,11 @@ int main(){
     setlocale(LC_ALL, "");
     initscr();start_color();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
     
+    WINDOW *game = newwin(LINES, COLS, 0, 0);
+
+    int max_y, max_x;
+    getmaxyx(stdscr, max_y, max_x);
+
     Item frog = {FROG_ID, LINES-4, (COLS/2)-FROG_DIM_X, 0, 1};
     Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
     for (int i = 0; i < STREAM_NUMBER; i++) {
@@ -39,9 +44,11 @@ int main(){
     Item timer = {TIMER_ID, 0, 60, 0, 0};
     
     Item crocodiles_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
+    int h=0;
     for (int i = 0; i < STREAM_NUMBER; i++) {
         for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
-            crocodiles_bullets[i][j].id = CROCODILE_MIN_BULLETS_ID+i+j;
+            crocodiles_bullets[i][j].id = CROCODILE_MIN_BULLETS_ID+h;
+            h++;
             crocodiles_bullets[i][j].x = -1;
             crocodiles_bullets[i][j].y = -1;
             crocodiles_bullets[i][j].speed = CROCODILE_BULLET_SPEED;
@@ -145,7 +152,6 @@ int main(){
                     if(frog.x + msg.x >= 0 && frog.x + msg.x <= COLS - FROG_DIM_X && frog.y + msg.y >= 0 && frog.y + msg.y <= LINES - FROG_DIM_Y){
                         frog.y += msg.y;
                         frog.x += msg.x;
-                        
                     }
                     break;
                 //BULLETS cas
@@ -182,16 +188,16 @@ int main(){
                                 if(crocodiles[i][j].id == msg.id){
                                     crocodiles[i][j] = msg;
                                     int stream = i;
-                                    if(frog.y > SIDEWALK_HEIGHT_1 && frog.y < SIDEWALK_HEIGHT_2){ 
+                                    if(frog.y >= SIDEWALK_HEIGHT_1 && frog.y < SIDEWALK_HEIGHT_2){ 
                                         if(frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X){
                                                 if (stream % 2 != 0)
                                                 {
-                                                    if(frog.x == COLS-1-FROG_DIM_X || frog.x == 0) continue;
+                                                    if(frog.x == COLS-FROG_DIM_X || frog.x == 0) continue;                                                   
                                                     else frog.x += odd;
                                                 }
                                                 else
                                                 {
-                                                    if(frog.x == COLS-1-FROG_DIM_X || frog.x == 0) continue;
+                                                    if(frog.x == COLS-FROG_DIM_X || frog.x == 0) continue;
                                                     else frog.x += even;
                                                 }
                                                 
@@ -209,13 +215,15 @@ int main(){
             }
             int frog_on_crocodile = FALSE;
             int stream = ((SIDEWALK_HEIGHT_2 + 1 - frog.y) / FROG_DIM_Y) -1;
+            debuglog("crocodile %d\n", crocodiles[stream][0].y);
             if(frog.y > SIDEWALK_HEIGHT_1 && frog.y < SIDEWALK_HEIGHT_2){
                 for (size_t j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++)
                 {
-                    if ( stream >= 0 && stream < STREAM_NUMBER)
+                    if (stream >= 0 && stream < STREAM_NUMBER)
                     {
                         if( (frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X)){
                             frog_on_crocodile = TRUE;
+                            
                         }
                     }
 

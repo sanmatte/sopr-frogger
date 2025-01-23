@@ -22,7 +22,7 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
 void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodiles_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]) {
     close(pipe_fds[0]);
     pid_t bullet_pid[STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER];
-    int random_shot, shotted_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER] = {0};
+    int random_shot, shotted_bullet = 0;
     
     while (manche > 0) {
         if (random_number == 0 && crocodile->x < COLS) {
@@ -31,10 +31,10 @@ void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodile
             if (random_shot == 1) {
                 for (int i = 0; i < STREAM_NUMBER; i++) {
                     for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
-                        if (shotted_bullets[i][j] == 0) {
+                        if (shotted_bullet == 0) {
                             crocodiles_bullets[i][j].y = crocodile->y + 1;
                             crocodiles_bullets[i][j].x = crocodile->x + CROCODILE_DIM_X;
-                            shotted_bullets[i][j] = 1;
+                            shotted_bullet = 1;
                             bullet_pid[i * CROCODILE_STREAM_MAX_NUMBER + j] = fork();
                             if (bullet_pid[i * CROCODILE_STREAM_MAX_NUMBER + j] == 0) {
                                 while (crocodiles_bullets[i][j].x < COLS) {
@@ -44,8 +44,7 @@ void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodile
                                         write(pipe_fds[1], &crocodiles_bullets[i][j], sizeof(Item));
                                     }
                                 }
-                                // Reset bullet state after it exits the screen
-                                shotted_bullets[i][j] = 0;
+                                shotted_bullet = 0;
                                 exit(0);
                             }
                         }
@@ -62,10 +61,10 @@ void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodile
             if (random_shot == 1) {
                 for (int i = 0; i < STREAM_NUMBER; i++) {
                     for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
-                        if (shotted_bullets[i][j] == 0) {
+                        if (shotted_bullet == 0) {
                             crocodiles_bullets[i][j].y = crocodile->y + 1;
                             crocodiles_bullets[i][j].x = crocodile->x - 1;
-                            shotted_bullets[i][j] = 1;
+                            shotted_bullet = 1;
                             bullet_pid[i * CROCODILE_STREAM_MAX_NUMBER + j] = fork();
                             if (bullet_pid[i * CROCODILE_STREAM_MAX_NUMBER + j] == 0) {
                                 while (crocodiles_bullets[i][j].x > -1) {
@@ -75,7 +74,7 @@ void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodile
                                         write(pipe_fds[1], &crocodiles_bullets[i][j], sizeof(Item));
                                     }
                                 }
-                                shotted_bullets[i][j] = 0;
+                                shotted_bullet = 0;
                                 exit(0);
                             }
                         }
