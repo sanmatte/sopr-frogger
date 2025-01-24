@@ -20,11 +20,15 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
 }
 
 void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodiles_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]) {
+    usleep((rand() % 500000) + (crocodile->id * 1000000)); 
     close(pipe_fds[0]);
     pid_t bullet_pid[STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER];
     int random_shot, shotted_bullet = 0;
     
     while (manche > 0) {
+        if (crocodile->id == 3) {
+        debuglog("ON COCK \ncrocodile id: %d\n", crocodile->id);
+        debuglog("crocodile x: %d\n\n", crocodile->x);}
         if (random_number == 0 && crocodile->x < COLS) {
             crocodile->x += 1;
             random_shot = rand() % 100;

@@ -112,9 +112,10 @@ int main(){
     } else {
         child_pids[0] = pid_frog;
     }
-    
+
     // Creazione dei processi Crocodile
     for (int i = 0; i < STREAM_NUMBER; i++) {
+        int distance = 1000000;
         for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
             pid_t pid_croc = fork();
             if (pid_croc < 0) {
@@ -122,15 +123,19 @@ int main(){
                 endwin();
                 exit(EXIT_FAILURE);
             } else if (pid_croc == 0) { 
-                srand(timestamp() + crocodiles[i][j].id + getpid());   
-                usleep((rand() % 3000000) + 1000000); 
+                srand(timestamp() + crocodiles[i][j].id + getpid()); 
+                distance += rand() % 500000;
+                usleep(distance); 
                 Crocodile(pipe_fds, &crocodiles[i][j], direction, crocodiles_bullets);
                 exit(0);
             } else {
                 child_pids[i * CROCODILE_STREAM_MAX_NUMBER + j + 1] = pid_croc;
+                distance += 7000000;
             }
-            direction = 1 - direction;
+            
         }
+        
+        direction = 1 - direction;
     }
 
     int even, odd;
@@ -187,6 +192,12 @@ int main(){
                             for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
                                 if(crocodiles[i][j].id == msg.id){
                                     crocodiles[i][j] = msg;
+                                    if (j == 1)
+                                    {
+                                        debuglog("crocodile id: %d\n", crocodiles[i][j].id);
+                                        debuglog("crocodile x: %d\n", crocodiles[i][j].x);
+                                        debuglog("crocodile x: %d\n\n", crocodiles[i][j-1].x);
+                                    }
                                     int stream = i;
                                     if(frog.y >= SIDEWALK_HEIGHT_1 && frog.y < SIDEWALK_HEIGHT_2){ 
                                         if(frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X){
@@ -215,7 +226,6 @@ int main(){
             }
             int frog_on_crocodile = FALSE;
             int stream = ((SIDEWALK_HEIGHT_2 + 1 - frog.y) / FROG_DIM_Y) -1;
-            debuglog("crocodile %d\n", crocodiles[stream][0].y);
             if(frog.y > SIDEWALK_HEIGHT_1 && frog.y < SIDEWALK_HEIGHT_2){
                 for (size_t j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++)
                 {
