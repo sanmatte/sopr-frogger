@@ -10,12 +10,10 @@ void reset_manche(Item *frog){
 }
 void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right){
     close(pipe_fds[0]); 
-    int max_y, max_x, ch;
-    int projectile_active = 0;
+    int ch, projectile_active = 0;
     pid_t bullet_pid_right = -1;
     pid_t bullet_pid_left = -1;
     bool has_moved = TRUE;
-    getmaxyx(stdscr, max_y, max_x);
     //signal(FROG_ON_CROCODILE_SIG, signal_handler);
     //signal(RESET_MANCHE_SIG, signal_handler);
     Item frogtest = {FROG_ID, 0, 0, 0, 1};
@@ -59,7 +57,7 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right){
                         bullet_right->x = frog->x + FROG_DIM_X;
                         bullet_right->y = frog->y+1;
 
-                        while (bullet_right->x < max_x) {
+                        while (bullet_right->x < GAME_WIDTH) {
                             bullet_right->x += 1;
                             if (pipe_fds != NULL) {
                                 srand(time(0)+1);

@@ -9,7 +9,7 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
                 if (direction == 0) {
                     crocodiles[i][j].x = -CROCODILE_DIM_X;  // Da sinistra verso destra
                 } else {
-                    crocodiles[i][j].x = COLS;  // Da destra verso sinistra
+                    crocodiles[i][j].x = GAME_WIDTH;  // Da destra verso sinistra
                 }
                 crocodiles[i][j].speed = stream_speed[i];
                 crocodiles[i][j].free = 1;
@@ -20,15 +20,12 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
 }
 
 void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodiles_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]) {
-    usleep((rand() % 500000) + (crocodile->id * 1000000)); 
+    //usleep((rand() % 500000) + (crocodile->id * 1000000)); 
     close(pipe_fds[0]);
     pid_t bullet_pid[STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER];
     int random_shot, shotted_bullet = 0;
     
     while (manche > 0) {
-        if (crocodile->id == 3) {
-        debuglog("ON COCK \ncrocodile id: %d\n", crocodile->id);
-        debuglog("crocodile x: %d\n\n", crocodile->x);}
         if (random_number == 0 && crocodile->x < COLS) {
             crocodile->x += 1;
             random_shot = rand() % 100;
@@ -55,7 +52,7 @@ void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodile
                     }
                 }
             }
-            if (crocodile->x == COLS) {
+            if (crocodile->x == GAME_WIDTH) {
                 crocodile->x = -CROCODILE_DIM_X;
                 sleep(rand() % 3);
             }

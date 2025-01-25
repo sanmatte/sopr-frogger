@@ -31,6 +31,8 @@
 #define DENS_5 130
 
 // define game zones
+#define GAME_WIDTH 150
+#define GAME_HEIGHT 46
 #define SCORE_HEIGHT 1
 #define DENS_HEIGHT 6
 #define SIDEWALK_HEIGHT_1 10
@@ -47,11 +49,11 @@
 
 // function prototipes
 
-void print_score(int manche, int timer, int score);
-void print_background(bool *dens);
-void print_frog(Item *frog);
-void print_crocodile_right(Item *crocodile);
-void print_crocodile_left(Item *crocodile);
-void print_bullets(Item *bullet);
+void print_score(WINDOW *game, int manche, int timer, int score);
+void print_background(WINDOW *game, bool *dens);
+void print_frog(WINDOW *game, Item *frog);
+void print_crocodile_right(WINDOW *game, Item *crocodile);
+void print_crocodile_left(WINDOW *game, Item *crocodile);
+void print_bullets(WINDOW *game, Item *bullet);
 
 #endif
