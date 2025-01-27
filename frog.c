@@ -8,6 +8,7 @@ void reset_manche(Item *frog){
     frog->x = (COLS/2)-FROG_DIM_X;
     newmanche = FALSE;
 }
+
 void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right){
     close(pipe_fds[0]); 
     int ch, projectile_active = 0;
@@ -61,7 +62,7 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right){
                             bullet_right->x += 1;
                             if (pipe_fds != NULL) {
                                 srand(time(0)+1);
-                                usleep(1000*(rand() % (3)));
+                                usleep(1000*(rand_range(0, 3)));
                                 write(pipe_fds[1], bullet_right, sizeof(Item));
                             }
                             usleep(BULLETS_SPEED);
@@ -78,7 +79,7 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right){
                             bullet_left->x -= 1;
                             if (pipe_fds != NULL) {
                                 srand(time(0)+2);
-                                usleep(1000*(rand() % (3)));
+                                usleep(1000*(rand_range(0, 3)));
                                 write(pipe_fds[1], bullet_left, sizeof(Item));
                             }
                             usleep(BULLETS_SPEED);  
@@ -112,35 +113,6 @@ void Frog(int *pipe_fds, Item *frog, Item *bullet_left, Item *bullet_right){
         if (bullet_pid_right == -1 && bullet_pid_left == -1) {
             projectile_active = 0;
         }
-        
-        //int stream = ((SIDEWALK_HEIGHT_2 + 1 - frog->y) / FROG_DIM_Y) -1;
-        // if (frog_on_crocodile) {
-        //     if (frog->x + 1 < max_x - FROG_DIM_X) { 
-        //         frog->x += 1;
-        //         frog_on_crocodile = FALSE;
-        //         debuglog("Frog on crocodile %d\n", stream_speed[stream]);
-        //         write(pipe_fds[1], frog, sizeof(Item));
-        //     }
-            
-        // }
-        
-
-// if (frog_on_crocodile) {
-//     if (frog->x + 1 < max_x - FROG_DIM_X) { 
-//         frog->x += 1;
-//         frog_on_crocodile = FALSE;
-//         has_moved = TRUE;
-//         // Use nanosleep for precise sleep handling
-//         struct timespec req, rem;
-//         req.tv_sec = stream_speed[stream] / 1000000;               // Convert microseconds to seconds
-//         req.tv_nsec = (stream_speed[stream] % 1000000) * 1000;     // Convert remaining microseconds to nanoseconds
-
-//         while (nanosleep(&req, &rem) == -1 && errno == EINTR) {
-//             req = rem; // Retry with remaining time if interrupted
-//         }
-//     }
-// }
-
 
         if(has_moved){
             // Scrive la posizione della rana nella pipe

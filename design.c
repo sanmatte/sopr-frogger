@@ -27,17 +27,17 @@ void print_score(WINDOW *game, int manche, int timer, int score){
 	
 	//score counter
 	wattron(game, COLOR_PAIR(11));
-	mvwprintw(game,0, COLS/2-20, "                  ");
-	mvwprintw(game, 0, COLS/2-20, "Score: %d", score);
+	mvwprintw(game,0, GAME_WIDTH/2-20, "                  ");
+	mvwprintw(game, 0, GAME_WIDTH/2-20, "Score: %d", score);
 	wattroff(game, COLOR_PAIR(11));
 
 	//timer
 	for(int i = 0; i < 60; i++){
-		mvwprintw(game, 0, COLS-60+i, " ");
+		mvwprintw(game, 0, GAME_WIDTH-60+i, " ");
 	}
 
 	wattron(game, COLOR_PAIR(1));
-	for(int i = COLS-1; i > COLS-1-timer; i--){
+	for(int i = GAME_WIDTH-1; i > GAME_WIDTH-1-timer; i--){
 		mvwprintw(game, 0, i, "█");
 	}
 	wattroff(game, COLOR_PAIR(1));

@@ -19,16 +19,15 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
     }
 }
 
-void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodiles_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]) {
-    //usleep((rand() % 500000) + (crocodile->id * 1000000)); 
+void Crocodile(int *pipe_fds, Item *crocodile, int direction, Item crocodiles_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]) {
     close(pipe_fds[0]);
     pid_t bullet_pid[STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER];
     int random_shot, shotted_bullet = 0;
     
     while (manche > 0) {
-        if (random_number == 0 && crocodile->x < COLS) {
+        if (direction == 0 && crocodile->x < COLS) {
             crocodile->x += 1;
-            random_shot = rand() % 100;
+            random_shot = rand_range(0, 100);
             if (random_shot == 1) {
                 for (int i = 0; i < STREAM_NUMBER; i++) {
                     for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
@@ -54,11 +53,11 @@ void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodile
             }
             if (crocodile->x == GAME_WIDTH) {
                 crocodile->x = -CROCODILE_DIM_X;
-                sleep(rand() % 3);
+                sleep(rand_range(1, 3));
             }
-        } else if (random_number == 1 && crocodile->x > -CROCODILE_DIM_X) {
+        } else if (direction == 1 && crocodile->x > -CROCODILE_DIM_X) {
             crocodile->x -= 1;
-            random_shot = rand() % 100;
+            random_shot = rand_range(0, 100);
             if (random_shot == 1) {
                 for (int i = 0; i < STREAM_NUMBER; i++) {
                     for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
@@ -84,7 +83,7 @@ void Crocodile(int *pipe_fds, Item *crocodile, int random_number, Item crocodile
             }
             if (crocodile->x == -CROCODILE_DIM_X) {
                 crocodile->x = COLS;
-                sleep(rand() % 3);
+                sleep(rand_range(1, 3));
             }
         }
         if (pipe_fds != NULL) {
