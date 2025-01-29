@@ -26,21 +26,49 @@ void print_score(WINDOW *game, int manche, int timer, int score){
 	wattroff(game, COLOR_PAIR(2));
 	
 	//score counter
-	wattron(game, COLOR_PAIR(11));
-	mvwprintw(game,0, GAME_WIDTH/2-20, "                  ");
-	mvwprintw(game, 0, GAME_WIDTH/2-20, "Score: %d", score);
-	wattroff(game, COLOR_PAIR(11));
+	switch(score){
+		case 0 ... 49:
+			wattron(game, COLOR_PAIR(6));
+			mvwprintw(game,0, GAME_WIDTH/2-20, "                  ");
+			mvwprintw(game, 0, GAME_WIDTH/2-20, "Score: %d", score);
+			wattroff(game, COLOR_PAIR(6));
+			break;
+		case 50 ... 99:
+			wattron(game, COLOR_PAIR(14));
+			mvwprintw(game,0, GAME_WIDTH/2-20, "                  ");
+			mvwprintw(game, 0, GAME_WIDTH/2-20, "Score: %d", score);
+			wattroff(game, COLOR_PAIR(14));
+			break;
+		case 100 ... 150:
+			wattron(game, COLOR_PAIR(16));
+			mvwprintw(game,0, GAME_WIDTH/2-20, "                  ");
+			mvwprintw(game, 0, GAME_WIDTH/2-20, "Score: %d", score);
+			wattroff(game, COLOR_PAIR(16));
+			break;
+	}
+	
 
 	//timer
+	// Cancella la riga del timer
 	for(int i = 0; i < 60; i++){
 		mvwprintw(game, 0, GAME_WIDTH-60+i, " ");
 	}
 
-	wattron(game, COLOR_PAIR(1));
+	// Se il timer è sotto i 10 secondi, cambia colore e lampeggia
+	if(timer <= 15){
+		wattron(game, COLOR_PAIR(6) | A_BLINK);
+	} else {
+		wattron(game, COLOR_PAIR(1));
+	}
+
+	// Disegna il timer
 	for(int i = GAME_WIDTH-1; i > GAME_WIDTH-1-timer; i--){
 		mvwprintw(game, 0, i, "█");
 	}
+
+	// Spegne gli attributi
 	wattroff(game, COLOR_PAIR(1));
+	wattroff(game, COLOR_PAIR(6) | A_BLINK);
 }
 
 void print_background(WINDOW *game, bool *dens){
@@ -133,14 +161,14 @@ void print_frog(WINDOW *game, Item *frog){
     for (int i = 0; i < FROG_DIM_Y; i++) {
         for (int j = 0; j < FROG_DIM_X; j++) {
 			if(i == 0 && (j > 2 && j < 7)){
-				wattron(game, COLOR_PAIR(9));
+				wattron(game, COLOR_PAIR(12));
 				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
-				wattroff(game, COLOR_PAIR(9));
+				wattroff(game, COLOR_PAIR(12));
 			}
 			else{
-				wattron(game, COLOR_PAIR(1));  
+				wattron(game, COLOR_PAIR(13));  
 				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
-				wattroff(game, COLOR_PAIR(1)); 
+				wattroff(game, COLOR_PAIR(13)); 
 			}
 		}
         }
@@ -249,5 +277,69 @@ void print_bullets(WINDOW *game, Item *bullets){
 	}
 	wattroff(game, COLOR_PAIR(5));
 }
-	
+
+void print_endgame(WINDOW *game, int manche, bool *dens){
+	static const char* sprite_matrix_lose[1][5] = {
+		{
+			"██╗   ██╗ ██████╗ ██╗   ██╗    ██╗      ██████╗ ███████╗███████╗",
+			"╚██╗ ██╔╝██╔═══██╗██║   ██║    ██║     ██╔═══██╗██╔════╝██╔════╝",
+			" ╚████╔╝ ██║   ██║██║   ██║    ██║     ██║   ██║███████╗█████╗  ",
+			"  ╚██╔╝  ██║   ██║██║   ██║    ██║     ██║   ██║╚════██║██╔══╝  ",
+			"   ██║   ╚██████╔╝╚██████╔╝    ███████╗╚██████╔╝███████╗███████╗"
+		}
+	};
+	static const char* sprite_matrix_win[1][5] = {
+		{
+			"██╗   ██╗ ██████╗ ██╗   ██╗    ██╗    ██╗██╗███╗   ██╗",
+			"╚██╗ ██╔╝██╔═══██╗██║   ██║    ██║    ██║██║████╗  ██║",
+			" ╚████╔╝ ██║   ██║██║   ██║    ██║ █╗ ██║██║██╔██╗ ██║",
+			"  ╚██╔╝  ██║   ██║██║   ██║    ██║███╗██║██║██║╚██╗██║",
+			"   ██║   ╚██████╔╝╚██████╔╝    ╚███╔███╔╝██║██║ ╚████║"
+		}
+	};
+
+	//lose screen
+	if(manche == 0){
+		wattron(game, COLOR_PAIR(13));
+		for(int i=0; i<GAME_HEIGHT; i++){
+			mvwhline(game, i, 0, ' ', GAME_WIDTH);
+		}
+		wattroff(game, COLOR_PAIR(13));
+		wattron(game, COLOR_PAIR(15));
+		for(int i=0; i<5; i++){
+			mvwprintw(game, (GAME_HEIGHT/2) + i - 2, GAME_WIDTH/2 - 30, "%s", sprite_matrix_lose[0][i]);
+		}
+		wattroff(game, COLOR_PAIR(15));
+		wrefresh(game);
+		sleep(3);
+	}
+
+	//win screen
+
+	// Controlla se tutti i valori di dens[] sono FALSE
+	bool all_false = true;
+	for(int i = 0; i < 5; i++){
+		if (dens[i] != FALSE) {
+			all_false = false;
+			break;
+		}
+	}
+
+	// Se tutti i valori sono FALSE, stampa la schermata di sconfitta
+	if (all_false) {
+		wattron(game, COLOR_PAIR(13));
+		for(int i=0; i<GAME_HEIGHT; i++){
+			mvwhline(game, i, 0, ' ', GAME_WIDTH);
+		}
+		wattroff(game, COLOR_PAIR(13));
+		wattron(game, COLOR_PAIR(15));
+		for(int i = 0; i < 5; i++) {
+			mvwprintw(game, (GAME_HEIGHT/2) + i - 2, GAME_WIDTH/2 - 30, "%s", sprite_matrix_win[0][i]);
+		}
+		wattroff(game, COLOR_PAIR(15));
+		wrefresh(game);
+		sleep(3);
+	}
+
+}
 

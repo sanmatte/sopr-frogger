@@ -13,6 +13,7 @@
 #include "frog.h"
 
 int manche = 3, score = 0;
+bool endgame = FALSE;
 bool dens[DENS_NUMBER] = {TRUE, TRUE, TRUE, TRUE, TRUE};
 
 void game_timer(int *pipe_fds){
@@ -31,7 +32,7 @@ int main(){
 
     WINDOW *game = newwin(GAME_HEIGHT, GAME_WIDTH, 0, 0);
 
-    Item frog = {FROG_ID, GAME_HEIGHT-4, (GAME_WIDTH/2)-FROG_DIM_X, 0, 0};
+    Item frog = {FROG_ID, GAME_HEIGHT-4, (GAME_WIDTH/2)-FROG_DIM_X/2, 0, 0};
     Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
     for (int i = 0; i < STREAM_NUMBER; i++) {
         for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
@@ -57,6 +58,10 @@ int main(){
     init_color(COLOR_GREY, 600, 600, 600);
     init_color(COLOR_LIGHTDARKGREEN, 28, 163, 32);
     init_color(COLOR_SAND, 745, 588, 313);
+    init_color(COLOR_FROG_EYE, 90, 113, 749);
+    init_color(COLOR_FROG_BODY, 62, 568, 184);
+    init_color(COLOR_DARK_ORANGE, 815, 615, 98);
+    init_color(COLOR_ENDGAME_BACKGROUND, 8, 372, 600);
 
     // Definizione delle coppie di colori
     init_pair(1, COLOR_GREEN, COLOR_GREEN);
@@ -70,6 +75,11 @@ int main(){
     init_pair(9, COLOR_BLACK, COLOR_GREEN);
     init_pair(10, COLOR_SAND, COLOR_SAND);
     init_pair(11, COLOR_DARKGREEN, COLOR_BLACK);
+    init_pair(12, COLOR_FROG_EYE, COLOR_FROG_BODY);
+    init_pair(13, COLOR_FROG_BODY, COLOR_FROG_BODY);
+    init_pair(14, COLOR_DARK_ORANGE, COLOR_BLACK);
+    init_pair(15, COLOR_ENDGAME_BACKGROUND, COLOR_FROG_BODY);
+
     
     // Definizione variabili
     int pipe_fds[2], direction = rand_range(0, 1);
@@ -145,7 +155,7 @@ int main(){
 
     Item msg;
     pid_t bullet_pid_left, bullet_pid_right;
-    while (manche > 0) {
+    while (endgame == FALSE) {
     if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
         switch (msg.id) {
             // FROG case
@@ -279,10 +289,10 @@ int main(){
                 }
                 if (frog_on_crocodile == FALSE)
                 {
-                    manche--;
-                    frog.y = GAME_HEIGHT-4;
-                    frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                    timer.x = 60;
+                    // manche--;
+                    // frog.y = GAME_HEIGHT-4;
+                    // frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
+                    // timer.x = 60;
                     // erase();
                     // print_death();
                     // refresh();
@@ -293,21 +303,54 @@ int main(){
             if(frog.y < DENS_HEIGHT){
                 switch(frog.x){
                     case DENS_1:
-                        score += 20;
+                        switch(timer.x)
+                        {
+                            case 41 ... 60:
+                                score += 30;
+                                break;
+                            case 21 ... 40:
+                                score += 20;
+                                break;
+                            case 1 ... 20:
+                                score += 10;
+                                break;
+                        }
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
                         frog.y = GAME_HEIGHT-4;
                         dens[0] = FALSE;
                         timer.x = 60;
                         break;
                     case DENS_2:
-                        score += 20;
+                        switch(timer.x)
+                        {
+                            case 41 ... 60:
+                                score += 30;
+                                break;
+                            case 21 ... 40:
+                                score += 20;
+                                break;
+                            case 1 ... 20:
+                                score += 10;
+                                break;
+                        }
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
                         frog.y = GAME_HEIGHT-4;
                         dens[1] = FALSE;
                         timer.x = 60;
                         break;
                     case DENS_3:
-                        score += 20;
+                        switch(timer.x)
+                        {
+                            case 41 ... 60:
+                                score += 30;
+                                break;
+                            case 21 ... 40:
+                                score += 20;
+                                break;
+                            case 1 ... 20:
+                                score += 10;
+                                break;
+                        }
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
                         frog.y = GAME_HEIGHT-4;
                         dens[2] = FALSE;
@@ -321,7 +364,18 @@ int main(){
                         timer.x = 60;
                         break;
                     case DENS_5:
-                        score += 20;
+                        switch(timer.x)
+                        {
+                            case 41 ... 60:
+                                score += 30;
+                                break;
+                            case 21 ... 40:
+                                score += 20;
+                                break;
+                            case 1 ... 20:
+                                score += 10;
+                                break;
+                        }
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
                         frog.y = GAME_HEIGHT-4;
                         dens[4] = FALSE;
@@ -332,6 +386,19 @@ int main(){
                         frog.y = GAME_HEIGHT-4;
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
                         timer.x = 60;
+                }
+            }
+
+            //manche end
+            if(manche == 0){
+                endgame = TRUE;
+            }
+
+            endgame = true;  // Assume che tutti i valori siano FALSE
+            for(int i = 0; i < 5; i++){
+                if (dens[i] != FALSE) {
+                    endgame = false;  // Se almeno uno è diverso da FALSE, endgame deve essere false
+                    break;
                 }
             }
 
@@ -359,10 +426,12 @@ int main(){
             print_frog(game, &frog);
             print_bullets(game, &bullet_left);
             print_bullets(game, &bullet_right);
-
+            
             wrefresh(game);
         }
     }
+
+    print_endgame(game, manche, dens);
 
     for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
         kill(child_pids[i], SIGTERM);  // Invia il segnale di terminazione

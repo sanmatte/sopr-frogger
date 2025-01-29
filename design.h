@@ -19,6 +19,10 @@
 #define COLOR_DARKGREEN 11
 #define COLOR_LIGHTDARKGREEN 12
 #define COLOR_SAND 13
+#define COLOR_FROG_EYE 14
+#define COLOR_FROG_BODY 15
+#define COLOR_DARK_ORANGE 16
+#define COLOR_ENDGAME_BACKGROUND 17
 
 //dens
 #define DENS_NUMBER 5
@@ -38,6 +42,7 @@
 #define SIDEWALK_HEIGHT_1 10
 #define SIDEWALK_HEIGHT_2 GAME_HEIGHT-5
 
+
 #define STREAM_NUMBER 8
 
 // define bullets
@@ -55,5 +60,6 @@ void print_frog(WINDOW *game, Item *frog);
 void print_crocodile_right(WINDOW *game, Item *crocodile);
 void print_crocodile_left(WINDOW *game, Item *crocodile);
 void print_bullets(WINDOW *game, Item *bullet);
+void print_endgame(WINDOW *game, int manche, bool *dens);
 
 #endif

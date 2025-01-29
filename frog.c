@@ -13,8 +13,6 @@ void Frog(int *pipe_fds, Item *frog){
     close(pipe_fds[0]); 
     int ch;
     bool has_moved = TRUE;
-    //signal(FROG_ON_CROCODILE_SIG, signal_handler);
-    //signal(RESET_MANCHE_SIG, signal_handler);
     Item frogtest = {FROG_ID, 0, 0, 0, 0};
     
 
