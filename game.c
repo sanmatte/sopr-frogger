@@ -79,6 +79,8 @@ int main(){
     init_pair(13, COLOR_FROG_BODY, COLOR_FROG_BODY);
     init_pair(14, COLOR_DARK_ORANGE, COLOR_BLACK);
     init_pair(15, COLOR_ENDGAME_BACKGROUND, COLOR_FROG_BODY);
+    init_pair(16, COLOR_FROG_BODY, COLOR_BLACK);
+    init_pair(17, COLOR_BLACK, COLOR_BLACK);
 
     
     // Definizione variabili
@@ -289,10 +291,10 @@ int main(){
                 }
                 if (frog_on_crocodile == FALSE)
                 {
-                    // manche--;
-                    // frog.y = GAME_HEIGHT-4;
-                    // frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                    // timer.x = 60;
+                    manche--;
+                    frog.y = GAME_HEIGHT-4;
+                    frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
+                    timer.x = 60;
                     // erase();
                     // print_death();
                     // refresh();
@@ -389,17 +391,17 @@ int main(){
                 }
             }
 
-            //manche end
-            if(manche == 0){
-                endgame = TRUE;
-            }
-
             endgame = true;  // Assume che tutti i valori siano FALSE
             for(int i = 0; i < 5; i++){
                 if (dens[i] != FALSE) {
                     endgame = false;  // Se almeno uno è diverso da FALSE, endgame deve essere false
                     break;
                 }
+            }
+
+            //manche end
+            if(manche == 0){
+                endgame = true;
             }
 
             print_score(game, manche, timer.x, score);

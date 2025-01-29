@@ -298,18 +298,35 @@ void print_endgame(WINDOW *game, int manche, bool *dens){
 		}
 	};
 
+	static const char* sprite_matrix_score[1][5] = {
+		{
+			"███████╗ ██████╗ ██████╗ ██████╗ ███████╗",
+			"██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝",
+			"███████╗██║     ██║   ██║██████╔╝█████╗",
+			"╚════██║██║     ██║   ██║██╔══██╗██╔══╝  ",
+			"███████║╚██████╗╚██████╔╝██║  ██║███████║"
+		}
+	};
+
+
 	//lose screen
 	if(manche == 0){
-		wattron(game, COLOR_PAIR(13));
+		wattron(game, COLOR_PAIR(17));
 		for(int i=0; i<GAME_HEIGHT; i++){
 			mvwhline(game, i, 0, ' ', GAME_WIDTH);
 		}
-		wattroff(game, COLOR_PAIR(13));
-		wattron(game, COLOR_PAIR(15));
+		wattroff(game, COLOR_PAIR(17));
+
+		wattron(game, COLOR_PAIR(6));
 		for(int i=0; i<5; i++){
-			mvwprintw(game, (GAME_HEIGHT/2) + i - 2, GAME_WIDTH/2 - 30, "%s", sprite_matrix_lose[0][i]);
+			mvwprintw(game, (GAME_HEIGHT/2) + i - 5, GAME_WIDTH/2 - 30, "%s", sprite_matrix_lose[0][i]);
 		}
-		wattroff(game, COLOR_PAIR(15));
+
+		for(int i=0; i<5; i++){
+			mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 - 30, "%s", sprite_matrix_score[0][i]);
+		}
+		wattroff(game, COLOR_PAIR(6));
+
 		wrefresh(game);
 		sleep(3);
 	}
@@ -332,10 +349,16 @@ void print_endgame(WINDOW *game, int manche, bool *dens){
 			mvwhline(game, i, 0, ' ', GAME_WIDTH);
 		}
 		wattroff(game, COLOR_PAIR(13));
+
 		wattron(game, COLOR_PAIR(15));
 		for(int i = 0; i < 5; i++) {
 			mvwprintw(game, (GAME_HEIGHT/2) + i - 2, GAME_WIDTH/2 - 30, "%s", sprite_matrix_win[0][i]);
 		}
+
+		for(int i=0; i<5; i++){
+			mvwprintw(game, (GAME_HEIGHT/2) + i + 5, GAME_WIDTH/2 - 30, "%s", sprite_matrix_score[0][i]);
+		}
+		
 		wattroff(game, COLOR_PAIR(15));
 		wrefresh(game);
 		sleep(3);
