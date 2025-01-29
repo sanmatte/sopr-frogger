@@ -53,7 +53,7 @@ void Crocodile(int *pipe_fds, Item *crocodile, int direction, Item crocodiles_bu
             }
             if (crocodile->x == GAME_WIDTH) {
                 crocodile->x = -CROCODILE_DIM_X;
-                sleep(rand_range(1, 3));
+                sleep(rand_range(2, 5));
             }
         } else if (direction == 1 && crocodile->x > -CROCODILE_DIM_X) {
             crocodile->x -= 1;
@@ -83,7 +83,7 @@ void Crocodile(int *pipe_fds, Item *crocodile, int direction, Item crocodiles_bu
             }
             if (crocodile->x == -CROCODILE_DIM_X) {
                 crocodile->x = COLS;
-                sleep(rand_range(1, 3));
+                sleep(rand_range(2, 5));
             }
         }
         if (pipe_fds != NULL) {

@@ -9,16 +9,16 @@ void print_score(WINDOW *game, int manche, int timer, int score){
 	wattron(game, COLOR_PAIR(6));
 	switch(manche){
 		case 3:
-			mvwprintw(game, 0, 1, "Lives: %s", "♥ ♥ ♥");
+			mvwprintw(game, 0, 1, "LIFES: %s", "♥ ♥ ♥");
 			break;
 		case 2:
-			mvwprintw(game, 0, 1, "Lives: %s", "♥ ♥");
+			mvwprintw(game, 0, 1, "LIFES: %s", "♥ ♥");
 			break;
 		case 1:
-			mvwprintw(game, 0, 1, "Lives: %s", "♥");
+			mvwprintw(game, 0, 1, "LIFES: %s", "♥");
 			break;
 		case 0:
-			mvwprintw(game, 0, 1, "Lives: %s", "");
+			mvwprintw(game, 0, 1, "LIFES: %s", "");
 			break;
 		default:
 			break;
