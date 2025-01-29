@@ -6,7 +6,7 @@ typedef struct {
     int y;
     int x;
     int speed;
-    int free;
+    int extra; // direzione per il coccodrillo e stato per la rana
 } Item;
 
 #endif

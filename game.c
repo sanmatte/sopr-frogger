@@ -30,15 +30,16 @@ int main(){
     
     int bullet_frog = 0;
 
-    WINDOW *game = newwin(GAME_HEIGHT, GAME_WIDTH, 0, 0);
+    // finestra di gioco centrata
+    WINDOW *game = newwin(GAME_HEIGHT, GAME_WIDTH, (LINES - GAME_HEIGHT)/2, (COLS - GAME_WIDTH)/2);
 
     Item frog = {FROG_ID, GAME_HEIGHT-4, (GAME_WIDTH/2)-FROG_DIM_X/2, 0, 0};
     Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
-    for (int i = 0; i < STREAM_NUMBER; i++) {
-        for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
-            crocodiles[i][j].free = 0;
-        }
-    }
+    // for (int i = 0; i < STREAM_NUMBER; i++) {
+    //     for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
+    //         crocodiles[i][j].extra = 0;
+    //     }
+    // }
     Item bullet_right = {BULLETS_ID, -1, -1, 0, 0};
     Item bullet_left = {BULLETS_ID, -1, -1, 0, 0};
     Item timer = {TIMER_ID, 0, 60, 0, 0};
@@ -49,7 +50,7 @@ int main(){
         crocodiles_bullets[i].x = -1;
         crocodiles_bullets[i].y = -1;
         crocodiles_bullets[i].speed = CROCODILE_BULLET_SPEED;
-        crocodiles_bullets[i].free = 1;
+        //crocodiles_bullets[i].extra.s = 1;
     }
 
     init_color(COLOR_DARKGREEN, 0, 400, 0);
@@ -82,7 +83,7 @@ int main(){
 
     
     // Definizione variabili
-    int pipe_fds[2], direction = rand_range(0, 1);
+    int pipe_fds[2], direction = (rand() % 2)? 1: -1;
     int stream_speed[STREAM_NUMBER];
 
     for(int i=0; i<STREAM_NUMBER; i++){
@@ -141,7 +142,7 @@ int main(){
             }
         }
         
-        direction = 1 - direction;
+        direction = -direction;
     }
 
     int even, odd;
@@ -163,9 +164,9 @@ int main(){
                 if (frog.x + msg.x >= 0 && frog.x + msg.x <= COLS - FROG_DIM_X && frog.y + msg.y >= 0 && frog.y + msg.y <= LINES - FROG_DIM_Y) {
                     frog.y += msg.y;
                     frog.x += msg.x;
-                    frog.free = msg.free;
+                    frog.extra = msg.extra;
 
-                    if (frog.free == 1 && bullet_frog == 0) {
+                    if (frog.extra == 1 && bullet_frog == 0) {
                         bullet_frog = 1;
 
                         // Creazione del processo per il proiettile destro

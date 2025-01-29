@@ -45,7 +45,7 @@ void Frog(int *pipe_fds, Item *frog){
                 has_moved = TRUE;
                 break;
             case 32:
-                frogtest.free = 1;
+                frogtest.extra = 1;
                 frogtest.y = 0;
                 frogtest.x = 0;
                 has_moved = TRUE;
@@ -60,7 +60,7 @@ void Frog(int *pipe_fds, Item *frog){
                 write(pipe_fds[1], &frogtest, sizeof(Item));
             }
         }
-        frogtest.free = 0;
+        frogtest.extra = 0;
         has_moved = FALSE;
     }
 }
