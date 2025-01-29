@@ -43,15 +43,13 @@ int main(){
     Item bullet_left = {BULLETS_ID, -1, -1, 0, 0};
     Item timer = {TIMER_ID, 0, 60, 0, 0};
     
-    Item crocodiles_bullets[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
-    for (int i = 0; i < STREAM_NUMBER; i++) {
-        for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
-            crocodiles_bullets[i][j].id = CROCODILE_MIN_BULLETS_ID + (i * CROCODILE_STREAM_MAX_NUMBER) + j;
-            crocodiles_bullets[i][j].x = -1;
-            crocodiles_bullets[i][j].y = -1;
-            crocodiles_bullets[i][j].speed = CROCODILE_BULLET_SPEED;
-            crocodiles_bullets[i][j].free = 1;
-        }
+    Item crocodiles_bullets[CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1];
+    for (int i = 0; i < CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1; i++) {
+        crocodiles_bullets[i].id = CROCODILE_MIN_BULLETS_ID + i;
+        crocodiles_bullets[i].x = -1;
+        crocodiles_bullets[i].y = -1;
+        crocodiles_bullets[i].speed = CROCODILE_BULLET_SPEED;
+        crocodiles_bullets[i].free = 1;
     }
 
     init_color(COLOR_DARKGREEN, 0, 400, 0);
@@ -135,7 +133,7 @@ int main(){
                 srand(timestamp() + crocodiles[i][j].id + getpid()); 
                 distance += rand_range(400000, 1000000);
                 usleep(distance); 
-                Crocodile(pipe_fds, &crocodiles[i][j], direction, crocodiles_bullets);
+                Crocodile(pipe_fds, &crocodiles[i][j], direction);
                 exit(0);
             } else {
                 child_pids[i * CROCODILE_STREAM_MAX_NUMBER + j + 1] = pid_croc;
@@ -236,13 +234,7 @@ int main(){
                     }
                     break;
                 case CROCODILE_MIN_BULLETS_ID ... CROCODILE_MAX_BULLETS_ID:
-                    for(int i = 0; i < STREAM_NUMBER; i++){
-                        for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
-                            if(crocodiles_bullets[i][j].id == msg.id){
-                                crocodiles_bullets[i][j] = msg;
-                            }
-                        }
-                    }
+                    crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID] = msg;
                     break;
                 //CROCODILE case
                 default:
@@ -420,11 +412,9 @@ int main(){
                     
                 }
             }
-            // for(int i=0; i<STREAM_NUMBER; i++){
-            //     for(int j=0; j<CROCODILE_STREAM_MAX_NUMBER; j++){
-            //         print_bullets(game, &crocodiles_bullets[i][j]);
-            //     }
-            // }
+            for (int i = 0; i < CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1; i++) {
+                print_bullets(game, &crocodiles_bullets[i]);
+            }
             print_frog(game, &frog);
             print_bullets(game, &bullet_left);
             print_bullets(game, &bullet_right);
