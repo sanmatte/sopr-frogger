@@ -50,15 +50,17 @@
 #define BULLETS_DIM 1
 #define BULLETS_SPEED 20000
 
+// timer
 #define TIMER_ID 27
+#define TIMER_SPEED 1000000
+#define TIMER_MAX 60
 
 // function prototipes
 
 void print_score(WINDOW *game, int manche, int timer, int score);
 void print_background(WINDOW *game, bool *dens);
 void print_frog(WINDOW *game, Item *frog);
-void print_crocodile_right(WINDOW *game, Item *crocodile);
-void print_crocodile_left(WINDOW *game, Item *crocodile);
+void print_crocodile(WINDOW *game, Item *crocodile);
 void print_bullets(WINDOW *game, Item *bullet);
 void print_endgame(WINDOW *game, int manche, bool *dens);
 

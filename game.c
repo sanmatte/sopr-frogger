@@ -20,7 +20,7 @@ void game_timer(int *pipe_fds){
     Item msg = {TIMER_ID, 0, 0, 0, 0};
     while(1){
         write(pipe_fds[1], &msg, sizeof(Item));
-        sleep(1);
+        usleep(TIMER_SPEED);
     }
 }
 
@@ -47,8 +47,8 @@ int main(){
     Item crocodiles_bullets[CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1];
     for (int i = 0; i < CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1; i++) {
         crocodiles_bullets[i].id = CROCODILE_MIN_BULLETS_ID + i;
-        crocodiles_bullets[i].x = -1;
-        crocodiles_bullets[i].y = -1;
+        crocodiles_bullets[i].x = -2;
+        crocodiles_bullets[i].y = -2;
         crocodiles_bullets[i].speed = CROCODILE_BULLET_SPEED;
         //crocodiles_bullets[i].extra.s = 1;
     }
@@ -146,7 +146,7 @@ int main(){
     }
 
     int even, odd;
-    if (direction == 0) {
+    if (direction == -1) {
         even = 1;
         odd = -1;
     } else {
@@ -161,7 +161,7 @@ int main(){
         switch (msg.id) {
             // FROG case
             case FROG_ID:
-                if (frog.x + msg.x >= 0 && frog.x + msg.x <= COLS - FROG_DIM_X && frog.y + msg.y >= 0 && frog.y + msg.y <= LINES - FROG_DIM_Y) {
+                if (frog.x + msg.x >= 0 && frog.x + msg.x <= GAME_WIDTH - FROG_DIM_X && frog.y + msg.y >= 0 && frog.y + msg.y <= GAME_HEIGHT - FROG_DIM_Y) {
                     frog.y += msg.y;
                     frog.x += msg.x;
                     frog.extra = msg.extra;
@@ -231,7 +231,7 @@ int main(){
                         manche--;
                         frog.y = GAME_HEIGHT-4;
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                        timer.x = 60;   
+                        timer.x = TIMER_MAX;   
                     }
                     break;
                 case CROCODILE_MIN_BULLETS_ID ... CROCODILE_MAX_BULLETS_ID:
@@ -287,7 +287,7 @@ int main(){
                     manche--;
                     frog.y = GAME_HEIGHT-4;
                     frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                    timer.x = 60;
+                    timer.x = TIMER_MAX;
                     // erase();
                     // print_death();
                     // refresh();
@@ -300,7 +300,7 @@ int main(){
                     case DENS_1:
                         switch(timer.x)
                         {
-                            case 41 ... 60:
+                            case 41 ... TIMER_MAX:
                                 score += 30;
                                 break;
                             case 21 ... 40:
@@ -313,7 +313,7 @@ int main(){
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
                         frog.y = GAME_HEIGHT-4;
                         dens[0] = FALSE;
-                        timer.x = 60;
+                        timer.x = TIMER_MAX;
                         break;
                     case DENS_2:
                         switch(timer.x)
@@ -331,12 +331,12 @@ int main(){
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
                         frog.y = GAME_HEIGHT-4;
                         dens[1] = FALSE;
-                        timer.x = 60;
+                        timer.x = TIMER_MAX;
                         break;
                     case DENS_3:
                         switch(timer.x)
                         {
-                            case 41 ... 60:
+                            case 41 ... TIMER_MAX:
                                 score += 30;
                                 break;
                             case 21 ... 40:
@@ -349,19 +349,19 @@ int main(){
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
                         frog.y = GAME_HEIGHT-4;
                         dens[2] = FALSE;
-                        timer.x = 60;
+                        timer.x = TIMER_MAX;
                         break;
                     case DENS_4:
                         score += 20;
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
                         frog.y = GAME_HEIGHT-4;
                         dens[3] = FALSE;
-                        timer.x = 60;
+                        timer.x = TIMER_MAX;
                         break;
                     case DENS_5:
                         switch(timer.x)
                         {
-                            case 41 ... 60:
+                            case 41 ... TIMER_MAX:
                                 score += 30;
                                 break;
                             case 21 ... 40:
@@ -374,13 +374,13 @@ int main(){
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
                         frog.y = GAME_HEIGHT-4;
                         dens[4] = FALSE;
-                        timer.x = 60;
+                        timer.x = TIMER_MAX;
                         break;
                     default:
                         manche--;
                         frog.y = GAME_HEIGHT-4;
                         frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                        timer.x = 60;
+                        timer.x = TIMER_MAX;
                 }
             }
 
@@ -402,17 +402,10 @@ int main(){
 
             for(int i = 0; i < STREAM_NUMBER; i++){
                 for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
-                    if ((direction+i) % 2 == 0)
-                    {
-                        print_crocodile_right(game, &crocodiles[i][j]);
-                    }
-                    else
-                    {
-                        print_crocodile_left(game, &crocodiles[i][j]);
-                    }
-                    
+                    print_crocodile(game, &crocodiles[i][j]);
                 }
             }
+
             for (int i = 0; i < CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1; i++) {
                 print_bullets(game, &crocodiles_bullets[i]);
             }
