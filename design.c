@@ -277,7 +277,7 @@ void print_bullets(WINDOW *game, Item *bullets){
 	wattroff(game, COLOR_PAIR(5));
 }
 
-void print_endgame(WINDOW *game, int manche, bool *dens){
+void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 	static const char* sprite_matrix_lose[1][5] = {
 		{
 			"██╗   ██╗ ██████╗ ██╗   ██╗    ██╗      ██████╗ ███████╗███████╗",
@@ -307,6 +307,81 @@ void print_endgame(WINDOW *game, int manche, bool *dens){
 		}
 	};
 
+	char *numbers[10][5] = {
+    {
+        " ██████╗  ", 
+        "██╔═══██╗ ", 
+        "██║   ██║ ", 
+        "██╚═══██║ ", 
+        "╚██████╔╝"
+    }, // 0
+    {
+        "  ██╗ ", 
+        " ███║ ", 
+        " ╚██║ ", 
+        "  ██║ ", 
+        "  ██║ "
+    }, // 1
+    {
+        "██████╗  ", 
+        "╚════██╗ ", 
+        " █████╔╝ ", 
+        "██╔═══╝  ", 
+        "███████╗ "
+    }, // 2
+    {
+        "██████╗  ", 
+        "╚════██╗ ", 
+        " █████╔╝ ", 
+        " ╚═══██╗ ", 
+        "██████╔╝ "
+    }, // 3
+    {
+        "██╗  ██╗ ", 
+        "██║  ██║ ", 
+        "███████║ ", 
+        "╚════██║ ", 
+        "     ██║ "
+    }, // 4
+    {
+        "███████╗ ", 
+        "██╔════╝ ", 
+        "███████╗ ", 
+        "╚════██║ ", 
+        "███████║ "
+    }, // 5
+    {
+        " ██████╗ ", 
+        "██╔════╝ ", 
+        "███████╗ ", 
+        "██╔═══██╗", 
+        "╚██████╔╝"
+    }, // 6
+    {
+        "███████╗ ", 
+        "╚════██║ ", 
+        "    ██╔╝ ", 
+        "   ██╔╝  ", 
+        "   ██║   "
+    }, // 7
+    {
+        " █████╗  ", 
+        "██╔══██╗ ", 
+        " █████╔╝ ", 
+        "██╔══██╗ ", 
+        "╚█████╔╝ "
+    }, // 8
+    {
+        " ██████╗ ", 
+        "██╔═══██╗", 
+        " ███████║", 
+        " ╚════██║", 
+        " ██████╔╝"
+    }  // 9
+};
+
+	
+
 
 	//lose screen
 	if(manche == 0){
@@ -324,6 +399,36 @@ void print_endgame(WINDOW *game, int manche, bool *dens){
 		for(int i=0; i<5; i++){
 			mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 - 30, "%s", sprite_matrix_score[0][i]);
 		}
+
+		if(score == 0){
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 20, "%s", numbers[0][i]);
+			}
+		}
+
+		else if(score >= 10 && score < 100){
+			int temp = score/10;
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 20, "%s", numbers[temp][i]);
+			}
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 30, "%s", numbers[0][i]);
+			}
+		}
+
+		else {
+			int temp = (score/10)-10;
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 20, "%s", numbers[1][i]);
+			}
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 30, "%s", numbers[temp][i]);
+			}
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 40, "%s", numbers[0][i]);
+			}
+		}
+
 		wattroff(game, COLOR_PAIR(6));
 
 		wrefresh(game);
@@ -357,10 +462,33 @@ void print_endgame(WINDOW *game, int manche, bool *dens){
 		for(int i=0; i<5; i++){
 			mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 - 30, "%s", sprite_matrix_score[0][i]);
 		}
+
+		if(score >= 10 && score < 100){
+			int temp = score/10;
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 20, "%s", numbers[temp][i]);
+			}
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 30, "%s", numbers[0][i]);
+			}
+		}
+
+		else {
+			int temp = (score/10)-10;
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 20, "%s", numbers[1][i]);
+			}
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 30, "%s", numbers[temp][i]);
+			}
+			for(int i=0; i<5; i++){
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 40, "%s", numbers[0][i]);
+			}
+		}
 		
 		wattroff(game, COLOR_PAIR(15));
 		wrefresh(game);
-		sleep(3);
+		sleep(5);
 	}
 
 }

@@ -156,6 +156,7 @@ int main(){
 
     Item msg;
     pid_t bullet_pid_left, bullet_pid_right;
+
     while (endgame == FALSE) {
     if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
         switch (msg.id) {
@@ -236,6 +237,34 @@ int main(){
                     break;
                 case CROCODILE_MIN_BULLETS_ID ... CROCODILE_MAX_BULLETS_ID:
                     crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID] = msg;
+
+                    // Collision beetwen frog and crocodile bullet
+                    if(frog.y == (crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].y - 1) && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x >= frog.x && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x <= frog.x + FROG_DIM_X){
+                        manche--;
+                        frog.y = GAME_HEIGHT-4;
+                        frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
+                        timer.x = TIMER_MAX;
+                    }
+
+                    if ((bullet_right.x == msg.x && bullet_right.y == msg.y) || (bullet_left.x == msg.x && bullet_left.y == msg.y)) {
+
+                        // Resetta i proiettili in caso di collisione
+                        bullet_right.x = -1;
+                        bullet_right.y = -1;
+                        bullet_left.x = -1;
+                        bullet_left.y = -1;
+
+                        // Termina i processi dei proiettili
+                        if (bullet_pid_right > 0) {
+                            kill(bullet_pid_right, SIGKILL);
+                            bullet_pid_right = -1;
+                        }
+                        if (bullet_pid_left > 0) {
+                            kill(bullet_pid_left, SIGKILL);
+                            bullet_pid_left = -1;
+                        }
+                    }
+
                     break;
                 //CROCODILE case
                 default:
@@ -294,6 +323,16 @@ int main(){
                     // sleep(5);
                 }
             }
+
+            // Collision between frog bullets and crocodile bullet
+            
+            // for(int i=0; i<CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID; i++){
+            //     if(crocodiles_bullets[i].x == bullet_right.x && crocodiles_bullets[i].y == bullet_right.y){
+            //         bullet_right.x = GAME_WIDTH;
+            //         bullet_right.y = GAME_HEIGHT;
+            //         write(pipe_fds[1], &bullet_right, sizeof(Item));
+            //     }
+            // }
 
             if(frog.y < DENS_HEIGHT){
                 switch(frog.x){
@@ -417,7 +456,7 @@ int main(){
         }
     }
 
-    print_endgame(game, manche, dens);
+    print_endgame(game, manche, dens, score);
 
     for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
         kill(child_pids[i], SIGTERM);  // Invia il segnale di terminazione
@@ -429,3 +468,5 @@ int main(){
     endwin();
     return 0;
 }
+
+

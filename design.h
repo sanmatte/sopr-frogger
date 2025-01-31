@@ -62,6 +62,6 @@ void print_background(WINDOW *game, bool *dens);
 void print_frog(WINDOW *game, Item *frog);
 void print_crocodile(WINDOW *game, Item *crocodile);
 void print_bullets(WINDOW *game, Item *bullet);
-void print_endgame(WINDOW *game, int manche, bool *dens);
+void print_endgame(WINDOW *game, int manche, bool *dens, int score);
 
 #endif

@@ -13,7 +13,7 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
             crocodiles[i][j].x = direction == -1 ? -CROCODILE_DIM_X : GAME_WIDTH; // Da sinistra verso destra se TRUE
             crocodiles[i][j].speed = stream_speed[i];
             crocodiles[i][j].extra = direction;
-        
+            
         }
         direction = - direction;
     }
@@ -96,10 +96,10 @@ void Crocodile(int *pipe_fds, Item *crocodile, int direction) {
     direction = crocodile->extra;
     int random_shot;
     int active = FALSE;
-    pid_t bullet_pid = -1; // Store the bullet's PID
+    pid_t bullet_pid = -1;
 
     while (1) {
-        random_shot = rand_range(0, 5);
+        random_shot = rand_range(0, 100);
         int shot_speed = rand_range(50000, crocodile->speed - 50000);
 
         // Check if the bullet process has exited
@@ -139,14 +139,13 @@ void Crocodile(int *pipe_fds, Item *crocodile, int direction) {
             if (random_shot == 1 && active == FALSE) {
                 bullet_pid = fork();
                 if (bullet_pid == 0) {
-                    // Child process: bullet logic
                     Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, crocodile->y + 1, crocodile->x - 1, 0, 0};
                     while (TRUE) {
                         bullet.x -= 1;
                         write(pipe_fds[1], &bullet, sizeof(Item));
                         usleep(shot_speed);
                         if (bullet.x <= -1) {
-                            exit(0); // Bullet exits the screen
+                            exit(0); 
                         }
                     }
                 }
