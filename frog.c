@@ -14,15 +14,18 @@ void Frog(int *pipe_fds, Item *frog){
     int ch;
     bool has_moved = TRUE;
     Item frogtest = {FROG_ID, 0, 0, 0, 0};
-    
 
     while (manche > 0) {
         if (newmanche)
         {
             reset_manche(frog);
         }
-        
-        ch = getch(); 
+
+        // Read the latest key press (ignore older ones)
+        do {
+            ch = getch();
+        } while (getch() != ERR); // Drain extra inputs
+
         switch (ch) {
             case KEY_UP:
                 frogtest.y = -FROG_DIM_Y;
@@ -62,5 +65,6 @@ void Frog(int *pipe_fds, Item *frog){
         }
         frogtest.extra = 0;
         has_moved = FALSE;
+        usleep(current_difficulty.frog_movement_limit); //default 0
     }
 }

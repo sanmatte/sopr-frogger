@@ -9,4 +9,14 @@ typedef struct {
     int extra; // direzione per il coccodrillo e stato per la rana
 } Item;
 
+typedef struct {
+    int bullets_speed;
+    int crocodile_speed_max;
+    int crocodile_speed_min;
+    int crocodile_bullet_speed;
+    int shot_range;
+    int frog_movement_limit;
+} Difficulty;
+
+extern Difficulty current_difficulty;
 #endif

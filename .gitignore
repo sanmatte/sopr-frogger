@@ -2,4 +2,3 @@ output
 a.out
 .vscode
 *.log
-main.c
