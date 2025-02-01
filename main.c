@@ -37,20 +37,20 @@ const Difficulty EASY = {
     .frog_movement_limit = 0
 };
 const Difficulty MEDIUM = {
-    .bullets_speed = 20000,
+    .bullets_speed = 40000,
     .crocodile_speed_max = 200000,
     .crocodile_speed_min = 100000,
     .crocodile_bullet_speed = 40000,
-    .shot_range = 30,
+    .shot_range = 20,
     .frog_movement_limit = 0
 };
 
 const Difficulty HARD = {
-    .bullets_speed = 10000,
-    .crocodile_speed_max = 150000,
-    .crocodile_speed_min = 50000,
-    .crocodile_bullet_speed = 50000,
-    .shot_range = 5,
+    .bullets_speed = 50000,
+    .crocodile_speed_max = 180000,
+    .crocodile_speed_min = 80000,
+    .crocodile_bullet_speed = 45000,
+    .shot_range = 20,
     .frog_movement_limit = 50000
 };
 
@@ -84,6 +84,10 @@ int main(){
         {
         case 0: //play
             startGame(win);
+            return_to_menu = 1;
+            wrefresh(win); // Refresh window
+            werase(win);  // Clear the window
+            //! TOFIX
             break;
         case 1:
             selection = showMenu(win, difficulties);

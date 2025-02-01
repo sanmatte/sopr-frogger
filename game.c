@@ -24,7 +24,7 @@ void game_timer(int *pipe_fds){
     }
 }
 
-int startGame(WINDOW *game) {
+void startGame(WINDOW *game) {
     setlocale(LC_ALL, "");
     int bullet_frog = 0;
 
@@ -318,21 +318,24 @@ int startGame(WINDOW *game) {
                 }
             }
             // Collision between frog bullets and crocodile bullet
-            
-            for(int i=0; i<=CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID; i++){
-                if(crocodiles_bullets[i].x == bullet_right.x && crocodiles_bullets[i].y == bullet_right.y){
-                    //kill(bullet_pid_right, SIGKILL);
-                    //kill(child_pids[i+1], SIGUSR1);
+            stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right.y) / FROG_DIM_Y);
+            for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
+                if((crocodiles_bullets[i].x - bullet_right.x) <= 1 && (crocodiles_bullets[i].x - bullet_right.x) >= -1 && crocodiles_bullets[i].y == bullet_right.y){
+                    kill(bullet_pid_right, SIGKILL);
+                    kill(child_pids[i+1], SIGUSR1);
+                    bullet_right.x = -1;
+                    bullet_right.y = -1;
+                    crocodiles_bullets[i].x = -2;
                 }
-                if(crocodiles_bullets[i].x == bullet_left.x && crocodiles_bullets[i].y == bullet_left.y){
-                    //kill(bullet_pid_left, SIGKILL);
-                    //kill(child_pids[i+1], SIGUSR1);
-                    debuglog("collision with bullet %d\n", crocodiles_bullets[i].id);
-                    debuglog("crocodile %d\n\n", crocodiles[i/CROCODILE_STREAM_MAX_NUMBER][i%CROCODILE_STREAM_MAX_NUMBER].id);
-                    break;
+                if((crocodiles_bullets[i].x - bullet_left.x) <= 1 && (crocodiles_bullets[i].x - bullet_left.x) >= -1 && crocodiles_bullets[i].y == bullet_left.y){
+                    kill(bullet_pid_left, SIGKILL);
+                    kill(child_pids[i+1], SIGUSR1);
+                    bullet_left.x = -1;
+                    bullet_left.y = -1;
+                    crocodiles_bullets[i].x = -2;
                 }
             }
-
+            // array 24 posti y = stream -> i - 0,1,2/3,4,5/
             // Collision between frog bullets and crocodile bullet
             
             // for(int i=0; i<CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID; i++){
@@ -474,7 +477,6 @@ int startGame(WINDOW *game) {
     for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
         waitpid(child_pids[i], NULL, 0);
     }
-    return 0;
 }
 
 

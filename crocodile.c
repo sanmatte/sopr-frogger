@@ -93,8 +93,7 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
 int exploded = FALSE;
 void handlesignal(int signum) {
     if (signum == SIGUSR1) {
-    exploded = FALSE;
-        return;
+        exploded = TRUE;
     }
 }
 void Crocodile(int *pipe_fds, Item *crocodile, int direction) {
@@ -103,8 +102,9 @@ void Crocodile(int *pipe_fds, Item *crocodile, int direction) {
     int random_shot;
     int active = FALSE;
     pid_t bullet_pid = -1; // Store the bullet's PID
-    //signal(SIGUSR1, handlesignal); // Ignore SIGUSR1 signal
+    signal(SIGUSR1, handlesignal); // Ignore SIGUSR1 signal
     while (1) {
+        
         random_shot = rand_range(0, current_difficulty.shot_range);
         int shot_speed = crocodile->speed - current_difficulty.crocodile_bullet_speed;
 
@@ -116,6 +116,18 @@ void Crocodile(int *pipe_fds, Item *crocodile, int direction) {
                 active = FALSE; // Reset active when the bullet exits
             }
         }
+        if (bullet_pid != -1 && exploded)
+        {
+            int status;
+            kill(bullet_pid, SIGKILL);
+            pid_t result = waitpid(bullet_pid, &status, WNOHANG);
+            if (result == bullet_pid) {
+                active = FALSE; // Reset active when the bullet exits
+            }
+            bullet_pid = -1;
+            exploded = FALSE;
+        }
+        
 
         if (direction == -1 && crocodile->x < GAME_WIDTH+1) {
             crocodile->x += 1;
@@ -125,7 +137,7 @@ void Crocodile(int *pipe_fds, Item *crocodile, int direction) {
                     // Child process: bullet logic
                     Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, crocodile->y + 1, crocodile->x + CROCODILE_DIM_X + 1, 0, 0};
                     while (TRUE) {
-                        if (bullet.x >= GAME_WIDTH || exploded) {
+                        if (bullet.x >= GAME_WIDTH) {
                             _exit(0); // Bullet exits the screen
                         }
                         bullet.x += 1;
@@ -147,7 +159,7 @@ void Crocodile(int *pipe_fds, Item *crocodile, int direction) {
                 if (bullet_pid == 0) {
                     Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, crocodile->y + 1, crocodile->x - 1, 0, 0};
                     while (TRUE) {
-                        if (bullet.x <= -1 || exploded) {
+                        if (bullet.x <= -1) {
                             _exit(0); // Bullet exits the screen
                         }
                         bullet.x -= 1;
@@ -167,7 +179,7 @@ void Crocodile(int *pipe_fds, Item *crocodile, int direction) {
         if (pipe_fds != NULL) {
             write(pipe_fds[1], crocodile, sizeof(Item));
         }
-
+        
         usleep(crocodile->speed);
     }
 }
