@@ -127,8 +127,6 @@ int startGame(WINDOW *game) {
                 exit(EXIT_FAILURE);
             } else if (pid_croc == 0) { 
                 srand(timestamp() + crocodiles[i][j].id + getpid());
-                debuglog("speed: %d\n", crocodiles[i][j].speed);
-                debuglog("speed by stream: %d\n", stream_speed[i]);
                 usleep(distance); 
                 Crocodile(pipe_fds, &crocodiles[i][j], direction);
                 _exit(0);
