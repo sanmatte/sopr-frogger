@@ -13,7 +13,7 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
             crocodiles[i][j].x = direction == -1 ? -CROCODILE_DIM_X : GAME_WIDTH; // Da sinistra verso destra se TRUE
             crocodiles[i][j].speed = stream_speed[i];
             crocodiles[i][j].extra = direction;
-        
+            
         }
         direction = - direction;
     }
@@ -145,7 +145,6 @@ void Crocodile(int *pipe_fds, Item *crocodile, int direction) {
             if (random_shot == 1 && active == FALSE) {
                 bullet_pid = fork();
                 if (bullet_pid == 0) {
-                    // Child process: bullet logic
                     Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, crocodile->y + 1, crocodile->x - 1, 0, 0};
                     while (TRUE) {
                         if (bullet.x <= -1 || exploded) {

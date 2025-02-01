@@ -155,6 +155,7 @@ int startGame(WINDOW *game) {
 
     Item msg;
     pid_t bullet_pid_left, bullet_pid_right;
+
     while (endgame == FALSE) {
     if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
         switch (msg.id) {
@@ -334,6 +335,16 @@ int startGame(WINDOW *game) {
                 }
             }
 
+            // Collision between frog bullets and crocodile bullet
+            
+            // for(int i=0; i<CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID; i++){
+            //     if(crocodiles_bullets[i].x == bullet_right.x && crocodiles_bullets[i].y == bullet_right.y){
+            //         bullet_right.x = GAME_WIDTH;
+            //         bullet_right.y = GAME_HEIGHT;
+            //         write(pipe_fds[1], &bullet_right, sizeof(Item));
+            //     }
+            // }
+
             if(frog.y < DENS_HEIGHT){
                 switch(frog.x){
                     case DENS_1:
@@ -467,3 +478,5 @@ int startGame(WINDOW *game) {
     }
     return 0;
 }
+
+
