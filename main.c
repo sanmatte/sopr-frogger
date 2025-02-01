@@ -78,6 +78,7 @@ int main(){
     // Call menu function and get user selection
     do{
         return_to_menu = 0;
+        print_frogger_sprite(win);
         int selection = showMenu(win, menu_options);
 
         switch (selection)

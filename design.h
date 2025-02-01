@@ -64,5 +64,5 @@ void print_crocodile(WINDOW *game, Item *crocodile);
 void print_bullets(WINDOW *game, Item *bullet);
 void print_endgame(WINDOW *game, int manche, bool *dens, int score);
 void startGame(WINDOW *game);
-
+void print_frogger_sprite(WINDOW *win);
 #endif
