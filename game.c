@@ -26,28 +26,6 @@ void game_timer(int *pipe_fds){
 
 void startGame(WINDOW *game) {
     setlocale(LC_ALL, "");
-    int bullet_frog = 0;
-
-    Item frog = {FROG_ID, GAME_HEIGHT-4, (GAME_WIDTH/2)-FROG_DIM_X/2, 0, 0};
-    Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
-    // for (int i = 0; i < STREAM_NUMBER; i++) {
-    //     for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
-    //         crocodiles[i][j].extra = 0;
-    //     }
-    // }
-    Item bullet_right = {BULLETS_ID, -1, -1, 0, 0};
-    Item bullet_left = {BULLETS_ID, -1, -1, 0, 0};
-    Item timer = {TIMER_ID, 0, 60, 0, 0};
-    
-    Item crocodiles_bullets[CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1];
-    for (int i = 0; i < CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1; i++) {
-        crocodiles_bullets[i].id = CROCODILE_MIN_BULLETS_ID + i;
-        crocodiles_bullets[i].x = -2;
-        crocodiles_bullets[i].y = -2;
-        crocodiles_bullets[i].speed = CROCODILE_BULLET_SPEED;
-        //crocodiles_bullets[i].extra.s = 1;
-    }
-
     init_color(COLOR_DARKGREEN, 0, 400, 0);
     init_color(COLOR_GREY, 600, 600, 600);
     init_color(COLOR_LIGHTDARKGREEN, 28, 163, 32);
@@ -75,6 +53,63 @@ void startGame(WINDOW *game) {
     init_pair(15, COLOR_ENDGAME_BACKGROUND, COLOR_FROG_BODY);
     init_pair(16, COLOR_FROG_BODY, COLOR_BLACK);
     init_pair(17, COLOR_BLACK, COLOR_BLACK);
+
+    werase(game);  // Clear the window
+    while (endgame == FALSE)
+    {
+        switch (play(game))
+        {
+        case 0: // manche lost
+            manche--;
+            if (manche == 0) {
+                endgame = true;
+            }
+            break;
+        case 1:
+            endgame = true; 
+            for(int i = 0; i < 5; i++){
+                if (dens[i] != FALSE) {
+                    endgame = false;
+                    break;
+                }
+            }
+            break;
+        }
+        debuglog("manche: %d\n", manche);
+        werase(game);
+        refresh();
+    }
+
+    print_endgame(game, manche, dens, score);
+    manche = 3;
+    score = 0;
+    endgame = FALSE;
+    for(int i = 0; i < DENS_NUMBER; i++){
+        dens[i] = TRUE;
+    }
+       
+
+}
+
+int play(WINDOW *game) {
+    /* Ritorna 0 se la manche è persa (manche --), ritorna 1 se è stata presa una tana */
+    int is_bullet_frog_active = 0;
+
+    Item frog = {FROG_ID, GAME_HEIGHT-4, (GAME_WIDTH/2)-FROG_DIM_X/2, 0, 0};
+    Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
+    Item bullet_right = {BULLETS_ID, -1, -1, 0, 0};
+    Item bullet_left = {BULLETS_ID, -1, -1, 0, 0};
+    Item timer = {TIMER_ID, 0, 60, 0, 0};
+    
+    Item crocodiles_bullets[CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1];
+    for (int i = 0; i < CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1; i++) {
+        crocodiles_bullets[i].id = CROCODILE_MIN_BULLETS_ID + i;
+        crocodiles_bullets[i].x = -2;
+        crocodiles_bullets[i].y = -2;
+        crocodiles_bullets[i].speed = CROCODILE_BULLET_SPEED;
+    }
+
+    
 
     
     // Definizione variabili
@@ -142,19 +177,10 @@ void startGame(WINDOW *game) {
         direction = -direction;
     }
 
-    int even, odd;
-    if (direction == -1) {
-        even = 1;
-        odd = -1;
-    } else {
-        odd = 1;
-        even = -1;
-    }
-
     Item msg;
     pid_t bullet_pid_left, bullet_pid_right;
 
-    while (endgame == FALSE) {
+    while (TRUE) {
     if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
         switch (msg.id) {
             // FROG case
@@ -164,8 +190,8 @@ void startGame(WINDOW *game) {
                     frog.x += msg.x;
                     frog.extra = msg.extra;
 
-                    if (frog.extra == 1 && bullet_frog == 0) {
-                        bullet_frog = 1;
+                    if (frog.extra == 1 && is_bullet_frog_active == 0) {
+                        is_bullet_frog_active = 1;
 
                         // Creazione del processo per il proiettile destro
                         bullet_pid_right = fork();
@@ -211,7 +237,7 @@ void startGame(WINDOW *game) {
                         }
                         // Resetta se entrambi i proiettili sono terminati
                         if (bullet_pid_right == -1 && bullet_pid_left == -1) {
-                            bullet_frog = 0;
+                            is_bullet_frog_active = 0;
                         }
                 }
                 break;
@@ -226,10 +252,8 @@ void startGame(WINDOW *game) {
                 case TIMER_ID:
                     timer.x -= 1;
                     if(timer.x == 0){
-                        manche--;
-                        frog.y = GAME_HEIGHT-4;
-                        frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                        timer.x = TIMER_MAX;   
+                        kill_all(child_pids, pid_timer);
+                        return 0;
                     }
                     break;
                 case CROCODILE_MIN_BULLETS_ID ... CROCODILE_MAX_BULLETS_ID:
@@ -237,10 +261,8 @@ void startGame(WINDOW *game) {
 
                                         // Collision beetwen frog and crocodile bullet
                     if(frog.y == (crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].y - 1) && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x >= frog.x && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x <= frog.x + FROG_DIM_X){
-                        manche--;
-                        frog.y = GAME_HEIGHT-4;
-                        frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                        timer.x = TIMER_MAX;
+                        kill_all(child_pids, pid_timer);
+                        return 0;
                     }
                     if ((bullet_right.x == msg.x && bullet_right.y == msg.y) || (bullet_left.x == msg.x && bullet_left.y == msg.y)) {
                         // Resetta i proiettili in caso di collisione
@@ -270,16 +292,16 @@ void startGame(WINDOW *game) {
                                     int stream = i;
                                     if(frog.y >= SIDEWALK_HEIGHT_1 && frog.y < SIDEWALK_HEIGHT_2){
                                         if(frog.y == crocodiles[stream][j].y && frog.x >= crocodiles[stream][j].x && frog.x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X){
-                                                if (stream % 2 != 0)
-                                                {   
-                                                    if(frog.x == GAME_WIDTH-FROG_DIM_X || frog.x == 0) continue;                                                   
-                                                    else frog.x += odd;
-                                                }
-                                                else
-                                                {   
-                                                    if(frog.x == GAME_WIDTH-FROG_DIM_X || frog.x == 0) continue;
-                                                    else frog.x += even;
-                                                }
+                                            if (crocodiles[stream][j].extra == 1)
+                                            {
+                                                if(frog.x == 0) continue;                                                   
+                                                else frog.x -= crocodiles[stream][j].extra;
+                                            }
+                                            else
+                                            {
+                                                if(frog.x == GAME_WIDTH - FROG_DIM_X) continue;                                                   
+                                                else frog.x -= crocodiles[stream][j].extra;
+                                            }
                                                 
                                                 print_frog(game, &frog);
                                                 wrefresh(game);
@@ -307,14 +329,8 @@ void startGame(WINDOW *game) {
                 }
                 if (frog_on_crocodile == FALSE)
                 {
-                    manche--;
-                    frog.y = GAME_HEIGHT-4;
-                    frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                    timer.x = TIMER_MAX;
-                    // erase();
-                    // print_death();
-                    // refresh();
-                    // sleep(5);
+                    kill_all(child_pids, pid_timer);
+                    return 0;
                 }
             }
             // Collision between frog bullets and crocodile bullet
@@ -361,10 +377,9 @@ void startGame(WINDOW *game) {
                                 score += 10;
                                 break;
                         }
-                        frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                        frog.y = GAME_HEIGHT-4;
                         dens[0] = FALSE;
-                        timer.x = TIMER_MAX;
+                        kill_all(child_pids, pid_timer);
+                        return 1;
                         break;
                     case DENS_2:
                         switch(timer.x)
@@ -379,10 +394,9 @@ void startGame(WINDOW *game) {
                                 score += 10;
                                 break;
                         }
-                        frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                        frog.y = GAME_HEIGHT-4;
                         dens[1] = FALSE;
-                        timer.x = TIMER_MAX;
+                        kill_all(child_pids, pid_timer);
+                        return 1;
                         break;
                     case DENS_3:
                         switch(timer.x)
@@ -397,17 +411,26 @@ void startGame(WINDOW *game) {
                                 score += 10;
                                 break;
                         }
-                        frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                        frog.y = GAME_HEIGHT-4;
                         dens[2] = FALSE;
-                        timer.x = TIMER_MAX;
+                        kill_all(child_pids, pid_timer);
+                        return 1;
                         break;
                     case DENS_4:
-                        score += 20;
-                        frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                        frog.y = GAME_HEIGHT-4;
+                        switch(timer.x)
+                        {
+                            case 41 ... TIMER_MAX:
+                                score += 30;
+                                break;
+                            case 21 ... 40:
+                                score += 20;
+                                break;
+                            case 1 ... 20:
+                                score += 10;
+                                break;
+                        }
                         dens[3] = FALSE;
-                        timer.x = TIMER_MAX;
+                        kill_all(child_pids, pid_timer);
+                        return 1;
                         break;
                     case DENS_5:
                         switch(timer.x)
@@ -422,30 +445,14 @@ void startGame(WINDOW *game) {
                                 score += 10;
                                 break;
                         }
-                        frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                        frog.y = GAME_HEIGHT-4;
                         dens[4] = FALSE;
-                        timer.x = TIMER_MAX;
+                        kill_all(child_pids, pid_timer);
+                        return 1;
                         break;
                     default:
-                        manche--;
-                        frog.y = GAME_HEIGHT-4;
-                        frog.x = rand_range(0, GAME_WIDTH - FROG_DIM_X);
-                        timer.x = TIMER_MAX;
+                        kill_all(child_pids, pid_timer);
+                        return 0;
                 }
-            }
-
-            endgame = true;  // Assume che tutti i valori siano FALSE
-            for(int i = 0; i < 5; i++){
-                if (dens[i] != FALSE) {
-                    endgame = false;  // Se almeno uno è diverso da FALSE, endgame deve essere false
-                    break;
-                }
-            }
-
-            //manche end
-            if(manche == 0){
-                endgame = true;
             }
 
             print_score(game, manche, timer.x, score);
@@ -467,16 +474,15 @@ void startGame(WINDOW *game) {
             wrefresh(game);
         }
     }
+}
 
-    print_endgame(game, manche, dens, score);
-
+void kill_all(pid_t *child_pids, pid_t pid_timer){
     for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
-        kill(child_pids[i], SIGTERM);  // Invia il segnale di terminazione
+        kill(child_pids[i], SIGKILL);  // Invia il segnale di terminazione
     }
-
+    kill(pid_timer, SIGKILL);
     for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
         waitpid(child_pids[i], NULL, 0);
     }
+    debuglog("All children terminated\n %d", 0);
 }
-
-

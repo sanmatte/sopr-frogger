@@ -86,8 +86,8 @@ int main(){
         case 0: //play
             startGame(win);
             return_to_menu = 1;
-            wrefresh(win); // Refresh window
             werase(win);  // Clear the window
+            wrefresh(win);  // Refresh window
             //! TOFIX
             break;
         case 1:

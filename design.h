@@ -65,4 +65,6 @@ void print_bullets(WINDOW *game, Item *bullet);
 void print_endgame(WINDOW *game, int manche, bool *dens, int score);
 void startGame(WINDOW *game);
 void print_frogger_sprite(WINDOW *win);
+int play(WINDOW *game);
+void kill_all(pid_t *child_pids, pid_t pid_timer);
 #endif
