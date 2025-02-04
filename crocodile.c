@@ -93,7 +93,6 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
         
 //     }
 // }
-
 int exploded = FALSE;
 void handlesignal(int signum) {
     if (signum == SIGUSR1) {

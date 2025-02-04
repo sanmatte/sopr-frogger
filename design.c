@@ -434,10 +434,10 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 20, "%s", numbers[1][i]);
 			}
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 25, "%s", numbers[temp][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 30, "%s", numbers[temp][i]);
 			}
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 35, "%s", numbers[0][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 40, "%s", numbers[0][i]);
 			}
 		}
 		
@@ -479,25 +479,4 @@ void print_frogger_sprite(WINDOW *win){
     }
 }
 
-void print_explosion(WINDOW *game, Item *explosion){
-	static const char* sprite_matrix[3][3] = {
-		{"█", "█", "█"},
-		{"█", "█", "█"},
-		{"█", "█", "█"},
-	};
-	for(int i=0; i<3; i++){
-		for(int j=0; j<3; j++){
-			if(i == 1 && j == 1){
-				wattron(game, COLOR_PAIR(18));
-				mvwprintw(game, explosion->y, explosion->x, "%s", sprite_matrix[i][j]);
-				wattroff(game, COLOR_PAIR(18));
-			}
-			else{
-				wattron(game, COLOR_PAIR(5));
-				mvwprintw(game, explosion->y-1+i, explosion->x-1+j, "%s", sprite_matrix[i][j]);
-				wattroff(game, COLOR_PAIR(5));
-			}
-		}
-	}
-}
 
