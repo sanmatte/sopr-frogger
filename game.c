@@ -54,6 +54,7 @@ void startGame(WINDOW *game) {
     init_pair(15, COLOR_ENDGAME_BACKGROUND, COLOR_FROG_BODY);
     init_pair(16, COLOR_FROG_BODY, COLOR_BLACK);
     init_pair(17, COLOR_BLACK, COLOR_BLACK);
+    init_pair(18, COLOR_YELLOW, COLOR_RED);
 
     werase(game);  // Clear the window
     while (endgame == FALSE)
@@ -271,6 +272,7 @@ int play(WINDOW *game) {
                         bullet_right = msg;
                     }
                     break;
+
                 case TIMER_ID:
                     timer.x -= 1;
                     if(timer.x == 0){
@@ -278,6 +280,7 @@ int play(WINDOW *game) {
                         return 0;
                     }
                     break;
+                
                 case CROCODILE_MIN_BULLETS_ID ... CROCODILE_MAX_BULLETS_ID:
                     crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID] = msg;
 
@@ -304,6 +307,7 @@ int play(WINDOW *game) {
                     }
 
                     break;
+                
                 //CROCODILE case
                 case PAUSE_ID:
                     killpg(group_pid, SIGSTOP);  // Pause all child processes
@@ -334,7 +338,6 @@ int play(WINDOW *game) {
                                                 if(frog.x == GAME_WIDTH - FROG_DIM_X) continue;                                                   
                                                 else frog.x -= crocodiles[stream][j].extra;
                                             }
-                                                
                                                 print_frog(game, &frog);
                                                 wrefresh(game);
                                         }
@@ -369,6 +372,15 @@ int play(WINDOW *game) {
             stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right.extra) / FROG_DIM_Y);
             for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
                 if((crocodiles_bullets[i].x - bullet_right.x) <= 1 && (crocodiles_bullets[i].x - bullet_right.x) >= -1 && crocodiles_bullets[i].y == bullet_right.y){
+                    pid_t explosion_pid = fork();
+                    if(explosion_pid == 0){
+                        explosion.x = bullet_right.x;
+                        explosion.y = bullet_right.y;
+                        print_explosion(game, &explosion);
+                        wrefresh(game);
+                        usleep(100000);
+                        _exit(0);
+                    }
                     kill(bullet_pid_right, SIGKILL);
                     kill(child_pids[i+1], SIGUSR1);
                     bullet_right.x = -1;
@@ -376,6 +388,15 @@ int play(WINDOW *game) {
                     crocodiles_bullets[i].x = -2;
                 }
                 if((crocodiles_bullets[i].x - bullet_left.x) <= 1 && (crocodiles_bullets[i].x - bullet_left.x) >= -1 && crocodiles_bullets[i].y == bullet_left.y){
+                    pid_t explosion_pid = fork();
+                    if(explosion_pid == 0){
+                        explosion.x = bullet_left.x;
+                        explosion.y = bullet_left.y;
+                        print_explosion(game, &explosion);
+                        wrefresh(game);
+                        usleep(100000);
+                        _exit(0);
+                    }
                     kill(bullet_pid_left, SIGKILL);
                     kill(child_pids[i+1], SIGUSR1);
                     bullet_left.x = -1;
@@ -383,99 +404,115 @@ int play(WINDOW *game) {
                     crocodiles_bullets[i].x = -2;
                 }
             }
-            // array 24 posti y = stream -> i - 0,1,2/3,4,5/
-            // Collision between frog bullets and crocodile bullet
-            
-            // for(int i=0; i<CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID; i++){
-            //     if(crocodiles_bullets[i].x == bullet_right.x && crocodiles_bullets[i].y == bullet_right.y){
-            //         bullet_right.x = GAME_WIDTH;
-            //         bullet_right.y = GAME_HEIGHT;
-            //         write(pipe_fds[1], &bullet_right, sizeof(Item));
-            //     }
-            // }
 
             if(frog.y < DENS_HEIGHT){
                 switch(frog.x){
                     case DENS_1:
-                        switch(timer.x)
-                        {
-                            case 41 ... TIMER_MAX:
-                                score += 30;
-                                break;
-                            case 21 ... 40:
-                                score += 20;
-                                break;
-                            case 1 ... 20:
-                                score += 10;
-                                break;
+                        if(dens[0] == TRUE){
+                            switch(timer.x)
+                            {
+                                case 41 ... TIMER_MAX:
+                                    score += 30;
+                                    break;
+                                case 21 ... 40:
+                                    score += 20;
+                                    break;
+                                case 1 ... 20:
+                                    score += 10;
+                                    break;
+                            }
+                            dens[0] = FALSE;
+                            kill_all(child_pids, pid_timer);
+                            return 1;
                         }
                         dens[0] = FALSE;
                         kill_all(pid_frog, group_pid);
                         return 1;
                         break;
                     case DENS_2:
-                        switch(timer.x)
-                        {
-                            case 41 ... 60:
-                                score += 30;
-                                break;
-                            case 21 ... 40:
-                                score += 20;
-                                break;
-                            case 1 ... 20:
-                                score += 10;
-                                break;
+                        if(dens[1] == TRUE){
+                            switch(timer.x)
+                            {
+                                case 41 ... 60:
+                                    score += 30;
+                                    break;
+                                case 21 ... 40:
+                                    score += 20;
+                                    break;
+                                case 1 ... 20:
+                                    score += 10;
+                                    break;
+                            }
+                            dens[1] = FALSE;
+                            kill_all(child_pids, pid_timer);
+                            return 1;
+                            break;
                         }
                         dens[1] = FALSE;
                         kill_all(pid_frog, group_pid);
                         return 1;
                         break;
                     case DENS_3:
-                        switch(timer.x)
-                        {
-                            case 41 ... TIMER_MAX:
-                                score += 30;
-                                break;
-                            case 21 ... 40:
-                                score += 20;
-                                break;
-                            case 1 ... 20:
-                                score += 10;
-                                break;
+                        if(dens[2] == TRUE){
+                            switch(timer.x)
+                            {
+                                case 41 ... TIMER_MAX:
+                                    score += 30;
+                                    break;
+                                case 21 ... 40:
+                                    score += 20;
+                                    break;
+                                case 1 ... 20:
+                                    score += 10;
+                                    break;
+                            }
+                            dens[2] = FALSE;
+                            kill_all(child_pids, pid_timer);
+                            return 1;
                         }
                         dens[2] = FALSE;
                         kill_all(pid_frog, group_pid);
                         return 1;
                         break;
                     case DENS_4:
-                        switch(timer.x)
-                        {
-                            case 41 ... TIMER_MAX:
-                                score += 30;
-                                break;
-                            case 21 ... 40:
-                                score += 20;
-                                break;
-                            case 1 ... 20:
-                                score += 10;
-                                break;
+                        if(dens[3] == TRUE){
+                            switch(timer.x)
+                            {
+                                case 41 ... TIMER_MAX:
+                                    score += 30;
+                                    break;
+                                case 21 ... 40:
+                                    score += 20;
+                                    break;
+                                case 1 ... 20:
+                                    score += 10;
+                                    break;
+                            }
+                            dens[3] = FALSE;
+                            kill_all(child_pids, pid_timer);
+                            return 1;
                         }
                         dens[3] = FALSE;
                         kill_all(pid_frog, group_pid);
                         return 1;
                         break;
                     case DENS_5:
-                        switch(timer.x)
-                        {
-                            case 41 ... TIMER_MAX:
-                                score += 30;
-                                break;
-                            case 21 ... 40:
-                                score += 20;
-                                break;
-                            case 1 ... 20:
-                                score += 10;
-                                break;
+                        if(dens[4] == TRUE){
+                            switch(timer.x)
+                            {
+                                case 41 ... TIMER_MAX:
+                                    score += 30;
+                                    break;
+                                case 21 ... 40:
+                                    score += 20;
+                                    break;
+                                case 1 ... 20:
+                                    score += 10;
+                                    break;
+                            }
+                            dens[4] = FALSE;
+                            kill_all(child_pids, pid_timer);
+                            return 1;
                         }
                         dens[4] = FALSE;
                         kill_all(pid_frog, group_pid);

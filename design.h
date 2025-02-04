@@ -50,6 +50,9 @@
 #define BULLETS_DIM 1
 #define BULLETS_SPEED 20000
 
+//define explosion
+#define EXPLOSION_ID 70
+
 // timer
 #define TIMER_ID 27
 #define TIMER_SPEED 1000000
@@ -66,6 +69,7 @@ void print_frog(WINDOW *game, Item *frog);
 void print_crocodile(WINDOW *game, Item *crocodile);
 void print_bullets(WINDOW *game, Item *bullet);
 void print_endgame(WINDOW *game, int manche, bool *dens, int score);
+void print_explosion(WINDOW *game, Item *explosion);
 void startGame(WINDOW *game);
 void print_frogger_sprite(WINDOW *win);
 int play(WINDOW *game);
