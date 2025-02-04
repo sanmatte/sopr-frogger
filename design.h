@@ -55,6 +55,9 @@
 #define TIMER_SPEED 1000000
 #define TIMER_MAX 60
 
+#define ESC 27
+#define PAUSE_ID 69
+
 // function prototipes
 
 void print_score(WINDOW *game, int manche, int timer, int score);
@@ -66,5 +69,5 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score);
 void startGame(WINDOW *game);
 void print_frogger_sprite(WINDOW *win);
 int play(WINDOW *game);
-void kill_all(pid_t *child_pids, pid_t pid_timer);
+void kill_all(pid_t frog, pid_t pid_group);
 #endif

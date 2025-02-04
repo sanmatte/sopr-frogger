@@ -25,7 +25,7 @@ void Frog(int *pipe_fds, Item *frog){
         do {
             ch = getch();
         } while (getch() != ERR); // Drain extra inputs
-
+        frogtest.id = FROG_ID;
         switch (ch) {
             case KEY_UP:
                 frogtest.y = -FROG_DIM_Y;
@@ -54,7 +54,12 @@ void Frog(int *pipe_fds, Item *frog){
                 has_moved = TRUE;
                 break;
             case 'q': 
-                endwin();
+                //kill_all(getpid(), getpgrp());
+                break;
+            //detect escape key press
+            case 'p':
+                frogtest.id = PAUSE_ID;
+                has_moved = TRUE;
                 break;
         }
 

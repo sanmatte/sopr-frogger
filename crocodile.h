@@ -20,7 +20,7 @@ extern int manche;
 #include "design.h"
 #include "struct.h"
 #include "utils.h"
-void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], int direction, int stream_speed[STREAM_NUMBER]);
-void Crocodile(int *pipe_fds, Item *crocodile, int random_number);
+void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], int stream_speed[STREAM_NUMBER]);
+void Crocodile(int *pipe_fds, Item *crocodile, int group_pid);
 
 #endif

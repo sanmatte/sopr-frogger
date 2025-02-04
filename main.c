@@ -47,10 +47,10 @@ const Difficulty MEDIUM = {
 
 const Difficulty HARD = {
     .bullets_speed = 50000,
-    .crocodile_speed_max = 180000,
-    .crocodile_speed_min = 80000,
-    .crocodile_bullet_speed = 45000,
-    .shot_range = 20,
+    .crocodile_speed_max = 100000,
+    .crocodile_speed_min = 30000,
+    .crocodile_bullet_speed = 20000,
+    .shot_range = 50,
     .frog_movement_limit = 50000
 };
 

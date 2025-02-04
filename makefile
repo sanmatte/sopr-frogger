@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -Wno-trigraphs -Werror
+CFLAGS = -Wall -Wextra -Wno-trigraphs 
 
 # Libraries
 LIBS = -lncursesw -lmenuw

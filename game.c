@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <errno.h>
 #include <locale.h>
 #include "design.h"
 #include "struct.h"
@@ -75,7 +76,6 @@ void startGame(WINDOW *game) {
             }
             break;
         }
-        debuglog("manche: %d\n", manche);
         werase(game);
         refresh();
     }
@@ -91,6 +91,19 @@ void startGame(WINDOW *game) {
 
 }
 
+void continue_usleep(long microseconds) {
+    long elapsed = 0;
+
+    while (elapsed < microseconds) {
+        usleep(1000);
+        elapsed += 1000;
+    }
+}
+
+
+
+
+
 int play(WINDOW *game) {
     /* Ritorna 0 se la manche è persa (manche --), ritorna 1 se è stata presa una tana */
     int is_bullet_frog_active = 0;
@@ -99,7 +112,7 @@ int play(WINDOW *game) {
     Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
     Item bullet_right = {BULLETS_ID, -1, -1, 0, 0};
     Item bullet_left = {BULLETS_ID, -1, -1, 0, 0};
-    Item timer = {TIMER_ID, 0, 60, 0, 0};
+    Item timer = {TIMER_ID, 0, TIMER_MAX, 0, 0};
     
     Item crocodiles_bullets[CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1];
     for (int i = 0; i < CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1; i++) {
@@ -113,7 +126,7 @@ int play(WINDOW *game) {
 
     
     // Definizione variabili
-    int pipe_fds[2], direction = (rand() % 2)? 1: -1;
+    int pipe_fds[2];
     int stream_speed[STREAM_NUMBER];
 
     for(int i=0; i<STREAM_NUMBER; i++){
@@ -124,11 +137,11 @@ int play(WINDOW *game) {
         exit(0);
     }
     
-    InitializeCrocodile(crocodiles, direction, stream_speed);
-
+    InitializeCrocodile(crocodiles, stream_speed);
+    int group_pid = 0;
     pid_t child_pids[(STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1];
-
     pid_t pid_timer = fork();
+    group_pid = pid_timer;
     if (pid_timer < 0) {
         perror("Errore nella fork");
         endwin();
@@ -137,7 +150,7 @@ int play(WINDOW *game) {
         game_timer(pipe_fds);
         _exit(0);
     }
-
+    setpgid(pid_timer, group_pid);
     //Creazione del processo Frog
     pid_t pid_frog = fork();
     if (pid_frog < 0) {
@@ -148,9 +161,10 @@ int play(WINDOW *game) {
         Frog(pipe_fds, &frog);
         _exit(0);
     } else {
+        //setpgid(pid_frog, group_pid);
         child_pids[0] = pid_frog;
     }
-
+    setpgid(0,0);
     // Creazione dei processi Crocodile
     for (int i = 0; i < STREAM_NUMBER; i++) {
         int distance = rand_range(0, stream_speed[i] * CROCODILE_DIM_X);
@@ -161,11 +175,19 @@ int play(WINDOW *game) {
                 endwin();
                 exit(EXIT_FAILURE);
             } else if (pid_croc == 0) { 
-                srand(timestamp() + crocodiles[i][j].id + getpid());
-                usleep(distance); 
-                Crocodile(pipe_fds, &crocodiles[i][j], direction);
+                // if (i == 0 && j == 0) {
+                //     group_pid = getpid();  // First child sets the group leader
+                // }
+                setpgid(0, group_pid);
+                continue_usleep(distance);
+                //usleep(distance); 
+                Crocodile(pipe_fds, &crocodiles[i][j], group_pid);
                 _exit(0);
             } else {
+            // if (i == 0 && j == 0) {
+            //     group_pid = pid_croc;  // Assign first child's PID as group leader
+            // }
+            setpgid(pid_croc, group_pid); 
                 child_pids[i * CROCODILE_STREAM_MAX_NUMBER + j + 1] = pid_croc;
                 // calculate mindistance between crocodiles
                 distance += crocodiles[i][j].speed * CROCODILE_DIM_X;
@@ -173,8 +195,6 @@ int play(WINDOW *game) {
                 distance += rand_range(crocodiles[i][j].speed * (CROCODILE_DIM_X / 2), crocodiles[i][j].speed * (CROCODILE_DIM_X));
             }
         }
-        
-        direction = -direction;
     }
 
     Item msg;
@@ -198,6 +218,7 @@ int play(WINDOW *game) {
                         if (bullet_pid_right == 0) {
                             bullet_right.x = frog.x + FROG_DIM_X;
                             bullet_right.y = frog.y + 1;
+                            bullet_right.extra = frog.y + 1;
                             while (bullet_right.x < GAME_WIDTH + 1) {
                                 bullet_right.x += 1;
                                 write(pipe_fds[1], &bullet_right, sizeof(Item));
@@ -211,6 +232,7 @@ int play(WINDOW *game) {
                         if (bullet_pid_left == 0) {
                             bullet_left.x = frog.x - 1;
                             bullet_left.y = frog.y + 1;
+                            bullet_left.extra = frog.y + 1;
                             while (bullet_left.x > -1) {
                                 bullet_left.x -= 1;
                                 write(pipe_fds[1], &bullet_left, sizeof(Item));
@@ -252,7 +274,7 @@ int play(WINDOW *game) {
                 case TIMER_ID:
                     timer.x -= 1;
                     if(timer.x == 0){
-                        kill_all(child_pids, pid_timer);
+                        kill_all(pid_frog, group_pid);
                         return 0;
                     }
                     break;
@@ -261,7 +283,7 @@ int play(WINDOW *game) {
 
                                         // Collision beetwen frog and crocodile bullet
                     if(frog.y == (crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].y - 1) && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x >= frog.x && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x <= frog.x + FROG_DIM_X){
-                        kill_all(child_pids, pid_timer);
+                        kill_all(pid_frog, group_pid);
                         return 0;
                     }
                     if ((bullet_right.x == msg.x && bullet_right.y == msg.y) || (bullet_left.x == msg.x && bullet_left.y == msg.y)) {
@@ -283,6 +305,16 @@ int play(WINDOW *game) {
 
                     break;
                 //CROCODILE case
+                case PAUSE_ID:
+                    killpg(group_pid, SIGSTOP);  // Pause all child processes
+                    //printf("Game Paused. Press any key to continue...\n");
+                    int ch = getchar();  // Wait for user input
+                    while (ch != 'p') {
+                        ch = getchar();
+                    }
+                    
+                    killpg(group_pid, SIGCONT);  // Resume all child processes
+                    break;
                 default:
                     if(msg.id >= CROCODILE_MIN_ID && msg.id <= CROCODILE_MAX_ID){
                         for(int i = 0; i < STREAM_NUMBER; i++){
@@ -329,12 +361,12 @@ int play(WINDOW *game) {
                 }
                 if (frog_on_crocodile == FALSE)
                 {
-                    kill_all(child_pids, pid_timer);
+                    kill_all(pid_frog, group_pid);
                     return 0;
                 }
             }
             // Collision between frog bullets and crocodile bullet
-            stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right.y) / FROG_DIM_Y);
+            stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right.extra) / FROG_DIM_Y);
             for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
                 if((crocodiles_bullets[i].x - bullet_right.x) <= 1 && (crocodiles_bullets[i].x - bullet_right.x) >= -1 && crocodiles_bullets[i].y == bullet_right.y){
                     kill(bullet_pid_right, SIGKILL);
@@ -378,7 +410,7 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[0] = FALSE;
-                        kill_all(child_pids, pid_timer);
+                        kill_all(pid_frog, group_pid);
                         return 1;
                         break;
                     case DENS_2:
@@ -395,7 +427,7 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[1] = FALSE;
-                        kill_all(child_pids, pid_timer);
+                        kill_all(pid_frog, group_pid);
                         return 1;
                         break;
                     case DENS_3:
@@ -412,7 +444,7 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[2] = FALSE;
-                        kill_all(child_pids, pid_timer);
+                        kill_all(pid_frog, group_pid);
                         return 1;
                         break;
                     case DENS_4:
@@ -429,7 +461,7 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[3] = FALSE;
-                        kill_all(child_pids, pid_timer);
+                        kill_all(pid_frog, group_pid);
                         return 1;
                         break;
                     case DENS_5:
@@ -446,11 +478,11 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[4] = FALSE;
-                        kill_all(child_pids, pid_timer);
+                        kill_all(pid_frog, group_pid);
                         return 1;
                         break;
                     default:
-                        kill_all(child_pids, pid_timer);
+                        kill_all(pid_frog, group_pid);
                         return 0;
                 }
             }
@@ -476,13 +508,15 @@ int play(WINDOW *game) {
     }
 }
 
-void kill_all(pid_t *child_pids, pid_t pid_timer){
-    for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
-        kill(child_pids[i], SIGKILL);  // Invia il segnale di terminazione
-    }
-    kill(pid_timer, SIGKILL);
-    for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
-        waitpid(child_pids[i], NULL, 0);
-    }
-    debuglog("All children terminated\n %d", 0);
+void kill_all(pid_t frog, pid_t pidgroup){
+    // for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
+    //     kill(child_pids[i], SIGKILL);  // Invia il segnale di terminazione
+    // }
+    // kill(pid_timer, SIGKILL);
+    // for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
+    //     waitpid(child_pids[i], NULL, 0);
+    // }
+    // debuglog("All children terminated\n %d", 0);
+    killpg(pidgroup, SIGKILL);
+    kill(frog, SIGKILL);
 }
