@@ -23,6 +23,8 @@
 #define COLOR_FROG_BODY 15
 #define COLOR_DARK_ORANGE 16
 #define COLOR_ENDGAME_BACKGROUND 17
+#define COLOR_BULLET_TRIGGER_DARK 18
+#define COLOR_BULLET_TRIGGER 19
 
 //dens
 #define DENS_NUMBER 5
@@ -63,7 +65,7 @@
 void print_score(WINDOW *game, int manche, int timer, int score);
 void print_background(WINDOW *game, bool *dens);
 void print_frog(WINDOW *game, Item *frog);
-void print_crocodile(WINDOW *game, Item *crocodile);
+void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger);
 void print_bullets(WINDOW *game, Item *bullet);
 void print_endgame(WINDOW *game, int manche, bool *dens, int score);
 void startGame(WINDOW *game);

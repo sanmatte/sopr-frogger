@@ -35,6 +35,8 @@ void startGame(WINDOW *game) {
     init_color(COLOR_FROG_BODY, 62, 568, 184);
     init_color(COLOR_DARK_ORANGE, 815, 615, 98);
     init_color(COLOR_ENDGAME_BACKGROUND, 8, 372, 600);
+    init_color(COLOR_BULLET_TRIGGER_DARK, 149, 8, 8);
+    init_color(COLOR_BULLET_TRIGGER, 478, 4, 4);
 
     // Definizione delle coppie di colori
     init_pair(1, COLOR_GREEN, COLOR_GREEN);
@@ -54,6 +56,8 @@ void startGame(WINDOW *game) {
     init_pair(15, COLOR_ENDGAME_BACKGROUND, COLOR_FROG_BODY);
     init_pair(16, COLOR_FROG_BODY, COLOR_BLACK);
     init_pair(17, COLOR_BLACK, COLOR_BLACK);
+    init_pair(18, COLOR_BULLET_TRIGGER, COLOR_BLUE);
+    init_pair(19, COLOR_BULLET_TRIGGER_DARK, COLOR_BULLET_TRIGGER);
 
     werase(game);  // Clear the window
     while (endgame == FALSE)
@@ -120,6 +124,7 @@ int play(WINDOW *game) {
         crocodiles_bullets[i].x = -2;
         crocodiles_bullets[i].y = -2;
         crocodiles_bullets[i].speed = CROCODILE_BULLET_SPEED;
+        crocodiles_bullets[i].extra = 0;
     }
 
     
@@ -492,7 +497,7 @@ int play(WINDOW *game) {
 
             for(int i = 0; i < STREAM_NUMBER; i++){
                 for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
-                    print_crocodile(game, &crocodiles[i][j]);
+                    print_crocodile(game, &crocodiles[i][j], crocodiles_bullets[i * CROCODILE_STREAM_MAX_NUMBER + j].extra);
                 }
             }
 

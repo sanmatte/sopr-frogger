@@ -103,6 +103,7 @@ void Crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
     close(pipe_fds[0]);
     int random_shot;
     int active = FALSE;
+    int shot_load = 1500000;
     pid_t bullet_pid = -1; // Store the bullet's PID
     signal(SIGUSR1, handlesignal); // Ignore SIGUSR1 signal
     while (1) {
@@ -138,7 +139,14 @@ void Crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
                 if (bullet_pid == 0) {
                     // Child process: bullet logic
                     setpgid(0, group_pid); 
-                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, crocodile->y + 1, crocodile->x + CROCODILE_DIM_X + 1, 0, 0};
+                    // x offset = space that the crocodile moves in the 1 sec
+                    int x_offset = shot_load / crocodile->speed + 1;
+                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, -5, crocodile->x + CROCODILE_DIM_X + x_offset, 0, 0};
+                    bullet.extra = 1;
+                    write(pipe_fds[1], &bullet, sizeof(Item));
+                    usleep(shot_load);
+                    bullet.y = crocodile->y + 1;
+                    bullet.extra = 0;
                     while (TRUE) {
                         if (bullet.x >= GAME_WIDTH) {
                             _exit(0); // Bullet exits the screen
@@ -161,7 +169,13 @@ void Crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
                 bullet_pid = fork();
                 if (bullet_pid == 0) {
                     setpgid(0, group_pid); 
-                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, crocodile->y + 1, crocodile->x - 1, 0, 0};
+                    int x_offset = shot_load / crocodile->speed + 1;
+                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, -5, crocodile->x - x_offset, 0, 0};
+                    bullet.extra = 1;
+                    write(pipe_fds[1], &bullet, sizeof(Item));
+                    usleep(shot_load);
+                    bullet.y = crocodile->y + 1;
+                    bullet.extra = 0;
                     while (TRUE) {
                         if (bullet.x <= -1) {
                             _exit(0); // Bullet exits the screen
