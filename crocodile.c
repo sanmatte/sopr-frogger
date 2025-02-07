@@ -53,6 +53,7 @@ void* bullet_left_crocodile(void *arg) {
         bullet->x -= 1;
         buffer_push(buffer, *bullet);
         usleep(bullet->speed);
+        
     }
     buffer_push(buffer, *bullet);
     free(args);
@@ -74,26 +75,13 @@ void* Crocodile(void *arg) {
         
         random_shot = rand_range(0, current_difficulty.shot_range);
         int shot_speed = crocodile.speed - current_difficulty.crocodile_bullet_speed;
-        // Check if the bullet process has exited
-        // if (active) {
-        //     int status;
-        //     pid_t result = waitpid(bullet_pid, &status, WNOHANG);
-        //     if (result == bullet_pid) {
-        //         active = FALSE; // Reset active when the bullet exits
-        //     }
-        // }
-
-        // if (bullet_pid != -1 && exploded)
-        // {
-        //     int status;
-        //     kill(bullet_pid, SIGKILL);
-        //     pid_t result = waitpid(bullet_pid, &status, WNOHANG);
-        //     if (result == bullet_pid) {
-        //         active = FALSE; // Reset active when the bullet exits
-        //     }
-        //     bullet_pid = -1;
-        //     exploded = FALSE;
-        // }
+        
+        if (exploded == TRUE) {
+            exploded = FALSE;
+            pthread_cancel(thread_bullet);
+            pthread_join(thread_bullet, NULL);
+            debuglog("Bullet exploded%d\n", 0);
+        }
         
 
         if (crocodile.extra == -1 && crocodile.x < GAME_WIDTH+1) {

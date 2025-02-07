@@ -223,13 +223,20 @@ void print_crocodile(WINDOW *game, Item *crocodile){
 	
 }
 
-void print_bullets(WINDOW *game, Item *bullets){
+void print_bullets(WINDOW *game, Item *bullets, int itemtype){
 	static const char* sprite_matrix[BULLETS_DIM] = {"▄"};
-	wattron(game, COLOR_PAIR(5));
-	for (int i = 0; i < BULLETS_DIM; i++) {
-		mvwprintw(game, bullets->y+i, bullets->x, "%s", sprite_matrix[i]);
+	if(itemtype == BULLETS_ID){
+		wattron(game, COLOR_PAIR(17));
+		mvwprintw(game, bullets->y, bullets->x, "%s", sprite_matrix[0]);
+		wattroff(game, COLOR_PAIR(17));
 	}
-	wattroff(game, COLOR_PAIR(5));
+	else{
+		wattron(game, COLOR_PAIR(5));
+		for (int i = 0; i < BULLETS_DIM; i++) {
+			mvwprintw(game, bullets->y+i, bullets->x, "%s", sprite_matrix[i]);
+		}
+		wattroff(game, COLOR_PAIR(5));
+	}
 }
 
 void print_endgame(WINDOW *game, int manche, bool *dens, int score){
