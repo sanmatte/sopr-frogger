@@ -147,12 +147,15 @@ int play(WINDOW *game) {
                 perror("Errore nell'allocazione della memoria per gli argomenti");
                 return 1;
             }
+            int *distance_ptr = malloc(sizeof(int));
+            *distance_ptr = distance;
             args[0] = &buffer;
             args[1] = &crocodiles[i][j];
-            args[2] = &distance;
+            args[2] = distance_ptr;
             
             if (pthread_create(&thread_crocodile[i][j], NULL, Crocodile, args) != 0) {
                 perror("Errore nella creazione del thread coccodrillo");
+                free(distance_ptr);
                 free(args);  // Free the allocated memory in case of error
                 return 1;
             }

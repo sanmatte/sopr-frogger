@@ -32,7 +32,7 @@ void* Crocodile(void *arg) {
     void **args = (void **)arg;
     Item crocodile = *(Item *)args[1];
     int distance = *(int*)args[2];
-    debuglog("%d\n",distance);
+
     int random_shot;
     int active = FALSE;
     continue_usleep(distance);
@@ -116,4 +116,6 @@ void* Crocodile(void *arg) {
         buffer_push(&buffer, crocodile); 
         usleep(crocodile.speed);
     }
+    free(args[2]);
+    free(args);
 }
