@@ -55,7 +55,7 @@ void* Frog(void *arg) {
                 has_moved = TRUE;
                 break;
             case 'q': 
-                //kill_all(getpid(), getpgrp());
+                //pkill_all(getpid(), getpgrp());
                 break;
             //detect escape key press
             case 'p':
