@@ -5,7 +5,7 @@
  * @param  crocodiles[][] matrix of crocodiles
  * @param  stream_speed[] speed of the streams
  */
-void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], int stream_speed[STREAM_NUMBER]){
+void initializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], int stream_speed[STREAM_NUMBER]){
     
     int direction = (rand() % 2)? 1: -1; // set random direction for the first stream
     
@@ -99,7 +99,7 @@ void handlesignal(int signum) {
         exploded = TRUE;
     }
 }
-void Crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
+void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
     close(pipe_fds[0]);
     int random_shot;
     int active = FALSE;

@@ -47,7 +47,6 @@ void print_score(WINDOW *game, int manche, int timer, int score){
 			break;
 	}
 	
-
 	//timer
 	// Cancella la riga del timer
 	for(int i = 0; i < 60; i++){
@@ -55,7 +54,7 @@ void print_score(WINDOW *game, int manche, int timer, int score){
 	}
 
 	// Se il timer è sotto i 10 secondi, cambia colore e lampeggia
-	if(timer <= 15){
+	if(timer <= 10){
 		wattron(game, COLOR_PAIR(6) | A_BLINK);
 	} else {
 		wattron(game, COLOR_PAIR(1));
@@ -153,7 +152,7 @@ void print_background(WINDOW *game, bool *dens){
 void print_frog(WINDOW *game, Item *frog){
 	static const char* sprite_matrix[FROG_DIM_Y][FROG_DIM_X] = {
         {"▄", "█", "", "▀", "▌", "▐", "▀", "", "█", "▄"},
-        {"", "▀", "▄", " ", "▄", " ", " ", "▄", "▀", ""},
+        {"", "▀", "█", " ", "▄", "▀", "▄", "▄", "▀", ""},
         {"", "", "▄", "█", "▄", "▀", "▄", "▄", "", ""},
         {"▀", "█", "▀", "", "", "", "", "▀", "█", "▀"},
 	};
@@ -164,6 +163,21 @@ void print_frog(WINDOW *game, Item *frog){
 				wattron(game, COLOR_PAIR(12));
 				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
 				wattroff(game, COLOR_PAIR(12));
+			}
+			else if(i == 1 && (j >= 2 && j <= 7)){
+				wattron(game, COLOR_PAIR(20));
+				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
+				wattroff(game, COLOR_PAIR(20));
+			}
+			else if(i == 2 && (j >= 2 && j <= 7)){
+				wattron(game, COLOR_PAIR(20));
+				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
+				wattroff(game, COLOR_PAIR(20));
+			}
+			else if(i == 3 && ((j >= 0  && j <= 2) || (j >= 7 && j <= 9))){
+				wattron(game, COLOR_PAIR(20));
+				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
+				wattroff(game, COLOR_PAIR(20));
 			}
 			else{
 				wattron(game, COLOR_PAIR(13));  

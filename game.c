@@ -25,6 +25,21 @@ void game_timer(int *pipe_fds){
     }
 }
 
+int compute_score(int timer, int score){
+    switch(timer){
+        case 31 ... TIMER_MAX:
+            score += 30;
+            break;
+        case 11 ... 30:
+            score += 20;
+            break;
+        case 1 ... 10:
+            score += 10;
+            break;
+    }
+    return score;
+}
+
 void startGame(WINDOW *game) {
     setlocale(LC_ALL, "");
     init_color(COLOR_DARKGREEN, 0, 400, 0);
@@ -33,10 +48,12 @@ void startGame(WINDOW *game) {
     init_color(COLOR_SAND, 745, 588, 313);
     init_color(COLOR_FROG_EYE, 90, 113, 749);
     init_color(COLOR_FROG_BODY, 62, 568, 184);
+    init_color(COLOR_FROG_BODY_DETAILS, 8, 639, 176);
     init_color(COLOR_DARK_ORANGE, 815, 615, 98);
     init_color(COLOR_ENDGAME_BACKGROUND, 8, 372, 600);
     init_color(COLOR_BULLET_TRIGGER_DARK, 149, 8, 8);
     init_color(COLOR_BULLET_TRIGGER, 478, 4, 4);
+
 
     // Definizione delle coppie di colori
     init_pair(1, COLOR_GREEN, COLOR_GREEN);
@@ -58,6 +75,8 @@ void startGame(WINDOW *game) {
     init_pair(17, COLOR_BLACK, COLOR_BLACK);
     init_pair(18, COLOR_BULLET_TRIGGER, COLOR_BLUE);
     init_pair(19, COLOR_BULLET_TRIGGER_DARK, COLOR_BULLET_TRIGGER);
+    init_pair(20, COLOR_FROG_BODY_DETAILS, COLOR_FROG_BODY);
+
 
     werase(game);  // Clear the window
     while (endgame == FALSE)
@@ -97,7 +116,6 @@ void startGame(WINDOW *game) {
 
 void continue_usleep(long microseconds) {
     long elapsed = 0;
-
     while (elapsed < microseconds) {
         usleep(1000);
         elapsed += 1000;
@@ -142,7 +160,7 @@ int play(WINDOW *game) {
         exit(0);
     }
     
-    InitializeCrocodile(crocodiles, stream_speed);
+    initializeCrocodile(crocodiles, stream_speed);
     int group_pid = 0;
     pid_t child_pids[(STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1];
     pid_t pid_timer = fork();
@@ -163,7 +181,7 @@ int play(WINDOW *game) {
         endwin();
         exit(EXIT_FAILURE);
     } else if (pid_frog == 0) {
-        Frog(pipe_fds, &frog);
+        frog_fun(pipe_fds, &frog);
         _exit(0);
     } else {
         //setpgid(pid_frog, group_pid);
@@ -186,7 +204,7 @@ int play(WINDOW *game) {
                 setpgid(0, group_pid);
                 continue_usleep(distance);
                 //usleep(distance); 
-                Crocodile(pipe_fds, &crocodiles[i][j], group_pid);
+                crocodile(pipe_fds, &crocodiles[i][j], group_pid);
                 _exit(0);
             } else {
             // if (i == 0 && j == 0) {
@@ -388,109 +406,76 @@ int play(WINDOW *game) {
                     crocodiles_bullets[i].x = -2;
                 }
             }
-            // array 24 posti y = stream -> i - 0,1,2/3,4,5/
-            // Collision between frog bullets and crocodile bullet
-            
-            // for(int i=0; i<CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID; i++){
-            //     if(crocodiles_bullets[i].x == bullet_right.x && crocodiles_bullets[i].y == bullet_right.y){
-            //         bullet_right.x = GAME_WIDTH;
-            //         bullet_right.y = GAME_HEIGHT;
-            //         write(pipe_fds[1], &bullet_right, sizeof(Item));
-            //     }
-            // }
 
             if(frog.y < DENS_HEIGHT){
                 switch(frog.x){
                     case DENS_1:
-                        switch(timer.x)
-                        {
-                            case 41 ... TIMER_MAX:
-                                score += 30;
-                                break;
-                            case 21 ... 40:
-                                score += 20;
-                                break;
-                            case 1 ... 20:
-                                score += 10;
-                                break;
+                        if(dens[0] == TRUE){
+                            score = compute_score(timer.x, score);
+                            dens[0] = FALSE;
+                            kill_all(pid_frog, group_pid);
+                            return 1;
                         }
-                        dens[0] = FALSE;
-                        kill_all(pid_frog, group_pid);
-                        return 1;
+                        else{
+                            kill_all(pid_frog, group_pid);
+                            return 0;
+                        }
                         break;
                     case DENS_2:
-                        switch(timer.x)
-                        {
-                            case 41 ... 60:
-                                score += 30;
-                                break;
-                            case 21 ... 40:
-                                score += 20;
-                                break;
-                            case 1 ... 20:
-                                score += 10;
-                                break;
+                        if(dens[1] == TRUE){
+                            score = compute_score(timer.x, score);
+                            dens[1] = FALSE;
+                            kill_all(pid_frog, group_pid);
+                            return 1;
                         }
-                        dens[1] = FALSE;
-                        kill_all(pid_frog, group_pid);
-                        return 1;
+                        else{
+                            kill_all(pid_frog, group_pid);
+                            return 0;
+                        }
                         break;
                     case DENS_3:
-                        switch(timer.x)
-                        {
-                            case 41 ... TIMER_MAX:
-                                score += 30;
-                                break;
-                            case 21 ... 40:
-                                score += 20;
-                                break;
-                            case 1 ... 20:
-                                score += 10;
-                                break;
+                        if(dens[2] == TRUE){
+                            score = compute_score(timer.x, score);
+                            dens[2] = FALSE;
+                            kill_all(pid_frog, group_pid);
+                            return 1;
                         }
-                        dens[2] = FALSE;
-                        kill_all(pid_frog, group_pid);
-                        return 1;
+                        else{
+                            kill_all(pid_frog, group_pid);
+                            return 0;
+                        }
                         break;
                     case DENS_4:
-                        switch(timer.x)
-                        {
-                            case 41 ... TIMER_MAX:
-                                score += 30;
-                                break;
-                            case 21 ... 40:
-                                score += 20;
-                                break;
-                            case 1 ... 20:
-                                score += 10;
-                                break;
+                        if(dens[3] == TRUE){
+                            score = compute_score(timer.x, score);
+                            dens[3] = FALSE;
+                            kill_all(pid_frog, group_pid);
+                            return 1;
                         }
-                        dens[3] = FALSE;
-                        kill_all(pid_frog, group_pid);
-                        return 1;
+                        else{
+                            kill_all(pid_frog, group_pid);
+                            return 0;
+                        }
                         break;
                     case DENS_5:
-                        switch(timer.x)
-                        {
-                            case 41 ... TIMER_MAX:
-                                score += 30;
-                                break;
-                            case 21 ... 40:
-                                score += 20;
-                                break;
-                            case 1 ... 20:
-                                score += 10;
-                                break;
+                        if(dens[4] == TRUE){
+                            score = compute_score(timer.x, score);
+                            dens[4] = FALSE;
+                            kill_all(pid_frog, group_pid);
+                            return 1;
                         }
-                        dens[4] = FALSE;
-                        kill_all(pid_frog, group_pid);
-                        return 1;
+                        else{
+                            kill_all(pid_frog, group_pid);
+                            return 0;
+                        }
                         break;
                     default:
                         kill_all(pid_frog, group_pid);
                         return 0;
                 }
             }
+
+            //All prints
 
             print_score(game, manche, timer.x, score);
             print_background(game, dens);
@@ -514,14 +499,6 @@ int play(WINDOW *game) {
 }
 
 void kill_all(pid_t frog, pid_t pidgroup){
-    // for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
-    //     kill(child_pids[i], SIGKILL);  // Invia il segnale di terminazione
-    // }
-    // kill(pid_timer, SIGKILL);
-    // for (int i = 0; i < (STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1; i++) {
-    //     waitpid(child_pids[i], NULL, 0);
-    // }
-    // debuglog("All children terminated\n %d", 0);
     killpg(pidgroup, SIGKILL);
     kill(frog, SIGKILL);
 }
