@@ -16,21 +16,47 @@ int rand_range(int min, int max) {
     return rand() % (max - min + 1) + min;
 }
 
-// void create_process(int* pipe_fds, pid_t *pid_list, int index, int sleep, void (*child_function)(int, void*), void* func_params) {
-//     pid_t pid = fork();
-//     if (pid < 0) {
-//         perror("Fork failed");
-//         exit(1);
-//     } else if (pid == 0) { // Processo figlio
-//         if (sleep > 0) {
-//             usleep(sleep);
-//         }
-//         child_function(pipe_fds[1], func_params);
-//         exit(0);
-//     } else { // Processo padre
-//         pid_list[index] = pid;
-//     }
-// }
+void start_colors(){
+    start_color();
+
+    init_color(COLOR_DARKGREEN, 0, 400, 0);
+    init_color(COLOR_GREY, 600, 600, 600);
+    init_color(COLOR_LIGHTDARKGREEN, 28, 163, 32);
+    init_color(COLOR_SAND, 745, 588, 313);
+    init_color(COLOR_FROG_EYE, 90, 113, 749);
+    init_color(COLOR_FROG_BODY, 62, 568, 184);
+    init_color(COLOR_FROG_BODY_DETAILS, 8, 639, 176);
+    init_color(COLOR_DARK_ORANGE, 815, 615, 98);
+    init_color(COLOR_ENDGAME_BACKGROUND, 8, 372, 600);
+    init_color(COLOR_BULLET_TRIGGER_DARK, 149, 8, 8);
+    init_color(COLOR_BULLET_TRIGGER, 478, 4, 4);
+    init_color(COLOR_RIVER_EASY, 106, 651, 623);
+    init_color(COLOR_RIVER_HARD,75, 90, 369);
+
+    // Definizione delle coppie di colori
+    init_pair(1, COLOR_GREEN, COLOR_GREEN);
+    init_pair(2, COLOR_GREY, COLOR_GREY);  
+    init_pair(3, COLOR_BLACK, COLOR_BLUE);
+    init_pair(4, COLOR_DARKGREEN, COLOR_BLUE);
+    init_pair(5, COLOR_RED, COLOR_RED);
+    init_pair(6, COLOR_RED, COLOR_BLACK);
+    init_pair(7, COLOR_LIGHTDARKGREEN, COLOR_DARKGREEN);
+    init_pair(8, COLOR_DARKGREEN, COLOR_DARKGREEN);
+    init_pair(9, COLOR_BLACK, COLOR_GREEN);
+    init_pair(10, COLOR_SAND, COLOR_SAND);
+    init_pair(11, COLOR_DARKGREEN, COLOR_BLACK);
+    init_pair(12, COLOR_FROG_EYE, COLOR_FROG_BODY);
+    init_pair(13, COLOR_FROG_BODY, COLOR_FROG_BODY);
+    init_pair(14, COLOR_DARK_ORANGE, COLOR_BLACK);
+    init_pair(15, COLOR_ENDGAME_BACKGROUND, COLOR_FROG_BODY);
+    init_pair(16, COLOR_FROG_BODY, COLOR_BLACK);
+    init_pair(17, COLOR_BLACK, COLOR_BLACK);
+    init_pair(18, COLOR_BULLET_TRIGGER, COLOR_BLUE);
+    init_pair(19, COLOR_BULLET_TRIGGER_DARK, COLOR_BULLET_TRIGGER);
+    init_pair(20, COLOR_FROG_BODY_DETAILS, COLOR_FROG_BODY);
+    init_pair(21, COLOR_RIVER_EASY, COLOR_RIVER_EASY);
+    init_pair(22, COLOR_RIVER_HARD, COLOR_RIVER_HARD);
+}
 
 time_t timestamp(void) {
     struct timeval tv;

@@ -41,49 +41,7 @@ int compute_score(int timer){
 
 void startGame(WINDOW *game) {
     setlocale(LC_ALL, "");
-    init_color(COLOR_DARKGREEN, 0, 400, 0);
-    init_color(COLOR_GREY, 600, 600, 600);
-    init_color(COLOR_LIGHTDARKGREEN, 28, 163, 32);
-    init_color(COLOR_SAND, 745, 588, 313);
-    init_color(COLOR_FROG_EYE, 90, 113, 749);
-    init_color(COLOR_FROG_BODY, 62, 568, 184);
-    init_color(COLOR_FROG_BODY_DETAILS, 8, 639, 176);
-    init_color(COLOR_DARK_ORANGE, 815, 615, 98);
-    init_color(COLOR_ENDGAME_BACKGROUND, 8, 372, 600);
-    init_color(COLOR_BULLET_TRIGGER_DARK, 149, 8, 8);
-    init_color(COLOR_BULLET_TRIGGER, 478, 4, 4);
-    init_color(COLOR_RIVER_EASY, 106, 651, 623);
-    init_color(COLOR_RIVER_HARD,75, 90, 369);
-
-
-    // Definizione delle coppie di colori
-    init_pair(1, COLOR_GREEN, COLOR_GREEN);
-    init_pair(2, COLOR_GREY, COLOR_GREY);  
-    init_pair(3, COLOR_BLACK, COLOR_BLUE);
-    init_pair(4, COLOR_DARKGREEN, COLOR_BLUE);
-    init_pair(5, COLOR_RED, COLOR_RED);
-    init_pair(6, COLOR_RED, COLOR_BLACK);
-    init_pair(7, COLOR_LIGHTDARKGREEN, COLOR_DARKGREEN);
-    init_pair(8, COLOR_DARKGREEN, COLOR_DARKGREEN);
-    init_pair(9, COLOR_BLACK, COLOR_GREEN);
-    init_pair(10, COLOR_SAND, COLOR_SAND);
-    init_pair(11, COLOR_DARKGREEN, COLOR_BLACK);
-    init_pair(12, COLOR_FROG_EYE, COLOR_FROG_BODY);
-    init_pair(13, COLOR_FROG_BODY, COLOR_FROG_BODY);
-    init_pair(14, COLOR_DARK_ORANGE, COLOR_BLACK);
-    init_pair(15, COLOR_ENDGAME_BACKGROUND, COLOR_FROG_BODY);
-    init_pair(16, COLOR_FROG_BODY, COLOR_BLACK);
-    init_pair(17, COLOR_BLACK, COLOR_BLACK);
-    init_pair(18, COLOR_BULLET_TRIGGER, COLOR_BLUE);
-    init_pair(19, COLOR_BULLET_TRIGGER_DARK, COLOR_BULLET_TRIGGER);
-    init_pair(20, COLOR_FROG_BODY_DETAILS, COLOR_FROG_BODY);
-    init_pair(21, COLOR_RIVER_EASY, COLOR_RIVER_EASY);
-    init_pair(22, COLOR_RIVER_HARD, COLOR_RIVER_HARD);
-
-
-
-
-
+    
     werase(game);  // Clear the window
     while (endgame == FALSE)
     {
@@ -129,9 +87,6 @@ void continue_usleep(long microseconds) {
 }
 
 
-
-
-
 int play(WINDOW *game) {
     /* Ritorna 0 se la manche è persa (manche --), ritorna 1 se è stata presa una tana */
     int is_bullet_frog_active = 0;
@@ -150,9 +105,6 @@ int play(WINDOW *game) {
         crocodiles_bullets[i].speed = CROCODILE_BULLET_SPEED;
         crocodiles_bullets[i].extra = 0;
     }
-
-    
-
     
     // Definizione variabili
     int pipe_fds[2];
@@ -248,13 +200,7 @@ int play(WINDOW *game) {
                         if (bullet_pid_right == 0) {
                             bullet_right.x = frog.x + FROG_DIM_X;
                             bullet_right.y = frog.y + 1;
-                            bullet_right.extra = frog.y + 1;
-                            while (bullet_right.x < GAME_WIDTH + 1) {
-                                bullet_right.x += 1;
-                                write(pipe_fds[1], &bullet_right, sizeof(Item));
-                                usleep(current_difficulty.bullets_speed);
-                            }
-                            _exit(0);
+                            bullet_right_controller(&bullet_right, pipe_fds);
                         }
 
                         // Creazione del processo per il proiettile sinistro
@@ -262,16 +208,10 @@ int play(WINDOW *game) {
                         if (bullet_pid_left == 0) {
                             bullet_left.x = frog.x - 1;
                             bullet_left.y = frog.y + 1;
-                            bullet_left.extra = frog.y + 1;
-                            while (bullet_left.x > -1) {
-                                bullet_left.x -= 1;
-                                write(pipe_fds[1], &bullet_left, sizeof(Item));
-                                usleep(current_difficulty.bullets_speed);
-                            }
-                            _exit(0);
+                            bullet_left_controller(&bullet_left, pipe_fds);
                         }
-                    } 
-                    // Controlla se i proiettili sono terminati
+                    }
+                        // Controlla se i proiettili sono terminati
                         if (bullet_pid_right > 0) {
                             int status;
                             pid_t result = waitpid(bullet_pid_right, &status, WNOHANG);
@@ -291,14 +231,15 @@ int play(WINDOW *game) {
                         if (bullet_pid_right == -1 && bullet_pid_left == -1) {
                             is_bullet_frog_active = 0;
                         }
-                }
+                    }
+                
                 break;
 
                 case BULLETS_ID:
-                    if (msg.x < frog.x) {
-                        bullet_left = msg;
-                    } else {
+                    if (msg.extra == 1) {
                         bullet_right = msg;
+                    } else {
+                        bullet_left = msg;
                     }
                     break;
                 case TIMER_ID:
@@ -316,22 +257,22 @@ int play(WINDOW *game) {
                         kill_all(pid_frog, group_pid);
                         return 0;
                     }
-                    if ((bullet_right.x == msg.x && bullet_right.y == msg.y) || (bullet_left.x == msg.x && bullet_left.y == msg.y)) {
-                        // Resetta i proiettili in caso di collisione
-                        bullet_right.x = -1;
-                        bullet_right.y = -1;
-                        bullet_left.x = -1;
-                        bullet_left.y = -1;
-                        // Termina i processi dei proiettili
-                        if (bullet_pid_right > 0) {
-                            kill(bullet_pid_right, SIGKILL);
-                            bullet_pid_right = -1;
-                        }
-                        if (bullet_pid_left > 0) {
-                            kill(bullet_pid_left, SIGKILL);
-                            bullet_pid_left = -1;
-                        }
-                    }
+                    // if ((bullet_right.x == msg.x && bullet_right.y == msg.y) || (bullet_left.x == msg.x && bullet_left.y == msg.y)) {
+                    //     // Resetta i proiettili in caso di collisione
+                    //     bullet_right.x = -1;
+                    //     bullet_right.y = -1;
+                    //     bullet_left.x = -1;
+                    //     bullet_left.y = -1;
+                    //     // Termina i processi dei proiettili
+                    //     if (bullet_pid_right > 0) {
+                    //         kill(bullet_pid_right, SIGKILL);
+                    //         bullet_pid_right = -1;
+                    //     }
+                    //     if (bullet_pid_left > 0) {
+                    //         kill(bullet_pid_left, SIGKILL);
+                    //         bullet_pid_left = -1;
+                    //     }
+                    // }
 
                     break;
                 //CROCODILE case
@@ -396,20 +337,18 @@ int play(WINDOW *game) {
                 }
             }
             // Collision between frog bullets and crocodile bullet
-            stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right.extra) / FROG_DIM_Y);
+            stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right.y) / FROG_DIM_Y);
             for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
                 if((crocodiles_bullets[i].x - bullet_right.x) <= 1 && (crocodiles_bullets[i].x - bullet_right.x) >= -1 && crocodiles_bullets[i].y == bullet_right.y){
                     kill(bullet_pid_right, SIGKILL);
                     kill(child_pids[i+1], SIGUSR1);
-                    bullet_right.x = -1;
-                    bullet_right.y = -1;
+                    bullet_right.x = -8;
                     crocodiles_bullets[i].x = -2;
                 }
                 if((crocodiles_bullets[i].x - bullet_left.x) <= 1 && (crocodiles_bullets[i].x - bullet_left.x) >= -1 && crocodiles_bullets[i].y == bullet_left.y){
                     kill(bullet_pid_left, SIGKILL);
                     kill(child_pids[i+1], SIGUSR1);
-                    bullet_left.x = -1;
-                    bullet_left.y = -1;
+                    bullet_left.x = -8;
                     crocodiles_bullets[i].x = -2;
                 }
             }

@@ -10,6 +10,11 @@ extern int manche;
 extern bool frog_on_crocodile;
 #include "design.h"
 #include "struct.h"
+
+
 void frog_fun(int *pipe_fds, Item *frog);
+void bullet_right_controller(Item *bullet_right, int *pipe_fds);
+void bullet_left_controller(Item *bullet_left, int *pipe_fds);
+
 #define RESET_MANCHE_SIG SIGUSR2
 #endif
