@@ -13,7 +13,9 @@
 #include "crocodile.h"
 #include "frog.h"
 #include "buffer.h"
-int testvar = 0;
+
+bool running = TRUE;
+
 int manche = 3, score = 0;
 bool endgame = FALSE;
 bool dens[DENS_NUMBER] = {TRUE, TRUE, TRUE, TRUE, TRUE};
@@ -106,7 +108,7 @@ void continue_usleep(long microseconds) {
 int play(WINDOW *game) {
     /* Ritorna 0 se la manche è persa (manche --), ritorna 1 se è stata presa una tana */
     int is_bullet_frog_active = 0;
-
+    running = TRUE;
     Item frog = {FROG_ID, GAME_HEIGHT-4, (GAME_WIDTH/2)-FROG_DIM_X/2, 0, 0};
     Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
     Item bullet_right = {BULLETS_ID, -1, -1, 0, 0};
@@ -223,7 +225,7 @@ int play(WINDOW *game) {
             case TIMER_ID:
                 timer.x -= 1;
                 if(timer.x == 0){
-                    kill(getpid(), SIGUSR1);
+                     
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
                     return 0;
                 }
@@ -233,7 +235,7 @@ int play(WINDOW *game) {
 
                 // Collision beetwen frog and crocodile bullet
                 if(frog.y == (crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].y - 1) && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x >= frog.x && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x <= frog.x + FROG_DIM_X){
-                    kill(getpid(), SIGUSR1);
+                     
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
                     return 0;
                 }
@@ -312,33 +314,29 @@ int play(WINDOW *game) {
                 {
                     // print_frog(game, &frog);
                     // wrefresh(game);
-                    kill(getpid(), SIGUSR1);
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
-                    usleep(1000000);
                     return 0;
                 }
             }
             // Collision between frog bullets and crocodile bullet
             stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right.y) / FROG_DIM_Y);
-            debuglog("Stream: %d\n", stream);
+
             for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
                 if((crocodiles_bullets[i].x - bullet_right.x) <= 1 && (crocodiles_bullets[i].x - bullet_right.x) >= -1 && crocodiles_bullets[i].y == bullet_right.y){
                     pthread_cancel(thread_bullet_right);
                     pthread_join(thread_bullet_right, NULL);
-                    debuglog("Collision Right%d\n", i);
+
                     pthread_kill(thread_crocodile[stream][i%CROCODILE_STREAM_MAX_NUMBER], SIGUSR1);
-                    bullet_right.x = -1;
-                    bullet_right.y = -1;
+                    bullet_right.x = -8;
                     is_bullet_frog_active = 0;
                     crocodiles_bullets[i].x = -2;
                 }
                 if((crocodiles_bullets[i].x - bullet_left.x) <= 1 && (crocodiles_bullets[i].x - bullet_left.x) >= -1 && crocodiles_bullets[i].y == bullet_left.y){
                     pthread_cancel(thread_bullet_left);
                     pthread_join(thread_bullet_left, NULL);
-                    debuglog("Collision Left%d\n", i);
+
                     pthread_kill(thread_crocodile[stream][i%CROCODILE_STREAM_MAX_NUMBER], SIGUSR1);
-                    bullet_left.x = -1;
-                    bullet_left.y = -1;
+                    bullet_left.x = -8;
                     is_bullet_frog_active = 0;
                     crocodiles_bullets[i].x = -2;
                 }
@@ -371,7 +369,7 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[0] = FALSE;
-                        kill(getpid(), SIGUSR1);
+                         
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
                         return 1;
                         break;
@@ -389,7 +387,7 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[1] = FALSE;
-                        kill(getpid(), SIGUSR1);
+                         
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
                         return 1;
                         break;
@@ -407,7 +405,7 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[2] = FALSE;
-                        kill(getpid(), SIGUSR1);
+                         
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
                         return 1;
                         break;
@@ -425,7 +423,7 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[3] = FALSE;
-                        kill(getpid(), SIGUSR1);
+                         
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
                         return 1;
                         break;
@@ -443,12 +441,12 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[4] = FALSE;
-                        kill(getpid(), SIGUSR1);
+                         
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
                         return 1;
                         break;
                     default:
-                        kill(getpid(), SIGUSR1);
+                         
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
                         return 0;
                 }

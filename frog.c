@@ -91,11 +91,12 @@ void* bullet_right_fun(void *arg) {
         bullet->x += 1;
         buffer_push(buffer, *bullet);
         usleep(current_difficulty.bullets_speed);
+        debuglog("I AM ACTIVE %d\n", pthread_self());
     }
     bullet->extra = 0;
     buffer_push(buffer, *bullet);
     free(args);
-    return NULL;
+    return 0;
 }
 
 void* bullet_left_fun(void *arg) {
@@ -114,9 +115,10 @@ void* bullet_left_fun(void *arg) {
         bullet->x -= 1;
         buffer_push(buffer, *bullet);
         usleep(current_difficulty.bullets_speed);
+        debuglog("I AM ACTIVE %d\n", pthread_self());
     }
     bullet->extra = 0;
     buffer_push(buffer, *bullet);
     free(args);
-    return NULL;
+    return 0;
 }

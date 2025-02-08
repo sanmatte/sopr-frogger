@@ -1,5 +1,5 @@
 #include "crocodile.h"
-extern int testvar;
+extern bool running;
 /**
  * @brief  Initiliaze the crocodile matrix
  * @param  crocodiles[][] matrix of crocodiles
@@ -21,7 +21,7 @@ void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
     }
 }
 
-int exploded = FALSE;
+__thread int exploded = FALSE;
 void handlesignal(int signum) {
     if (signum == SIGUSR1) {
         exploded = TRUE;
@@ -32,10 +32,14 @@ void* bullet_right_crocodile(void *arg) {
     Item* bullet = (Item *)args[0];
     shared_buffer_t* buffer = (shared_buffer_t *)args[1];
 
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    //pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+
     // Muovi il proiettile fino al limite del gioco
     while (bullet->x < GAME_WIDTH + 1) {
         bullet->x += 1;
         buffer_push(buffer, *bullet);
+        pthread_testcancel();
         usleep(bullet->speed);
     }
     buffer_push(buffer, *bullet);
@@ -48,10 +52,14 @@ void* bullet_left_crocodile(void *arg) {
     Item* bullet = (Item *)args[0];
     shared_buffer_t* buffer = (shared_buffer_t *)args[1];
     
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    //pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    
     // Muovi il proiettile fino al limite del gioco
     while (bullet->x >= 0) {
         bullet->x -= 1;
         buffer_push(buffer, *bullet);
+        pthread_testcancel();
         usleep(bullet->speed);
         
     }
@@ -65,14 +73,12 @@ void* Crocodile(void *arg) {
     int distance = *(int*)args[2];
     free(args[2]);
     free(args);
-    testvar += 1;
     int random_shot;
     int active = FALSE;
     pthread_t thread_bullet;
     continue_usleep(distance);
-    signal(SIGUSR1, handlesignal); // Ignore SIGUSR1 signal
+    signal(SIGUSR1, handlesignal);
     while (1) {
-        
         random_shot = rand_range(0, current_difficulty.shot_range);
         int shot_speed = crocodile.speed - current_difficulty.crocodile_bullet_speed;
         
@@ -80,13 +86,14 @@ void* Crocodile(void *arg) {
             exploded = FALSE;
             pthread_cancel(thread_bullet);
             pthread_join(thread_bullet, NULL);
-            debuglog("Bullet exploded%d\n", 0);
         }
         
 
         if (crocodile.extra == -1 && crocodile.x < GAME_WIDTH+1) {
             crocodile.x += 1;
             if(random_shot == 1 && active == FALSE) {
+                pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+
                 void **args = malloc(3 * sizeof(void*));
                 Item* bullet = malloc(sizeof(Item));
                 bullet->id = crocodile.id - 2 + CROCODILE_MIN_BULLETS_ID;
@@ -103,6 +110,7 @@ void* Crocodile(void *arg) {
             {
                 if(pthread_tryjoin_np(thread_bullet, NULL) == 0) {
                     active = FALSE;
+                    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
                 }
             }
             if (crocodile.x == GAME_WIDTH + 1) {
@@ -113,6 +121,7 @@ void* Crocodile(void *arg) {
         } else if (crocodile.extra == 1 && crocodile.x > -CROCODILE_DIM_X-1) {
             crocodile.x -= 1;
             if(random_shot == 1 && active == FALSE) {
+                pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
                 void **args = malloc(3 * sizeof(void*));
                 Item* bullet = malloc(sizeof(Item));
                 bullet->id = crocodile.id - 2 + CROCODILE_MIN_BULLETS_ID;
@@ -129,6 +138,7 @@ void* Crocodile(void *arg) {
             {
                 if(pthread_tryjoin_np(thread_bullet, NULL) == 0) {
                     active = FALSE;
+                    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
                 }
             }
             if (crocodile.x == -CROCODILE_DIM_X - 1) {
@@ -136,11 +146,18 @@ void* Crocodile(void *arg) {
                 usleep(rand_range(0, crocodile.speed * (CROCODILE_DIM_X / 3)));
             }
         }
-
+        pthread_testcancel();
         // Write crocodile position to the pipe
         buffer_push(&buffer, crocodile); 
         usleep(crocodile.speed);
     }
-    free(args[2]);
-    free(args);
+    if (active == TRUE) {
+        exploded = FALSE;
+        pthread_cancel(thread_bullet);
+        pthread_join(thread_bullet, NULL);
+        //debuglog("Thread bullet killed%d\n", pthread_self());
+    }
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    pthread_testcancel();
+    return 0;
 }
