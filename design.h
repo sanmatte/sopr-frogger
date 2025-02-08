@@ -75,4 +75,5 @@ void startGame(WINDOW *game);
 void print_frogger_sprite(WINDOW *win);
 int play(WINDOW *game);
 void kill_all(pid_t frog, pid_t pid_group);
+void ctrlc_handler(int signum);
 #endif

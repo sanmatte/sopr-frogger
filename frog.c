@@ -9,7 +9,7 @@ void reset_manche(Item *frog){
     newmanche = FALSE;
 }
 
-void frog_fun(int *pipe_fds, Item *frog){
+void frog_controller(int *pipe_fds, Item *frog){
     close(pipe_fds[0]); 
     int ch;
     bool has_moved = TRUE;

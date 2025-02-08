@@ -62,8 +62,13 @@ Difficulty current_difficulty;
 
 int main(){
     setlocale(LC_ALL, "");
+<<<<<<< HEAD
     initscr();start_colors();keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
     
+=======
+    initscr();start_color();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
+
+>>>>>>> refs/remotes/origin/multi-process
     current_difficulty = MEDIUM;
 
     if(LINES < GAME_HEIGHT || COLS < GAME_WIDTH){
