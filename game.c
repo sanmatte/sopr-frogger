@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "crocodile.h"
 #include "frog.h"
-
+bool sigintdetected = FALSE;
 int manche = 3, score = 0;
 bool endgame = FALSE, dens[DENS_NUMBER] = {TRUE, TRUE, TRUE, TRUE, TRUE};
 
@@ -188,7 +188,7 @@ int play(WINDOW *game) {
         endwin();
         exit(EXIT_FAILURE);
     } else if (pid_frog == 0) {
-        frog_fun(pipe_fds, &frog);
+        frog_controller(pipe_fds, &frog);
         _exit(0);
     } else {
         //setpgid(pid_frog, group_pid);
@@ -229,7 +229,7 @@ int play(WINDOW *game) {
 
     Item msg;
     pid_t bullet_pid_left, bullet_pid_right;
-
+    signal(SIGINT, ctrlc_handler);
     while (TRUE) {
     if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
         switch (msg.id) {
@@ -501,11 +501,34 @@ int play(WINDOW *game) {
             print_bullets(game, &bullet_right);
             
             wrefresh(game);
+
+    if (sigintdetected == TRUE) {
+        kill_all(pid_frog, group_pid);  // Kill all relevant processes
+        endwin(); // End ncurses mode
+        system("clear"); // Clear the screen
+        exit(0); // Exit cleanly
+
+    }
+
+
         }
     }
 }
 
 void kill_all(pid_t frog, pid_t pidgroup){
     killpg(pidgroup, SIGKILL);
+    pid_t pid;
+    while ((pid = waitpid(-pidgroup, NULL, 0)) > 0) {
+    }
     kill(frog, SIGKILL);
+    waitpid(frog, NULL, 0);
+    debuglog("frog killed%d\n", frog);
+}
+
+void ctrlc_handler(int signum){
+    if (signum == SIGINT)
+    {
+        sigintdetected = TRUE;
+    }
+    
 }
