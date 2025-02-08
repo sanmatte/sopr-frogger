@@ -136,11 +136,11 @@ void print_background(WINDOW *game, bool *dens){
 	}
 	wattroff(game, COLOR_PAIR(10)); 
 
-	wattron(game, COLOR_PAIR(3));  
+	wattron(game, COLOR_PAIR(22));  
 	for (int y = SIDEWALK_HEIGHT_1; y <= SIDEWALK_HEIGHT_2; y++) {
 		mvwhline(game, y, 0, ' ', GAME_WIDTH);
 	}
-	wattroff(game, COLOR_PAIR(3));
+	wattroff(game, COLOR_PAIR(22));
 	
 	wattron(game, COLOR_PAIR(10));  
 	for (int y = GAME_HEIGHT-1; y > SIDEWALK_HEIGHT_2; y--) {

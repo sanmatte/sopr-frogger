@@ -70,8 +70,9 @@ int main(){
         WINDOW *err_screen = newwin(0, 0, 0, 0);
         while(LINES < GAME_HEIGHT || COLS < GAME_WIDTH){
             mvwprintw(err_screen, 1, 3, "La finestra è troppo piccola per giocare");
-            mvwprintw(err_screen, 3, 3, "Dimensione minima: %d x %d", GAME_WIDTH, GAME_HEIGHT);
-            mvwprintw(err_screen, 5, 3, "Dimensione attuale: %d x %d", COLS, LINES);
+            mvwprintw(err_screen, 2, 3, "Imposta il terminale a schermo intero e ridimensiona la finestra");
+            mvwprintw(err_screen, 4, 3, "Dimensione minima: %d x %d", GAME_WIDTH, GAME_HEIGHT);
+            mvwprintw(err_screen, 6, 3, "Dimensione attuale: %d x %d", COLS, LINES);
             wrefresh(err_screen);
         }
         wclear(err_screen);

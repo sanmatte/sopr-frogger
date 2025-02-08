@@ -14,8 +14,7 @@
 #include "frog.h"
 
 int manche = 3, score = 0;
-bool endgame = FALSE;
-bool dens[DENS_NUMBER] = {TRUE, TRUE, TRUE, TRUE, TRUE};
+bool endgame = FALSE, dens[DENS_NUMBER] = {TRUE, TRUE, TRUE, TRUE, TRUE};
 
 void game_timer(int *pipe_fds){
     Item msg = {TIMER_ID, 0, 0, 0, 0};
@@ -25,7 +24,7 @@ void game_timer(int *pipe_fds){
     }
 }
 
-int compute_score(int timer, int score){
+int compute_score(int timer){
     switch(timer){
         case 31 ... TIMER_MAX:
             score += 30;
@@ -53,6 +52,8 @@ void startGame(WINDOW *game) {
     init_color(COLOR_ENDGAME_BACKGROUND, 8, 372, 600);
     init_color(COLOR_BULLET_TRIGGER_DARK, 149, 8, 8);
     init_color(COLOR_BULLET_TRIGGER, 478, 4, 4);
+    init_color(COLOR_RIVER_EASY, 106, 651, 623);
+    init_color(COLOR_RIVER_HARD,75, 90, 369);
 
 
     // Definizione delle coppie di colori
@@ -76,6 +77,11 @@ void startGame(WINDOW *game) {
     init_pair(18, COLOR_BULLET_TRIGGER, COLOR_BLUE);
     init_pair(19, COLOR_BULLET_TRIGGER_DARK, COLOR_BULLET_TRIGGER);
     init_pair(20, COLOR_FROG_BODY_DETAILS, COLOR_FROG_BODY);
+    init_pair(21, COLOR_RIVER_EASY, COLOR_RIVER_EASY);
+    init_pair(22, COLOR_RIVER_HARD, COLOR_RIVER_HARD);
+
+
+
 
 
     werase(game);  // Clear the window
@@ -161,6 +167,7 @@ int play(WINDOW *game) {
     }
     
     initializeCrocodile(crocodiles, stream_speed);
+    
     int group_pid = 0;
     pid_t child_pids[(STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER) + 1];
     pid_t pid_timer = fork();
@@ -411,7 +418,7 @@ int play(WINDOW *game) {
                 switch(frog.x){
                     case DENS_1:
                         if(dens[0] == TRUE){
-                            score = compute_score(timer.x, score);
+                            score = compute_score(timer.x);
                             dens[0] = FALSE;
                             kill_all(pid_frog, group_pid);
                             return 1;
@@ -423,7 +430,7 @@ int play(WINDOW *game) {
                         break;
                     case DENS_2:
                         if(dens[1] == TRUE){
-                            score = compute_score(timer.x, score);
+                            score = compute_score(timer.x);
                             dens[1] = FALSE;
                             kill_all(pid_frog, group_pid);
                             return 1;
@@ -435,7 +442,7 @@ int play(WINDOW *game) {
                         break;
                     case DENS_3:
                         if(dens[2] == TRUE){
-                            score = compute_score(timer.x, score);
+                            score = compute_score(timer.x);
                             dens[2] = FALSE;
                             kill_all(pid_frog, group_pid);
                             return 1;
@@ -447,7 +454,7 @@ int play(WINDOW *game) {
                         break;
                     case DENS_4:
                         if(dens[3] == TRUE){
-                            score = compute_score(timer.x, score);
+                            score = compute_score(timer.x);
                             dens[3] = FALSE;
                             kill_all(pid_frog, group_pid);
                             return 1;
@@ -459,7 +466,7 @@ int play(WINDOW *game) {
                         break;
                     case DENS_5:
                         if(dens[4] == TRUE){
-                            score = compute_score(timer.x, score);
+                            score = compute_score(timer.x);
                             dens[4] = FALSE;
                             kill_all(pid_frog, group_pid);
                             return 1;
