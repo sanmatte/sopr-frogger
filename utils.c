@@ -32,6 +32,7 @@ void start_colors(){
     init_color(COLOR_BULLET_TRIGGER, 478, 4, 4);
     init_color(COLOR_RIVER_EASY, 125, 816, 839);
     init_color(COLOR_RIVER_HARD,75, 90, 369);
+    init_color(COLOR_PAUSE_MENU, 780, 674, 86);
 
     // Definizione delle coppie di colori
     init_pair(1, COLOR_GREEN, COLOR_GREEN);
@@ -60,6 +61,7 @@ void start_colors(){
     init_pair(24, COLOR_DARKGREEN, COLOR_RIVER_HARD);
     init_pair(25, COLOR_BULLET_TRIGGER, COLOR_RIVER_EASY);
     init_pair(26, COLOR_BULLET_TRIGGER, COLOR_RIVER_HARD);
+    init_pair(27, COLOR_PAUSE_MENU, COLOR_PAUSE_MENU);
 }
 
 time_t timestamp(void) {

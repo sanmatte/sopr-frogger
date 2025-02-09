@@ -137,3 +137,5 @@ void printkitten(WINDOW *game) {
 
     wgetch(game); // Wait for user input before continuing
 }
+
+

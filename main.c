@@ -105,7 +105,6 @@ int main(){
             return_to_menu = 1;
             werase(win);  // Clear the window
             wrefresh(win);  // Refresh window
-            //! TOFIX
             break;
         case 1:
             selection = showMenu(win, difficulties);

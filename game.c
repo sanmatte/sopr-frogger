@@ -7,11 +7,8 @@
 #include <time.h>
 #include <errno.h>
 #include <locale.h>
-#include "design.h"
-#include "struct.h"
-#include "utils.h"
-#include "crocodile.h"
-#include "frog.h"
+#include "game.h"
+
 bool sigintdetected = FALSE;
 int manche = 3, score = 0;
 bool endgame = FALSE, dens[DENS_NUMBER] = {TRUE, TRUE, TRUE, TRUE, TRUE};
@@ -62,7 +59,15 @@ void startGame(WINDOW *game) {
                 }
             }
             break;
+        case 2:
+            exit(0);
+            break;
+        case 3:
+            return;
+            break;
         }
+        
+        
         werase(game);
         refresh();
     }
@@ -136,7 +141,7 @@ int play(WINDOW *game) {
         endwin();
         exit(EXIT_FAILURE);
     } else if (pid_frog == 0) {
-        frog_controller(pipe_fds, &frog);
+        frog_controller(pipe_fds);
         _exit(0);
     } else {
         //setpgid(pid_frog, group_pid);
@@ -197,13 +202,6 @@ int play(WINDOW *game) {
                                 bullet_right.x = frog.x + FROG_DIM_X;
                                 bullet_right.y = frog.y + 1;
                                 bullet_right_controller(&bullet_right, pipe_fds);
-                                // bullet_right.extra = 1;
-                                // while(bullet_right.x < GAME_WIDTH){
-                                //     bullet_right.x += 1;
-                                //     write(pipe_fds[1], &bullet_right, sizeof(Item));
-                                //     usleep(current_difficulty.bullets_speed);
-                                // }
-                                // _exit(0);
                             }
 
                             // Creazione del processo per il proiettile sinistro
@@ -212,13 +210,6 @@ int play(WINDOW *game) {
                                 bullet_left.x = frog.x - 1;
                                 bullet_left.y = frog.y + 1;
                                 bullet_left_controller(&bullet_left, pipe_fds);
-                                // bullet_left.extra = -1;
-                                // while(bullet_left.x > -1){
-                                //     bullet_left.x -= 1;
-                                //     write(pipe_fds[1], &bullet_left, sizeof(Item));
-                                //     usleep(current_difficulty.bullets_speed);
-                                // }
-                                //_exit(0);
                             }
                         }
                         // Controlla se i proiettili sono terminati
@@ -267,15 +258,36 @@ int play(WINDOW *game) {
                     break;
                 //CROCODILE case
                 case PAUSE_ID:
+                    WINDOW *pause = newwin(5, 25, (GAME_HEIGHT/2) + 5,  (GAME_WIDTH/2) + 10);
+                    box(pause, 0, 0);
+                    mvwprintw(pause, 1, 1 , "Press Q to quit");
+	                mvwprintw(pause, 2, 1 , "Press P to resume");
+                    mvwprintw(pause, 3, 1 , "Press M to go to menu");
+                    wrefresh(pause);
                     killpg(group_pid, SIGSTOP);  // Pause all child processes
-                    //printf("Game Paused. Press any key to continue...\n");
                     int ch = getchar();  // Wait for user input
-                    while (ch != 'p') {
+                    while (ch != 'p' && ch != 'q' && ch != 'm') {
                         ch = getchar();
                     }
-                    
-                    killpg(group_pid, SIGCONT);  // Resume all child processes
+                    if(ch == 'p'){
+                        killpg(group_pid, SIGCONT);  // Resume all child processes
+                    }
+                    else if(ch == 'q'){
+                        kill_all(pid_frog, group_pid);
+                        endwin();
+                        return 2;
+                    }
+                    else if(ch == 'm'){
+                        kill_all(pid_frog, group_pid);
+                        return 3;
+                    }
+
                     break;
+                case QUIT_ID:
+                    kill_all(pid_frog, group_pid);
+                    endwin();
+                    return 2;
+                    break;  
                 default:
                     if(msg.id >= CROCODILE_MIN_ID && msg.id <= CROCODILE_MAX_ID){
                         for(int i = 0; i < STREAM_NUMBER; i++){

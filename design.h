@@ -2,8 +2,6 @@
 #define DESIGN_H
 
 #include <ncurses.h>
-#include "struct.h"
-#include "design.h"
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -13,6 +11,10 @@
 #include <sys/time.h>
 #include <time.h>
 #include <locale.h>
+
+#include "struct.h"
+#include "game.h"
+#include "menu.h"
 
 //colours define
 #define COLOR_GREY 10
@@ -28,52 +30,18 @@
 #define COLOR_FROG_BODY_DETAILS 20
 #define COLOR_RIVER_EASY 21
 #define COLOR_RIVER_HARD 22
-
-//dens
-#define DENS_NUMBER 5
-#define DENS_HEIGHT 6
-#define DENS_DIM 10
-#define DENS_1 10
-#define DENS_2 40
-#define DENS_3 70
-#define DENS_4 100
-#define DENS_5 130
-
-// define game zones
-#define GAME_WIDTH 150
-#define GAME_HEIGHT 46
-#define SCORE_HEIGHT 1
-#define DENS_HEIGHT 6
-#define SIDEWALK_HEIGHT_1 10
-#define SIDEWALK_HEIGHT_2 GAME_HEIGHT-5
+#define COLOR_PAUSE_MENU 23
 
 
-#define STREAM_NUMBER 8
-
-// define bullets
-#define BULLETS_ID 26
-#define BULLETS_DIM 1
-#define BULLETS_SPEED 20000
-
-// timer
-#define TIMER_ID 27
-#define TIMER_SPEED 1000000
-#define TIMER_MAX 60
-
-#define ESC 27
-#define PAUSE_ID 69
 
 // function prototipes
-
 void print_score(WINDOW *game, int manche, int timer, int score);
 void print_background(WINDOW *game, bool *dens);
 void print_frog(WINDOW *game, Item *frog);
 void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger);
 void print_bullets(WINDOW *game, Item *bullet);
 void print_endgame(WINDOW *game, int manche, bool *dens, int score);
-void startGame(WINDOW *game);
 void print_frogger_sprite(WINDOW *win);
-int play(WINDOW *game);
-void kill_all(pid_t frog, pid_t pid_group);
-void ctrlc_handler(int signum);
+void print_pause(WINDOW *win);
+
 #endif
