@@ -14,11 +14,8 @@
 #include "frog.h"
 #include "buffer.h"
 
-<<<<<<< HEAD
 bool running = TRUE;
 
-=======
->>>>>>> parent of be87db4 (crockbullets)
 int manche = 3, score = 0;
 bool endgame = FALSE;
 bool dens[DENS_NUMBER] = {TRUE, TRUE, TRUE, TRUE, TRUE};
@@ -228,12 +225,8 @@ int play(WINDOW *game) {
             case TIMER_ID:
                 timer.x -= 1;
                 if(timer.x == 0){
-<<<<<<< HEAD
                      
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
-=======
-                    kill_all(thread_timer, thread_frog, thread_crocodile);
->>>>>>> parent of be87db4 (crockbullets)
                     return 0;
                 }
                 break;
@@ -242,12 +235,8 @@ int play(WINDOW *game) {
 
                 // Collision beetwen frog and crocodile bullet
                 if(frog.y == (crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].y - 1) && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x >= frog.x && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x <= frog.x + FROG_DIM_X){
-<<<<<<< HEAD
                      
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
-=======
-                    kill_all(thread_timer, thread_frog, thread_crocodile);
->>>>>>> parent of be87db4 (crockbullets)
                     return 0;
                 }
                 if ((bullet_right.x == msg.x && bullet_right.y == msg.y) || (bullet_left.x == msg.x && bullet_left.y == msg.y)) {
@@ -325,12 +314,7 @@ int play(WINDOW *game) {
                 {
                     // print_frog(game, &frog);
                     // wrefresh(game);
-<<<<<<< HEAD
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
-=======
-                    kill_all(thread_timer, thread_frog, thread_crocodile);
-                    usleep(1000000);
->>>>>>> parent of be87db4 (crockbullets)
                     return 0;
                 }
             }
@@ -385,12 +369,8 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[0] = FALSE;
-<<<<<<< HEAD
                          
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
-=======
-                        kill_all(thread_timer, thread_frog, thread_crocodile);
->>>>>>> parent of be87db4 (crockbullets)
                         return 1;
                         break;
                     case DENS_2:
@@ -407,12 +387,8 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[1] = FALSE;
-<<<<<<< HEAD
                          
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
-=======
-                        kill_all(thread_timer, thread_frog, thread_crocodile);
->>>>>>> parent of be87db4 (crockbullets)
                         return 1;
                         break;
                     case DENS_3:
@@ -429,12 +405,8 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[2] = FALSE;
-<<<<<<< HEAD
                          
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
-=======
-                        kill_all(thread_timer, thread_frog, thread_crocodile);
->>>>>>> parent of be87db4 (crockbullets)
                         return 1;
                         break;
                     case DENS_4:
@@ -451,12 +423,8 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[3] = FALSE;
-<<<<<<< HEAD
                          
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
-=======
-                        kill_all(thread_timer, thread_frog, thread_crocodile);
->>>>>>> parent of be87db4 (crockbullets)
                         return 1;
                         break;
                     case DENS_5:
@@ -473,7 +441,6 @@ int play(WINDOW *game) {
                                 break;
                         }
                         dens[4] = FALSE;
-<<<<<<< HEAD
                          
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
                         return 1;
@@ -481,13 +448,6 @@ int play(WINDOW *game) {
                     default:
                          
                         pkill_all(thread_timer, thread_frog, thread_crocodile);
-=======
-                        kill_all(thread_timer, thread_frog, thread_crocodile);
-                        return 1;
-                        break;
-                    default:
-                        kill_all(thread_timer, thread_frog, thread_crocodile);
->>>>>>> parent of be87db4 (crockbullets)
                         return 0;
                 }
             }
@@ -513,7 +473,7 @@ int play(WINDOW *game) {
     
 }
 
-void kill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]){
+void pkill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]){
     pthread_cancel(thread_timer);
     pthread_join(thread_timer, NULL);
     pthread_cancel(thread_frog);
