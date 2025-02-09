@@ -225,7 +225,7 @@ void print_crocodile(WINDOW *game, Item *crocodile){
 
 void print_bullets(WINDOW *game, Item *bullets, int itemtype){
 	static const char* sprite_matrix[BULLETS_DIM] = {"▄"};
-	if(itemtype == BULLETS_ID){
+	if(itemtype == BULLET_ID_LEFT || itemtype == BULLET_ID_RIGHT){
 		wattron(game, COLOR_PAIR(17));
 		mvwprintw(game, bullets->y, bullets->x, "%s", sprite_matrix[0]);
 		wattroff(game, COLOR_PAIR(17));

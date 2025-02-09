@@ -11,7 +11,7 @@ extern bool frog_on_crocodile;
 #include "design.h"
 #include "struct.h"
 
-void* Frog(void* args);
+void* Frog();
 void* bullet_right_fun(void* args);
 void* bullet_left_fun(void* args);
 

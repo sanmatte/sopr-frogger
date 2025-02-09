@@ -10,17 +10,13 @@ void reset_manche(Item *frog){
     newmanche = FALSE;
 }
 
-void* Frog(void *arg) {
+void* Frog() {
     //shared_buffer_t buffer = *(shared_buffer_t*)arg;
     int ch;
     bool has_moved = TRUE;
     Item frogtest = {FROG_ID, 0, 0, 0, 0};
 
     while (manche > 0) {
-        // if (newmanche)
-        // {
-        //     reset_manche(frog);
-        // }
 
         // Read the latest key press (ignore older ones)
         do {
@@ -77,18 +73,16 @@ void* Frog(void *arg) {
 void* bullet_right_fun(void *arg) {
     void **args = (void **)arg;
     // Ottieni i puntatori alle strutture
-    Item* frog = (Item *)args[0];
-    Item* bullet = (Item *)args[1];
-    shared_buffer_t* buffer = (shared_buffer_t *)args[2];
+    Item* bullet = (Item *)args[0];
+    shared_buffer_t* buffer = (shared_buffer_t *)args[1];
 
-    // Inizializza la posizione del proiettile
-    bullet->x = frog->x + FROG_DIM_X;
-    bullet->y = frog->y + 1;
-    bullet->extra = 1;
-
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     // Muovi il proiettile fino al limite del gioco
     while (bullet->x < GAME_WIDTH + 1) {
         bullet->x += 1;
+
+        suspend_thread();
+
         buffer_push(buffer, *bullet);
         usleep(current_difficulty.bullets_speed);
     }
@@ -101,17 +95,16 @@ void* bullet_right_fun(void *arg) {
 void* bullet_left_fun(void *arg) {
     void **args = (void **)arg;
 
-    Item* frog = (Item *)args[0];
-    Item* bullet = (Item *)args[1];
-    shared_buffer_t* buffer = (shared_buffer_t *)args[2];
-
-    bullet->x = frog->x - 1;
-    bullet->y = frog->y + 1;
-    bullet->extra = 1;
+    Item* bullet = (Item *)args[0];
+    shared_buffer_t* buffer = (shared_buffer_t *)args[1];
     
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     // Muovi il proiettile fino al limite del gioco
     while (bullet->x >= 0) {
         bullet->x -= 1;
+
+        suspend_thread();
+
         buffer_push(buffer, *bullet);
         usleep(current_difficulty.bullets_speed);
     }

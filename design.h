@@ -42,20 +42,23 @@
 #define SIDEWALK_HEIGHT_1 10
 #define SIDEWALK_HEIGHT_2 GAME_HEIGHT-5
 
+extern pthread_mutex_t m_suspend_mutex;
+extern pthread_cond_t m_resume_cond;
+
 
 #define STREAM_NUMBER 8
 
 // define bullets
-#define BULLETS_ID 26
+#define BULLET_ID_RIGHT 26
+#define BULLET_ID_LEFT 27
 #define BULLETS_DIM 1
 #define BULLETS_SPEED 20000
 
 // timer
-#define TIMER_ID 27
+#define TIMER_ID 28
 #define TIMER_SPEED 1000000
 #define TIMER_MAX 60
 
-#define ESC 27
 #define PAUSE_ID 69
 
 // function prototipes
