@@ -78,7 +78,7 @@ void* Crocodile(void *arg) {
     pthread_t thread_bullet;
     continue_usleep(distance);
     signal(SIGUSR1, handlesignal);
-    while (1) {
+    while (running) {
         random_shot = rand_range(0, current_difficulty.shot_range);
         int shot_speed = crocodile.speed - current_difficulty.crocodile_bullet_speed;
         

@@ -69,5 +69,5 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score);
 void startGame(WINDOW *game);
 void print_frogger_sprite(WINDOW *win);
 int play(WINDOW *game);
-void kill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]);
+void pkill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]);
 #endif

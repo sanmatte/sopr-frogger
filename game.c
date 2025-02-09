@@ -478,6 +478,7 @@ void pkill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_c
     pthread_join(thread_timer, NULL);
     pthread_cancel(thread_frog);
     pthread_join(thread_frog, NULL);
+    running = FALSE;
     for(int i=0; i < STREAM_NUMBER; i++){
         for(int j=0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
             pthread_cancel(thread_crocodile[i][j]);
