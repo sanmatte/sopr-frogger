@@ -66,8 +66,6 @@ void startGame(WINDOW *game) {
             return;
             break;
         }
-        
-        
         werase(game);
         refresh();
     }
@@ -158,19 +156,12 @@ int play(WINDOW *game) {
                 endwin();
                 exit(EXIT_FAILURE);
             } else if (pid_croc == 0) { 
-                // if (i == 0 && j == 0) {
-                //     group_pid = getpid();  // First child sets the group leader
-                // }
                 setpgid(0, group_pid);
                 continue_usleep(distance);
-                //usleep(distance); 
                 crocodile(pipe_fds, &crocodiles[i][j], group_pid);
                 _exit(0);
             } else {
-            // if (i == 0 && j == 0) {
-            //     group_pid = pid_croc;  // Assign first child's PID as group leader
-            // }
-            setpgid(pid_croc, group_pid); 
+                setpgid(pid_croc, group_pid); 
                 child_pids[i * CROCODILE_STREAM_MAX_NUMBER + j + 1] = pid_croc;
                 // calculate mindistance between crocodiles
                 distance += crocodiles[i][j].speed * CROCODILE_DIM_X;

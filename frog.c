@@ -8,7 +8,6 @@ void frog_controller(int *pipe_fds){
     Item frog = {FROG_ID, 0, 0, 0, 0};
 
     while (1) {
-
         // Read the latest key press (ignore older ones)
         do {
             ch = getch();
