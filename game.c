@@ -460,9 +460,6 @@ void kill_all(pid_t frog, pid_t pidgroup){
     while ((pid = waitpid(-pidgroup, NULL, 0)) > 0) {
     }
     kill(frog, SIGKILL);
-<<<<<<< HEAD
-}
-=======
     waitpid(frog, NULL, 0);
     debuglog("frog killed%d\n", frog);
 }
@@ -474,4 +471,3 @@ void ctrlc_handler(int signum){
     }
     
 }
->>>>>>> refs/remotes/origin/multi-process
