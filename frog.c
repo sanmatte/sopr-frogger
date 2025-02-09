@@ -75,7 +75,7 @@ void frog_controller(int *pipe_fds, Item *frog){
 }
 
 void bullet_right_controller(Item *bullet_right, int *pipe_fds){
-    //close(pipe_fds[0]);
+    close(pipe_fds[0]);
     bullet_right->extra = 1;
     while (bullet_right->x < GAME_WIDTH + 1) {
         bullet_right->x += 1;
@@ -86,7 +86,7 @@ void bullet_right_controller(Item *bullet_right, int *pipe_fds){
 }
 
 void bullet_left_controller(Item *bullet_left, int *pipe_fds){
-    //close(pipe_fds[0]);
+    close(pipe_fds[0]);
     bullet_left->extra = -1;
     while (bullet_left->x > -1) {
         bullet_left->x -= 1;

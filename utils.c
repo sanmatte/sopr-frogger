@@ -30,7 +30,7 @@ void start_colors(){
     init_color(COLOR_ENDGAME_BACKGROUND, 8, 372, 600);
     init_color(COLOR_BULLET_TRIGGER_DARK, 149, 8, 8);
     init_color(COLOR_BULLET_TRIGGER, 478, 4, 4);
-    init_color(COLOR_RIVER_EASY, 106, 651, 623);
+    init_color(COLOR_RIVER_EASY, 125, 816, 839);
     init_color(COLOR_RIVER_HARD,75, 90, 369);
 
     // Definizione delle coppie di colori
@@ -56,6 +56,10 @@ void start_colors(){
     init_pair(20, COLOR_FROG_BODY_DETAILS, COLOR_FROG_BODY);
     init_pair(21, COLOR_RIVER_EASY, COLOR_RIVER_EASY);
     init_pair(22, COLOR_RIVER_HARD, COLOR_RIVER_HARD);
+    init_pair(23, COLOR_DARKGREEN, COLOR_RIVER_EASY);
+    init_pair(24, COLOR_DARKGREEN, COLOR_RIVER_HARD);
+    init_pair(25, COLOR_BULLET_TRIGGER, COLOR_RIVER_EASY);
+    init_pair(26, COLOR_BULLET_TRIGGER, COLOR_RIVER_HARD);
 }
 
 time_t timestamp(void) {

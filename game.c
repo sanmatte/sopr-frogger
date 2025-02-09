@@ -89,14 +89,11 @@ void continue_usleep(long microseconds) {
 
 int play(WINDOW *game) {
     /* Ritorna 0 se la manche è persa (manche --), ritorna 1 se è stata presa una tana */
-    int is_bullet_frog_active = 0;
-
     Item frog = {FROG_ID, GAME_HEIGHT-4, (GAME_WIDTH/2)-FROG_DIM_X/2, 0, 0};
     Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
     Item bullet_right = {BULLETS_ID, -1, -1, 0, 0};
     Item bullet_left = {BULLETS_ID, -1, -1, 0, 0};
     Item timer = {TIMER_ID, 0, TIMER_MAX, 0, 0};
-    
     Item crocodiles_bullets[CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1];
     for (int i = 0; i < CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1; i++) {
         crocodiles_bullets[i].id = CROCODILE_MIN_BULLETS_ID + i;
@@ -107,8 +104,7 @@ int play(WINDOW *game) {
     }
     
     // Definizione variabili
-    int pipe_fds[2];
-    int stream_speed[STREAM_NUMBER];
+    int pipe_fds[2], stream_speed[STREAM_NUMBER], is_bullet_frog_active = 0;
 
     for(int i=0; i<STREAM_NUMBER; i++){
         stream_speed[i] = rand_range(current_difficulty.crocodile_speed_min, current_difficulty.crocodile_speed_max);
@@ -183,34 +179,48 @@ int play(WINDOW *game) {
     pid_t bullet_pid_left, bullet_pid_right;
     signal(SIGINT, ctrlc_handler);
     while (TRUE) {
-    if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
-        switch (msg.id) {
-            // FROG case
-            case FROG_ID:
-                if (frog.x + msg.x >= 0 && frog.x + msg.x <= GAME_WIDTH - FROG_DIM_X && frog.y + msg.y >= 0 && frog.y + msg.y <= GAME_HEIGHT - FROG_DIM_Y) {
-                    frog.y += msg.y;
-                    frog.x += msg.x;
-                    frog.extra = msg.extra;
+        if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
+            switch (msg.id) {
+                // FROG case
+                case FROG_ID:
+                    if (frog.x + msg.x >= 0 && frog.x + msg.x <= GAME_WIDTH - FROG_DIM_X && frog.y + msg.y >= 0 && frog.y + msg.y <= GAME_HEIGHT - FROG_DIM_Y) {
+                        frog.y += msg.y;
+                        frog.x += msg.x;
+                        frog.extra = msg.extra;
 
-                    if (frog.extra == 1 && is_bullet_frog_active == 0) {
-                        is_bullet_frog_active = 1;
+                        if (frog.extra == 1 && is_bullet_frog_active == 0) {
+                            is_bullet_frog_active = 1;
 
-                        // Creazione del processo per il proiettile destro
-                        bullet_pid_right = fork();
-                        if (bullet_pid_right == 0) {
-                            bullet_right.x = frog.x + FROG_DIM_X;
-                            bullet_right.y = frog.y + 1;
-                            bullet_right_controller(&bullet_right, pipe_fds);
+                            // Creazione del processo per il proiettile destro
+                            bullet_pid_right = fork();
+                            if (bullet_pid_right == 0) {
+                                bullet_right.x = frog.x + FROG_DIM_X;
+                                bullet_right.y = frog.y + 1;
+                                bullet_right_controller(&bullet_right, pipe_fds);
+                                // bullet_right.extra = 1;
+                                // while(bullet_right.x < GAME_WIDTH){
+                                //     bullet_right.x += 1;
+                                //     write(pipe_fds[1], &bullet_right, sizeof(Item));
+                                //     usleep(current_difficulty.bullets_speed);
+                                // }
+                                // _exit(0);
+                            }
+
+                            // Creazione del processo per il proiettile sinistro
+                            bullet_pid_left = fork();
+                            if (bullet_pid_left == 0) {
+                                bullet_left.x = frog.x - 1;
+                                bullet_left.y = frog.y + 1;
+                                bullet_left_controller(&bullet_left, pipe_fds);
+                                // bullet_left.extra = -1;
+                                // while(bullet_left.x > -1){
+                                //     bullet_left.x -= 1;
+                                //     write(pipe_fds[1], &bullet_left, sizeof(Item));
+                                //     usleep(current_difficulty.bullets_speed);
+                                // }
+                                //_exit(0);
+                            }
                         }
-
-                        // Creazione del processo per il proiettile sinistro
-                        bullet_pid_left = fork();
-                        if (bullet_pid_left == 0) {
-                            bullet_left.x = frog.x - 1;
-                            bullet_left.y = frog.y + 1;
-                            bullet_left_controller(&bullet_left, pipe_fds);
-                        }
-                    }
                         // Controlla se i proiettili sono terminati
                         if (bullet_pid_right > 0) {
                             int status;
@@ -232,9 +242,7 @@ int play(WINDOW *game) {
                             is_bullet_frog_active = 0;
                         }
                     }
-                
-                break;
-
+                    break;
                 case BULLETS_ID:
                     if (msg.extra == 1) {
                         bullet_right = msg;
@@ -251,29 +259,11 @@ int play(WINDOW *game) {
                     break;
                 case CROCODILE_MIN_BULLETS_ID ... CROCODILE_MAX_BULLETS_ID:
                     crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID] = msg;
-
-                                        // Collision beetwen frog and crocodile bullet
+                    // Collision beetwen frog and crocodile bullet
                     if(frog.y == (crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].y - 1) && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x >= frog.x && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x <= frog.x + FROG_DIM_X){
                         kill_all(pid_frog, group_pid);
                         return 0;
                     }
-                    // if ((bullet_right.x == msg.x && bullet_right.y == msg.y) || (bullet_left.x == msg.x && bullet_left.y == msg.y)) {
-                    //     // Resetta i proiettili in caso di collisione
-                    //     bullet_right.x = -1;
-                    //     bullet_right.y = -1;
-                    //     bullet_left.x = -1;
-                    //     bullet_left.y = -1;
-                    //     // Termina i processi dei proiettili
-                    //     if (bullet_pid_right > 0) {
-                    //         kill(bullet_pid_right, SIGKILL);
-                    //         bullet_pid_right = -1;
-                    //     }
-                    //     if (bullet_pid_left > 0) {
-                    //         kill(bullet_pid_left, SIGKILL);
-                    //         bullet_pid_left = -1;
-                    //     }
-                    // }
-
                     break;
                 //CROCODILE case
                 case PAUSE_ID:
@@ -305,17 +295,15 @@ int play(WINDOW *game) {
                                                 if(frog.x == GAME_WIDTH - FROG_DIM_X) continue;                                                   
                                                 else frog.x -= crocodiles[stream][j].extra;
                                             }
-                                                
-                                                print_frog(game, &frog);
-                                                wrefresh(game);
+                                            print_frog(game, &frog);
+                                            wrefresh(game);
                                         }
-                                        
                                     }
+                                }
                             }
                         }
                     }
                     break;
-                }
             }
             int frog_on_crocodile = FALSE;
             int stream = ((SIDEWALK_HEIGHT_2 + 1 - frog.y) / FROG_DIM_Y) -1;
@@ -441,15 +429,12 @@ int play(WINDOW *game) {
             
             wrefresh(game);
 
-    if (sigintdetected == TRUE) {
-        kill_all(pid_frog, group_pid);  // Kill all relevant processes
-        endwin(); // End ncurses mode
-        system("clear"); // Clear the screen
-        exit(0); // Exit cleanly
-
-    }
-
-
+            if (sigintdetected == TRUE) {
+                kill_all(pid_frog, group_pid);  // Kill all relevant processes
+                endwin(); // End ncurses mode
+                system("clear"); // Clear the screen
+                exit(0); // Exit cleanly
+            }
         }
     }
 }
@@ -469,5 +454,4 @@ void ctrlc_handler(int signum){
     {
         sigintdetected = TRUE;
     }
-    
 }
