@@ -3,7 +3,11 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Wno-trigraphs 
 
 # Libraries
+<<<<<<< HEAD
 LIBS = -g -lncursesw -lmenuw -D_GNU_SOURCE -lpthread -fsanitize=address
+=======
+LIBS = -lncursesw -lmenuw -lpthread
+>>>>>>> parent of be87db4 (crockbullets)
 
 SRC = $(wildcard *.c) # compile all .c files in the directory
 HEADERS = $(wildcard *.h)
