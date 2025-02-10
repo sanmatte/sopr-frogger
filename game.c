@@ -104,6 +104,7 @@ void continue_usleep(long microseconds) {
     long elapsed = 0;
 
     while (elapsed < microseconds) {
+        suspend_thread();
         usleep(1000);
         elapsed += 1000;
     }
@@ -256,7 +257,9 @@ int play(WINDOW *game) {
                 break;
             
             case PAUSE_ID:
+                pthread_mutex_lock(&m_suspend_mutex);
                 pause_flag = 1;
+                pthread_mutex_unlock(&m_suspend_mutex);
                 int ch = getchar();  // Wait for user input
                 while (ch != 'p') {
                     ch = getchar();
