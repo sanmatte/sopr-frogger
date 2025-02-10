@@ -81,15 +81,6 @@ void startGame(WINDOW *game) {
 
 }
 
-void continue_usleep(long microseconds) {
-    long elapsed = 0;
-    while (elapsed < microseconds) {
-        usleep(1000);
-        elapsed += 1000;
-    }
-}
-
-
 int play(WINDOW *game) {
     /* Ritorna 0 se la manche è persa (manche --), ritorna 1 se è stata presa una tana */
     Item frog = {FROG_ID, GAME_HEIGHT-4, (GAME_WIDTH/2)-FROG_DIM_X/2, 0, 0};
@@ -142,7 +133,6 @@ int play(WINDOW *game) {
         frog_controller(pipe_fds);
         _exit(0);
     } else {
-        //setpgid(pid_frog, group_pid);
         child_pids[0] = pid_frog;
     }
     setpgid(0,0);
@@ -255,8 +245,8 @@ int play(WINDOW *game) {
 	                mvwprintw(pause, 2, 1 , "Press P to resume");
                     mvwprintw(pause, 3, 1 , "Press M to go to menu");
                     wrefresh(pause);
-                    killpg(group_pid, SIGSTOP);  // Pause all child processes
-                    int ch = getchar();  // Wait for user input
+                    killpg(group_pid, SIGSTOP);  // manda un segnale a tutti i processi del gruppo
+                    int ch = getchar();  // aspetta un input da tastiera
                     while (ch != 'p' && ch != 'q' && ch != 'm') {
                         ch = getchar();
                     }
@@ -327,7 +317,7 @@ int play(WINDOW *game) {
                     return 0;
                 }
             }
-            // Collision between frog bullets and crocodile bullet
+            // collisioni tra proiettili e coccodrilli
             stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right.y) / FROG_DIM_Y);
             for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
                 if((crocodiles_bullets[i].x - bullet_right.x) <= 1 && (crocodiles_bullets[i].x - bullet_right.x) >= -1 && crocodiles_bullets[i].y == bullet_right.y){
@@ -433,10 +423,10 @@ int play(WINDOW *game) {
             wrefresh(game);
 
             if (sigintdetected == TRUE) {
-                kill_all(pid_frog, group_pid);  // Kill all relevant processes
-                endwin(); // End ncurses mode
-                system("clear"); // Clear the screen
-                exit(0); // Exit cleanly
+                kill_all(pid_frog, group_pid);
+                endwin();
+                system("clear");
+                exit(0);
             }
         }
     }
@@ -449,7 +439,6 @@ void kill_all(pid_t frog, pid_t pidgroup){
     }
     kill(frog, SIGKILL);
     waitpid(frog, NULL, 0);
-    debuglog("frog killed%d\n", frog);
 }
 
 void ctrlc_handler(int signum){

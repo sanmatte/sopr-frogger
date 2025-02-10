@@ -7,11 +7,8 @@
 
 #include "design.h"
 
-#define DEBUG_FILE_NAME "debuglogs.log"
-
-void debuglog(char *message, int arg);
 int rand_range(int min, int max);
 void start_colors();
-time_t timestamp(void);
+void continue_usleep(long microseconds);
 
 #endif

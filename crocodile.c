@@ -28,6 +28,14 @@ void handlesignal(int signum) {
         exploded = TRUE;
     }
 }
+
+/**
+ * @brief  Crocodile process
+ * @note   
+ * @param  *pipe_fds: Pipe file descriptors
+ * @param  *crocodile: Crocodile item
+ * @param  group_pid: Group PID
+ */
 void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
     close(pipe_fds[0]);
     int random_shot;
@@ -85,7 +93,7 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
                         usleep(shot_speed);
                     }
                 }
-                active = TRUE; // Set active when a bullet is fired
+                active = TRUE;
             }
             if (crocodile->x == GAME_WIDTH + 1) {
                 crocodile->x = -CROCODILE_DIM_X;

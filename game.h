@@ -42,6 +42,5 @@ void startGame(WINDOW *game);
 int play(WINDOW *game);
 void kill_all(pid_t frog, pid_t pid_group);
 void ctrlc_handler(int signum);
-void continue_usleep(long microseconds);
 
 #endif

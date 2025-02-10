@@ -1,17 +1,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "utils.h"
-void debuglog(char *message, int arg){
-    FILE *f = fopen(DEBUG_FILE_NAME, "a");
-    if (f == NULL)
-    {
-        printf("Error opening file!\n");
-        exit(1);
-    }
-    fprintf(f, message, arg);
-    fclose(f);
-}
 
+/**
+ * @brief  Genera un numero casuale compreso tra min e max
+ * @param  min: valore minimo
+ * @param  max: valore massimo
+*/
 int rand_range(int min, int max) {
     return rand() % (max - min + 1) + min;
 }
@@ -64,9 +59,14 @@ void start_colors(){
     init_pair(27, COLOR_PAUSE_MENU, COLOR_PAUSE_MENU);
 }
 
-time_t timestamp(void) {
-    struct timeval tv;
-    gettimeofday(&tv, NULL); // Get unix time in seconds and the microseconds
-    time_t milliseconds = tv.tv_sec * 1000 + tv.tv_usec / 1000; // Calc unix time in milliseconds
-    return milliseconds;
+/**
+ * @brief Sleep ma non viene fermata dai segnali
+ * @param microseconds tempo in microsecondi
+ */
+void continue_usleep(long microseconds) {
+    long elapsed = 0;
+    while (elapsed < microseconds) {
+        usleep(1000);
+        elapsed += 1000;
+    }
 }
