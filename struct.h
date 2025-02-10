@@ -11,7 +11,7 @@ typedef struct {
     int y;
     int x;
     int speed;
-    int extra; // direzione per il coccodrillo e stato per la rana
+    int extra; // direzione per il coccodrillo, tipo per il proiettile o stato del proiettile
 } Item;
 
 typedef struct {

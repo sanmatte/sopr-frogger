@@ -12,6 +12,7 @@
 #include "crocodile.h"
 #include "frog.h"
 #include "menu.h"
+#include "game.h"
 
 // Menu options
 char *menu_options[] = {
@@ -50,7 +51,7 @@ const Difficulty MEDIUM = {
 };
 
 const Difficulty HARD = {
-    .bullets_speed = 50000,
+    .bullets_speed = 40000,
     .crocodile_speed_max = 100000,
     .crocodile_speed_min = 30000,
     .crocodile_bullet_speed = 20000,
@@ -68,7 +69,7 @@ Difficulty current_difficulty;
 
 int main(){
     setlocale(LC_ALL, "");
-    initscr();start_color();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
+    initscr();start_colors();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
     
     current_difficulty = MEDIUM;
 
@@ -88,13 +89,12 @@ int main(){
     // finestra di gioco centrata
     WINDOW *win = newwin(GAME_HEIGHT, GAME_WIDTH, (LINES - GAME_HEIGHT)/2, (COLS - GAME_WIDTH)/2);
 
-   // Draw a border and refresh
     box(win, 0, 0);
     wrefresh(win);
     keypad(win, TRUE);
 
     int return_to_menu = 0;
-    // Call menu function and get user selection
+
     do{
         return_to_menu = 0;
         print_frogger_sprite(win);
@@ -105,8 +105,8 @@ int main(){
         case 0: //play
             startGame(win);
             return_to_menu = 1;
-            werase(win);  // Clear the window
-            wrefresh(win);  // Refresh window
+            werase(win);
+            wrefresh(win);
             //! TOFIX
             break;
         case 1:
@@ -121,7 +121,7 @@ int main(){
             case 2:
                 current_difficulty = HARD;
                 break;
-            case 3: // return to main menu
+            case 3: // return to menu
                 break;
             }
             return_to_menu = 1;

@@ -2,6 +2,7 @@
 #include "design.h"
 #include "frog.h"
 #include "crocodile.h"
+#include "game.h"
 
 void print_score(WINDOW *game, int manche, int timer, int score){
 	//lives counter

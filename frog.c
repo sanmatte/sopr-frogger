@@ -1,69 +1,66 @@
 #include "frog.h"
 #include "utils.h"
 #include "buffer.h"
+#include "game.h"
 #include <sys/types.h>
 int newmanche = FALSE; 
 
-void reset_manche(Item *frog){
-    frog->y = LINES-4;
-    frog->x = (COLS/2)-FROG_DIM_X;
-    newmanche = FALSE;
-}
-
 void* Frog() {
-    //shared_buffer_t buffer = *(shared_buffer_t*)arg;
     int ch;
     bool has_moved = TRUE;
-    Item frogtest = {FROG_ID, 0, 0, 0, 0};
+    Item frog = {FROG_ID, 0, 0, 0, 0};
 
-    while (manche > 0) {
+    while (1) {
 
-        // Read the latest key press (ignore older ones)
+        // legge l'ultimo input
         do {
             ch = getch();
-        } while (getch() != ERR); // Drain extra inputs
-        frogtest.id = FROG_ID;
+        } while (getch() != ERR); // svuota il buffer di input
+        frog.id = FROG_ID;
         switch (ch) {
             case KEY_UP:
-                frogtest.y = -FROG_DIM_Y;
-                frogtest.x = 0;
+                frog.y = -FROG_DIM_Y;
+                frog.x = 0;
                 has_moved = TRUE; //! move inside if
                 break;
             case KEY_DOWN:
-                frogtest.y = +FROG_DIM_Y;
-                frogtest.x = 0;
+                frog.y = +FROG_DIM_Y;
+                frog.x = 0;
                 has_moved = TRUE;
                 break;
             case KEY_LEFT:
-                frogtest.y = 0;
-                frogtest.x = -1;
+                frog.y = 0;
+                frog.x = -1;
                 has_moved = TRUE;
                 break;
             case KEY_RIGHT:
-                frogtest.y = 0;
-                frogtest.x = +1;
+                frog.y = 0;
+                frog.x = +1;
                 has_moved = TRUE;
                 break;
             case 32:
-                frogtest.extra = 1;
-                frogtest.y = 0;
-                frogtest.x = 0;
+                frog.extra = 1;
+                frog.y = 0;
+                frog.x = 0;
                 has_moved = TRUE;
                 break;
             case 'q': 
-                //kill_all(getpid(), getpgrp());
+                frog.id = QUIT_ID;
+                has_moved = TRUE;
                 break;
             //detect escape key press
             case 'p':
-                frogtest.id = PAUSE_ID;
+                frog.id = PAUSE_ID;
                 has_moved = TRUE;
                 break;
         }
 
+        suspend_thread();
+
         if(has_moved){
-            buffer_push(&buffer, frogtest);
+            buffer_push(&buffer, frog);
         }
-        frogtest.extra = 0;
+        frog.extra = 0;
         has_moved = FALSE;
         usleep(current_difficulty.frog_movement_limit); //default 0
     }
@@ -71,45 +68,37 @@ void* Frog() {
 }
 
 void* bullet_right_fun(void *arg) {
-    void **args = (void **)arg;
-    // Ottieni i puntatori alle strutture
-    Item* bullet = (Item *)args[0];
-    shared_buffer_t* buffer = (shared_buffer_t *)args[1];
+    Item* bullet = (Item *)arg;
 
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-    // Muovi il proiettile fino al limite del gioco
+    // muove il proiettile fino al limite dello schermo
     while (bullet->x < GAME_WIDTH + 1) {
         bullet->x += 1;
 
         suspend_thread();
 
-        buffer_push(buffer, *bullet);
+        buffer_push(&buffer, *bullet);
         usleep(current_difficulty.bullets_speed);
     }
     bullet->extra = 0;
-    buffer_push(buffer, *bullet);
-    free(args);
+    buffer_push(&buffer, *bullet);
     return NULL;
 }
 
 void* bullet_left_fun(void *arg) {
-    void **args = (void **)arg;
-
-    Item* bullet = (Item *)args[0];
-    shared_buffer_t* buffer = (shared_buffer_t *)args[1];
+    Item* bullet = (Item *)arg;
     
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-    // Muovi il proiettile fino al limite del gioco
+    // muove il proiettile fino al limite dello schermo
     while (bullet->x >= 0) {
         bullet->x -= 1;
 
         suspend_thread();
 
-        buffer_push(buffer, *bullet);
+        buffer_push(&buffer, *bullet);
         usleep(current_difficulty.bullets_speed);
     }
     bullet->extra = 0;
-    buffer_push(buffer, *bullet);
-    free(args);
+    buffer_push(&buffer, *bullet);
     return NULL;
 }

@@ -4,9 +4,8 @@
 #define NUM_OPTIONS 4
 
 
-// Function to display the menu inside a given window and return the selected option
 int showMenu(WINDOW *win, char *menu_options[]) {
-    ITEM *items[NUM_OPTIONS + 1]; // Array of menu items (+1 for NULL termination)
+    ITEM *items[NUM_OPTIONS + 1]; // (+1 for NULL termination)
     MENU *menu;
     int choice, selected;
 
@@ -14,18 +13,16 @@ int showMenu(WINDOW *win, char *menu_options[]) {
     for (int i = 0; i < NUM_OPTIONS; i++) {
         items[i] = new_item(menu_options[i], NULL);
     }
-    items[NUM_OPTIONS] = NULL; // NULL-terminate the menu
+    items[NUM_OPTIONS] = NULL; // NULL per termination
 
-    // Create menu and attach it to the given window
+    // crea il menu
     menu = new_menu(items);
     set_menu_win(menu, win);
-    set_menu_sub(menu, derwin(win, NUM_OPTIONS + 2, 30, 2, 5)); // Subwindow for items
-    set_menu_mark(menu, " > "); // Highlight marker
+    set_menu_sub(menu, derwin(win, NUM_OPTIONS + 2, 30, 2, 5)); // suubwindow
+    set_menu_mark(menu, " > ");
 
-    // Enable keyboard input for window
     keypad(win, TRUE);
 
-    // Draw window border
     box(win, 0, 0);
     wrefresh(win);
 
@@ -33,8 +30,7 @@ int showMenu(WINDOW *win, char *menu_options[]) {
     post_menu(menu);
     wrefresh(win);
 
-    // Handle user input
-    while ((choice = wgetch(win)) != 10) { // Loop until ENTER key (ASCII 10)
+    while ((choice = wgetch(win)) != 10) { // aspetta il tasto ENTER
         switch (choice) {
             case KEY_DOWN:
                 menu_driver(menu, REQ_DOWN_ITEM);
@@ -46,24 +42,22 @@ int showMenu(WINDOW *win, char *menu_options[]) {
         wrefresh(win);
     }
 
-    // Get selected option
     selected = item_index(current_item(menu));
 
-    // Cleanup
+
     unpost_menu(menu);
     free_menu(menu);
     for (int i = 0; i < NUM_OPTIONS; i++) {
         free_item(items[i]);
     }
 
-    return selected; // Return user selection
+    return selected;
 }
 
 
 void print_rules(WINDOW *win){
-    //print rules: Every player has to reach the other side of the road without being hit by the cars.
-    werase(win); // Clear window
-    box(win, 0, 0); // Draw a border
+    werase(win); 
+    box(win, 0, 0); 
 
     int y = 2; // Start position
     mvwprintw(win, y++, 2, "RULES:");
@@ -80,16 +74,16 @@ void print_rules(WINDOW *win){
     
     mvwprintw(win, y + 2, 2, "Press any key to return...");
 
-    wrefresh(win); // Refresh window
-    wgetch(win);   // Wait for user input
+    wrefresh(win); 
+    wgetch(win);  
 }
 
 void printkitten(WINDOW *game) {
-    werase(game);  // Clear the window
-    box(game, 0, 0); // Draw a border
+    werase(game);  
+    box(game, 0, 0);
 
-    int start_y = 1; // Start printing from this y position
-    int start_x = 2; // Small left margin for alignment
+    int start_y = 1; 
+    int start_x = 2;
 
     mvwprintw(game, start_y++, start_x, "                                                                                                    ");
     mvwprintw(game, start_y++, start_x, "                                                                                                    ");
@@ -133,7 +127,7 @@ void printkitten(WINDOW *game) {
 
     mvwprintw(game, start_y + 2, start_x, "Press any key to exit...");
 
-    wrefresh(game); // Refresh window
+    wrefresh(game); 
 
-    wgetch(game); // Wait for user input before continuing
+    wgetch(game); 
 }

@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Wno-trigraphs 
 
 # Libraries
-LIBS = -lncursesw -lmenuw -D_GNU_SOURCE -pthread -fsanitize=address	-g
+LIBS = -lncursesw -lmenuw -D_GNU_SOURCE -pthread
 
 SRC = $(wildcard *.c) # compile all .c files in the directory
 HEADERS = $(wildcard *.h)
