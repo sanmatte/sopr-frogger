@@ -79,16 +79,6 @@ void startGame(WINDOW *game) {
 
 }
 
-void continue_usleep(long microseconds) {
-    long elapsed = 0;
-
-    while (elapsed < microseconds) {
-        suspend_thread();
-        usleep(1000);
-        elapsed += 1000;
-    }
-}
-
 
 int play(WINDOW *game) {
     /* Ritorna 0 se la manche è persa (manche --), ritorna 1 se è stata presa una tana */

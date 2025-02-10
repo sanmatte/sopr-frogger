@@ -6,13 +6,28 @@
 pthread_mutex_t m_suspend_mutex;  // mutex per sospendere i thread
 pthread_cond_t m_resume_cond;     // variabile per riprendere i thread dopo la pausa
 
+/**
+ * Funzione per generare un numero casuale compreso tra min e max
+ * @param min valore minimo
+ * @param max valore massimo
+ * @return numero casuale
+*/
 int rand_range(int min, int max) {
     return rand() % (max - min + 1) + min;
 }
 
-void producer_rand_sleep(){
-    int sleep_time = rand_range(0, 10000);
-    usleep(sleep_time);
+/**
+ * Funziona come la sleep ma non viene interrotta da un segnale
+ * @param microseconds numero di microsecondi
+*/
+void continue_usleep(long microseconds) {
+    long elapsed = 0;
+
+    while (elapsed < microseconds) {
+        suspend_thread();
+        usleep(1000);
+        elapsed += 1000;
+    }
 }
 
 void init_suspend_resume() {
@@ -20,6 +35,9 @@ void init_suspend_resume() {
     pthread_cond_init(&m_resume_cond, NULL);
 }
 
+/**
+ * Sospende i thread se pause_flag == 1 (usata per le pause del gioco)
+*/
 void suspend_thread() {
     pthread_mutex_lock(&m_suspend_mutex);
     
@@ -30,6 +48,9 @@ void suspend_thread() {
     pthread_mutex_unlock(&m_suspend_mutex);
 }
 
+/**
+ * Riprende i thread impostando pause_flag = 0 e inviando un segnale a tutti i thread in attesa
+*/
 void resume_threads() {
     pthread_mutex_lock(&m_suspend_mutex);
     
