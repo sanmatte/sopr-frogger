@@ -34,7 +34,9 @@ const Difficulty EASY = {
     .crocodile_speed_min = 150000,
     .crocodile_bullet_speed = 30000,
     .shot_range = 100,
-    .frog_movement_limit = 0
+    .frog_movement_limit = 0,
+    .river_color = 21,
+    .shotload_time = 1500000
 };
 const Difficulty MEDIUM = {
     .bullets_speed = 40000,
@@ -42,7 +44,9 @@ const Difficulty MEDIUM = {
     .crocodile_speed_min = 100000,
     .crocodile_bullet_speed = 40000,
     .shot_range = 20,
-    .frog_movement_limit = 0
+    .frog_movement_limit = 0,
+    .river_color = 3,
+    .shotload_time = 1200000
 };
 
 const Difficulty HARD = {
@@ -51,7 +55,9 @@ const Difficulty HARD = {
     .crocodile_speed_min = 30000,
     .crocodile_bullet_speed = 20000,
     .shot_range = 50,
-    .frog_movement_limit = 50000
+    .frog_movement_limit = 50000,
+    .river_color = 22,
+    .shotload_time = 900000
 };
 
 extern Difficulty current_difficulty;

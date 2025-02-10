@@ -26,6 +26,13 @@ void* bullet_right_crocodile(void *arg) {
 
     int expected = bullet->id;
 
+    int  tmp_y = bullet->y;
+    bullet->y = -5;
+    buffer_push(&buffer, *bullet);
+    usleep(current_difficulty.shotload_time);
+    bullet->y = tmp_y;
+    bullet->extra = 0;
+
     while (bullet->x < GAME_WIDTH + 1) {
         bullet->x += 1;
         expected = bullet->id;
@@ -48,6 +55,12 @@ void* bullet_left_crocodile(void *arg) {
     Item* bullet = (Item *)arg;
 
     int expected = bullet->id;
+    int  tmp_y = bullet->y;
+    bullet->y = -5;
+    buffer_push(&buffer, *bullet);
+    usleep(current_difficulty.shotload_time);
+    bullet->y = tmp_y;
+    bullet->extra = 0;
 
     while (bullet->x >= 0) {
         bullet->x -= 1;
@@ -118,11 +131,13 @@ void* Crocodile(void *arg) {
                 void *arg = malloc(sizeof(void*));
                 Item* bullet = malloc(sizeof(Item));
 
+                int x_offset = current_difficulty.shotload_time / crocodile.speed + 1;
+
                 bullet->id = crocodile.id - 2 + CROCODILE_MIN_BULLETS_ID;
                 bullet->y = crocodile.y + 1;
-                bullet->x = crocodile.x + CROCODILE_DIM_X + 1;
+                bullet->x = crocodile.x + CROCODILE_DIM_X + 1 + x_offset;
                 bullet->speed = shot_speed;
-                bullet->extra = 0;
+                bullet->extra = 1;
 
                 arg = bullet;
                 pthread_create(&thread_bullet, NULL, bullet_right_crocodile, arg);
@@ -152,11 +167,13 @@ void* Crocodile(void *arg) {
                 void *arg = malloc(sizeof(void*));
                 Item* bullet = malloc(sizeof(Item));
 
+                int x_offset = current_difficulty.shotload_time / crocodile.speed + 1;
+                
                 bullet->id = crocodile.id - 2 + CROCODILE_MIN_BULLETS_ID;
                 bullet->y = crocodile.y + 1;
-                bullet->x = crocodile.x - 1;
+                bullet->x = crocodile.x - x_offset;
                 bullet->speed = shot_speed;
-                bullet->extra = 0;
+                bullet->extra = 1;
 
                 arg = bullet;
                 pthread_create(&thread_bullet, NULL, bullet_left_crocodile, arg);
