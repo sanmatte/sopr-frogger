@@ -17,6 +17,7 @@ typedef struct {
     int shot_range;
     int frog_movement_limit;
     int river_color;
+    int shotload_time;
 } Difficulty;
 
 extern Difficulty current_difficulty;

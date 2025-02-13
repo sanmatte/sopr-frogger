@@ -75,7 +75,7 @@ void bullet_right_controller(Item *bullet_right, int *pipe_fds){
 void bullet_left_controller(Item *bullet_left, int *pipe_fds){
     close(pipe_fds[0]);
     bullet_left->extra = -1;
-    while (bullet_left->x > -1) {
+    while (bullet_left->x > -1){
         bullet_left->x -= 1;
         write(pipe_fds[1], bullet_left, sizeof(Item));
         usleep(current_difficulty.bullets_speed);

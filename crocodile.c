@@ -5,7 +5,7 @@
  * @param  crocodiles[][] matrix of crocodiles
  * @param  stream_speed[] speed of the streams
  */
-void initializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], int stream_speed[STREAM_NUMBER]){
+void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]){
     
     int direction = (rand() % 2)? 1: -1; // set random direction for the first stream
     
@@ -19,6 +19,30 @@ void initializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUM
             
         }
         direction = - direction;
+    }
+}
+
+void crocodile_bullet_right_controller(Item *bullet, int *pipe_fds){
+    bullet->extra = 0;
+    while (TRUE) {
+        if (bullet->x >= GAME_WIDTH) {
+            _exit(0); // Bullet exits the screen
+        }
+        bullet->x += 1;
+        write(pipe_fds[1], bullet, sizeof(Item));
+        usleep(bullet->speed);
+    }
+}
+
+void crocodile_bullet_left_controller(Item *bullet, int *pipe_fds){
+    bullet->extra = 0;
+    while (TRUE) {
+        if (bullet->x <= -1) {
+            _exit(0); // Bullet exits the screen
+        }
+        bullet->x -= 1;
+        write(pipe_fds[1], bullet, sizeof(Item));
+        usleep(bullet->speed);
     }
 }
 
@@ -40,7 +64,6 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
     close(pipe_fds[0]);
     int random_shot;
     int active = FALSE;
-    int shot_load = 1500000;
     pid_t bullet_pid = -1; // Store the bullet's PID
     signal(SIGUSR1, handlesignal); // Ignore SIGUSR1 signal
     while (1) {
@@ -77,21 +100,13 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
                     // Child process: bullet logic
                     setpgid(0, group_pid); 
                     // x offset = space that the crocodile moves in the 1 sec
-                    int x_offset = shot_load / crocodile->speed + 1;
-                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, -5, crocodile->x + CROCODILE_DIM_X + x_offset, 0, 0};
+                    int x_offset = current_difficulty.shotload_time / crocodile->speed + 1;
+                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, -5, crocodile->x + CROCODILE_DIM_X + x_offset, shot_speed, 0};
                     bullet.extra = 1;
                     write(pipe_fds[1], &bullet, sizeof(Item));
-                    usleep(shot_load);
+                    usleep(current_difficulty.shotload_time);
                     bullet.y = crocodile->y + 1;
-                    bullet.extra = 0;
-                    while (TRUE) {
-                        if (bullet.x >= GAME_WIDTH) {
-                            _exit(0); // Bullet exits the screen
-                        }
-                        bullet.x += 1;
-                        write(pipe_fds[1], &bullet, sizeof(Item));
-                        usleep(shot_speed);
-                    }
+                    crocodile_bullet_right_controller(&bullet, pipe_fds);
                 }
                 active = TRUE;
             }
@@ -106,21 +121,13 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
                 bullet_pid = fork();
                 if (bullet_pid == 0) {
                     setpgid(0, group_pid); 
-                    int x_offset = shot_load / crocodile->speed + 1;
-                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, -5, crocodile->x - x_offset, 0, 0};
+                    int x_offset = current_difficulty.shotload_time / crocodile->speed + 1;
+                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, -5, crocodile->x - x_offset, shot_speed, 0};
                     bullet.extra = 1;
                     write(pipe_fds[1], &bullet, sizeof(Item));
-                    usleep(shot_load);
+                    usleep(current_difficulty.shotload_time);
                     bullet.y = crocodile->y + 1;
-                    bullet.extra = 0;
-                    while (TRUE) {
-                        if (bullet.x <= -1) {
-                            _exit(0); // Bullet exits the screen
-                        }
-                        bullet.x -= 1;
-                        write(pipe_fds[1], &bullet, sizeof(Item));
-                        usleep(shot_speed);
-                    }
+                    crocodile_bullet_left_controller(&bullet, pipe_fds);
                 }
                 active = TRUE; // Set active when a bullet is fired
             }
@@ -138,3 +145,4 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
         usleep(crocodile->speed);
     }
 }
+

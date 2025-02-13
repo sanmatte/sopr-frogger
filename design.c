@@ -185,8 +185,8 @@ void print_frog(WINDOW *game, Item *frog){
 				wattroff(game, COLOR_PAIR(13)); 
 			}
 		}
-        }
     }
+}
 	
 void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 	static const char* sprite_matrix_right[CROCODILE_DIM_Y][CROCODILE_DIM_X] = {
