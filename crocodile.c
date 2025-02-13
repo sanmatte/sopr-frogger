@@ -6,7 +6,7 @@
  * @param  crocodiles[][] matrice di coccodrilli
  * @param  stream_speed[] vettore delle velocità dei coccodrilli
  */
-void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], int stream_speed[STREAM_NUMBER]){
+void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]){
     
     int direction = (rand() % 2)? 1: -1; // direzione random iniziale
     

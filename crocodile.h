@@ -28,7 +28,7 @@ extern int manche;
 
 #define STREAM_NUMBER 8
 
-void InitializeCrocodile(Item crocodiles[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], int stream_speed[STREAM_NUMBER]);
+void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]);
 void* Crocodile(void* args);
 
 extern shared_buffer_t buffer;
