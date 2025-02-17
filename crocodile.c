@@ -22,12 +22,18 @@ void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]){
     }
 }
 
+void bullet_cleanup_function(void *arg) {
+    free(arg);
+}
+
 /**
  * @brief  Funzione per il movimento dei proiettili dei coccodrilli verso destra
  * @param  arg bullet_obj
  */
 void* bullet_right_crocodile(void *arg) {
     Item* bullet = (Item *)arg;
+
+    pthread_cleanup_push(bullet_cleanup_function, arg);
 
     int expected = bullet->id;
     //gestione  del cambio colore prima di sparare
@@ -53,7 +59,7 @@ void* bullet_right_crocodile(void *arg) {
     }
     bullet->x = GAME_WIDTH + 10;
     buffer_push(&buffer, *bullet);
-    free(arg);
+    pthread_cleanup_pop(arg);
     return NULL;
 }
 /**
@@ -62,6 +68,8 @@ void* bullet_right_crocodile(void *arg) {
  */
 void* bullet_left_crocodile(void *arg) {
     Item* bullet = (Item *)arg;
+
+     pthread_cleanup_push(bullet_cleanup_function, arg);
 
     int expected = bullet->id;
     // gestione del cambio colore prima di sparare
@@ -87,7 +95,7 @@ void* bullet_left_crocodile(void *arg) {
     }
     bullet->x = GAME_WIDTH + 10;
     buffer_push(&buffer, *bullet);
-    free(arg);
+    pthread_cleanup_pop(arg);
     return NULL;
 }
 /**

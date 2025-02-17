@@ -25,6 +25,11 @@
 #define TIMER_MAX 60
 #define PAUSE_ID 69
 #define QUIT_ID 55
+// endgame ids
+#define MANCHE_LOST 0
+#define MANCHE_WON 1
+#define GAME_QUIT 2
+#define BACK_TO_MENU 3
 // function prototipes
 void startGame(WINDOW *game);
 int play(WINDOW *game);
