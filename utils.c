@@ -61,6 +61,17 @@ void resume_threads() {
     pthread_mutex_unlock(&m_suspend_mutex);
 }
 
+void debuglog(char *message, int arg){
+    FILE *f = fopen("debuglog.logs", "a");
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    fprintf(f, message, arg);
+    fclose(f);
+}
+
 void start_colors(){
     start_color();
     init_color(COLOR_DARKGREEN, 0, 400, 0);

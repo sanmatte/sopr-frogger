@@ -14,7 +14,7 @@ void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]){
         for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
             crocodiles[i][j].id = CROCODILE_MIN_ID + (i * CROCODILE_STREAM_MAX_NUMBER) + j;
             crocodiles[i][j].y = SIDEWALK_HEIGHT_2 - CROCODILE_DIM_Y + 1 - (i * CROCODILE_DIM_Y);  
-            crocodiles[i][j].x = direction == -1 ? -CROCODILE_DIM_X : GAME_WIDTH; // da sinistra a destra se true
+            crocodiles[i][j].x = direction == 1 ? -CROCODILE_DIM_X : GAME_WIDTH; // da sinistra a destra se true
             crocodiles[i][j].speed = stream_speed[i];
             crocodiles[i][j].extra = direction;
         }
@@ -69,7 +69,7 @@ void* bullet_right_crocodile(void *arg) {
 void* bullet_left_crocodile(void *arg) {
     Item* bullet = (Item *)arg;
 
-     pthread_cleanup_push(bullet_cleanup_function, arg);
+    pthread_cleanup_push(bullet_cleanup_function, arg);
 
     int expected = bullet->id;
     // gestione del cambio colore prima di sparare
@@ -113,10 +113,8 @@ void crocodile_cleanup_function(void *arg) {
                 pthread_join(child_thread, NULL);
             }
         }
-
     }
     free(args);
-    
 }
 /**
  * @brief  Funzione per il movimento dei coccodrilli
@@ -142,81 +140,39 @@ void* Crocodile(void *arg) {
     args_cleanup[1] = &active;
     pthread_cleanup_push(crocodile_cleanup_function, args_cleanup);
 
-    while (1) {
+    while ( (crocodile.extra == 1) ? crocodile.x < GAME_WIDTH + 1 : crocodile.x > -CROCODILE_DIM_X-1 ) {
         
         random_shot = rand_range(0, current_difficulty.shot_range);
         int shot_speed = crocodile.speed - current_difficulty.crocodile_bullet_speed;
-        
-        if (crocodile.extra == -1 && crocodile.x < GAME_WIDTH+1) {
 
-            crocodile.x += 1;
+        crocodile.x += crocodile.extra;
 
-            if(random_shot == 1 && active == FALSE) {
+        if(random_shot == 1 && active == FALSE) {
 
-                void *arg;
-                Item* bullet = malloc(sizeof(Item));
+            void *arg;
+            Item* bullet = malloc(sizeof(Item));
 
-                int x_offset = current_difficulty.shotload_time / crocodile.speed + 1;
+            int x_offset = current_difficulty.shotload_time / crocodile.speed + 1;
 
-                bullet->id = crocodile.id - 2 + CROCODILE_MIN_BULLETS_ID;
-                bullet->y = crocodile.y + 1;
-                bullet->x = crocodile.x + CROCODILE_DIM_X + 1 + x_offset;
-                bullet->speed = shot_speed;
-                bullet->extra = 1;
+            bullet->id = crocodile.id - 2 + CROCODILE_MIN_BULLETS_ID;
+            bullet->y = crocodile.y + 1;
+            bullet->x = crocodile.extra == 1 ? crocodile.x + CROCODILE_DIM_X + 1 + x_offset : crocodile.x - x_offset;
+            bullet->speed = shot_speed;
+            bullet->extra = 1;
 
-                arg = bullet;
+            arg = bullet;
+            if (crocodile.extra == 1)
                 pthread_create(&thread_bullet, NULL, bullet_right_crocodile, arg);
-
-                active = TRUE;
-            }
-            else if (active == TRUE)
-            {   
-                if(pthread_tryjoin_np(thread_bullet, NULL) == 0)
-                {
-                    active = FALSE;
-                }
-            }
-            if (crocodile.x == GAME_WIDTH + 1) {
-
-                crocodile.x = -CROCODILE_DIM_X;
-                usleep(rand_range(0, crocodile.speed * (CROCODILE_DIM_X) / 3));
-
-            }
-        
-        } else if (crocodile.extra == 1 && crocodile.x > -CROCODILE_DIM_X-1) {
-
-            crocodile.x -= 1;
-
-            if(random_shot == 1 && active == FALSE) {
-
-                void *arg;
-                Item* bullet = malloc(sizeof(Item));
-
-                int x_offset = current_difficulty.shotload_time / crocodile.speed + 1;
-                
-                bullet->id = crocodile.id - 2 + CROCODILE_MIN_BULLETS_ID;
-                bullet->y = crocodile.y + 1;
-                bullet->x = crocodile.x - x_offset;
-                bullet->speed = shot_speed;
-                bullet->extra = 1;
-
-                arg = bullet;
+            else
                 pthread_create(&thread_bullet, NULL, bullet_left_crocodile, arg);
 
-                active = TRUE;
-            }
-            else if (active == TRUE)
-            {   
-                if(pthread_tryjoin_np(thread_bullet, NULL) == 0)
-                {
-                    active = FALSE;
-                }
-            }
-            if (crocodile.x == -CROCODILE_DIM_X - 1) {
-
-                crocodile.x = GAME_WIDTH;
-                usleep(rand_range(0, crocodile.speed * (CROCODILE_DIM_X / 3)));
-
+            active = TRUE;
+        }
+        else if (active == TRUE)
+        {   
+            if(pthread_tryjoin_np(thread_bullet, NULL) == 0)
+            {
+                active = FALSE;
             }
         }
 
@@ -230,6 +186,8 @@ void* Crocodile(void *arg) {
         buffer_push(&buffer, crocodile); 
         usleep(crocodile.speed);
     }
-    pthread_cleanup_pop(0);
+    pthread_cleanup_pop(1);
+    pthread_detach(pthread_self());
     return 0;
+    //usleep(rand_range(0, crocodile.speed * (CROCODILE_DIM_X) / 3));
 }

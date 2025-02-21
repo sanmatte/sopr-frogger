@@ -169,7 +169,7 @@ int play(WINDOW *game) {
             void** args = malloc(2 * sizeof(void*));
             if (args == NULL) {
                 perror("Errore nell'allocazione della memoria per gli argomenti");
-                return 1;
+                return -1;
             }
             int *distance_ptr = malloc(sizeof(int));
             *distance_ptr = distance;
@@ -180,7 +180,7 @@ int play(WINDOW *game) {
                 perror("Errore nella creazione del thread coccodrillo");
                 free(distance_ptr);
                 free(args);
-                return 1;
+                return -1;
             }
             //distanza minima
             distance += crocodiles[i][j].speed * CROCODILE_DIM_X;
@@ -206,8 +206,7 @@ int play(WINDOW *game) {
                         bullet_right->y = frog->y + 1;
                         bullet_right->extra = 1;
                          
-                        void *argr = malloc(sizeof(void*)); 
-                        argr = bullet_right;      
+                        void *argr = bullet_right;  
 
                         if (pthread_create(&thread_bullet_right, NULL, bullet_right_fun, argr) != 0) {
                             perror("Errore nella creazione del thread per il proiettile destro");
@@ -217,8 +216,7 @@ int play(WINDOW *game) {
                         bullet_left->y = frog->y + 1;
                         bullet_left->extra = -1;
 
-                        void* argl = malloc(sizeof(void*));
-                        argl = bullet_left;
+                        void* argl = bullet_left;
 
                         if (pthread_create(&thread_bullet_left, NULL, bullet_left_fun, argl) != 0) {
                             perror("Errore nella creazione del thread per il proiettile destro");
@@ -231,21 +229,20 @@ int play(WINDOW *game) {
                             {
                                 is_bullet_frog_active = 0;
                             }
+                            debuglog("is_bullet_frog_active: %d\n", is_bullet_frog_active);
                         } 
                 }
                 break;
 
             case BULLET_ID_RIGHT:
                 if(bullet_right->extra != 0){
-                    bullet_right->x = msg.x;
-                    bullet_right->y = msg.y;
+                    *bullet_right = msg;
                 }
                 break;
 
             case BULLET_ID_LEFT:
                 if(bullet_left->extra != 0){
-                    bullet_left->x = msg.x;
-                    bullet_left->y = msg.y;
+                    *bullet_left = msg;
                 }
                 break;
 
@@ -311,21 +308,63 @@ int play(WINDOW *game) {
                                 int stream = i;
                                 if(frog->y >= SIDEWALK_HEIGHT_1 && frog->y < SIDEWALK_HEIGHT_2){
                                     if(frog->y == crocodiles[stream][j].y && frog->x >= crocodiles[stream][j].x && frog->x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X){
-                                        if (crocodiles[stream][j].extra == 1)
+                                        if (crocodiles[stream][j].extra == -1)
                                         {
                                             if(frog->x == 0) continue;                                                   
-                                            else frog->x -= crocodiles[stream][j].extra;
+                                            else frog->x += crocodiles[stream][j].extra;
                                         }
                                         else
                                         {
                                             if(frog->x == GAME_WIDTH - FROG_DIM_X) continue;                                                   
-                                            else frog->x -= crocodiles[stream][j].extra;
+                                            else frog->x += crocodiles[stream][j].extra;
                                         }
-
                                         print_frog(game, frog);
                                         wrefresh(game);
                                     }
                                     
+                                }
+                            }
+
+                            //crocodile respawn
+                            if(crocodiles[i][j].extra == 1 && crocodiles[i][j].x == GAME_WIDTH + 1){
+                                
+                                //pthread_join(thread_crocodile[i][j], NULL);
+                                thread_crocodile[i][j] = -1;
+                                crocodiles[i][j].x = - CROCODILE_DIM_X;
+
+                                int *distance_ptr = malloc(sizeof(int));
+                                *distance_ptr = rand_range(0, crocodiles[i][j].speed * (CROCODILE_DIM_X) / 3);
+
+                                void** args = malloc(2 * sizeof(void*));
+                                args[0] = &crocodiles[i][j];
+                                args[1] = distance_ptr;
+
+                                if (pthread_create(&thread_crocodile[i][j], NULL, Crocodile, args) != 0) {
+                                    perror("Errore nella creazione del thread coccodrillo");
+                                    free(distance_ptr);
+                                    free(args);
+                                    return -1;
+                                }
+
+                            }
+                            else if(crocodiles[i][j].extra == -1 && crocodiles[i][j].x == - CROCODILE_DIM_X - 1){
+                                
+                                //pthread_join(thread_crocodile[i][j], NULL);
+                                thread_crocodile[i][j] = -1;
+                                crocodiles[i][j].x = GAME_WIDTH + CROCODILE_DIM_X;
+
+                                int *distance_ptr = malloc(sizeof(int));
+                                *distance_ptr = rand_range(0, crocodiles[i][j].speed * (CROCODILE_DIM_X) / 3);
+
+                                void** args = malloc(2 * sizeof(void*));
+                                args[0] = &crocodiles[i][j];
+                                args[1] = distance_ptr;
+
+                                if (pthread_create(&thread_crocodile[i][j], NULL, Crocodile, args) != 0) {
+                                    perror("Errore nella creazione del thread coccodrillo");
+                                    free(distance_ptr);
+                                    free(args);
+                                    return -1;
                                 }
                             }
                         }
@@ -360,24 +399,27 @@ int play(WINDOW *game) {
         // Collision between frog bullets and crocodile bullet
         if(is_bullet_frog_active == 1){
             stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right->y) / FROG_DIM_Y);
-            for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
-                if((crocodiles_bullets[i].x - bullet_right->x) <= 1 && (crocodiles_bullets[i].x - bullet_right->x) >= -1 && crocodiles_bullets[i].y == bullet_right->y){
-                    pthread_cancel(thread_bullet_right);
-                    pthread_join(thread_bullet_right, NULL);
-                    atomic_store(&collided_bullet, crocodiles_bullets[i].id);
-                    bullet_right->x = -8;
-                    bullet_right->extra = 0;
-                    crocodiles_bullets[i].x = -18;
-                }
-                if((crocodiles_bullets[i].x - bullet_left->x) <= 1 && (crocodiles_bullets[i].x - bullet_left->x) >= -1 && crocodiles_bullets[i].y == bullet_left->y){
-                    pthread_cancel(thread_bullet_left);
-                    pthread_join(thread_bullet_left, NULL);
-                    atomic_store(&collided_bullet, crocodiles_bullets[i].id);
-                    bullet_left->x = -8;
-                    bullet_left->extra = 0;
-                    crocodiles_bullets[i].x = -18;
+            if( stream >= 0 && stream < STREAM_NUMBER ) {
+                for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
+                    if((crocodiles_bullets[i].x - bullet_right->x) <= 1 && (crocodiles_bullets[i].x - bullet_right->x) >= -1 && crocodiles_bullets[i].y == bullet_right->y){
+                        pthread_cancel(thread_bullet_right);
+                        pthread_join(thread_bullet_right, NULL);
+                        atomic_store(&collided_bullet, crocodiles_bullets[i].id);
+                        bullet_right->x = -8;
+                        bullet_right->extra = 0;
+                        crocodiles_bullets[i].x = -18;
+                    }
+                    if((crocodiles_bullets[i].x - bullet_left->x) <= 1 && (crocodiles_bullets[i].x - bullet_left->x) >= -1 && crocodiles_bullets[i].y == bullet_left->y){
+                        pthread_cancel(thread_bullet_left);
+                        pthread_join(thread_bullet_left, NULL);
+                        atomic_store(&collided_bullet, crocodiles_bullets[i].id);
+                        bullet_left->x = -8;
+                        bullet_left->extra = 0;
+                        crocodiles_bullets[i].x = -18;
+                    }
                 }
             }
+            
         }
 
         if(frog->y < DENS_HEIGHT){
@@ -386,35 +428,35 @@ int play(WINDOW *game) {
                     compute_score(timer->x);
                     dens[0] = FALSE;
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
-                    return 1;
+                    manche_result = MANCHE_WON;
                     break;
                 case DENS_2:
                     compute_score(timer->x);
                     dens[1] = FALSE;
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
-                    return 1;
+                    manche_result = MANCHE_WON;
                     break;
                 case DENS_3:
                     compute_score(timer->x);
                     dens[2] = FALSE;
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
-                    return 1;
+                    manche_result = MANCHE_WON;
                     break;
                 case DENS_4:
                     compute_score(timer->x);
                     dens[3] = FALSE;
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
-                    return 1;
+                    manche_result = MANCHE_WON;
                     break;
                 case DENS_5:
                     compute_score(timer->x);
                     dens[4] = FALSE;
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
-                    return 1;
+                    manche_result = MANCHE_WON;
                     break;
                 default:
                     pkill_all(thread_timer, thread_frog, thread_crocodile);
-                    return 0;
+                    manche_result = MANCHE_LOST;
             }
         }
         if (manche_result != -1)
@@ -459,8 +501,11 @@ void pkill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_c
     pthread_join(thread_frog, NULL);
     for(int i=0; i < STREAM_NUMBER; i++){
         for(int j=0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
-            pthread_cancel(thread_crocodile[i][j]);
-            pthread_join(thread_crocodile[i][j], NULL);
+            if ((int)thread_crocodile[i][j] != -1)
+            {
+                pthread_cancel(thread_crocodile[i][j]);
+                pthread_join(thread_crocodile[i][j], NULL);
+            }
         }
     }
 }

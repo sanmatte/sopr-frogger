@@ -13,7 +13,7 @@ int rand_range(int min, int max);
 void start_colors();
 void continue_usleep(long microseconds);
 void producer_rand_sleep();
-
+void debuglog(char *format, int arg);
 void init_suspend_resume();
 void suspend_thread(); 
 void resume_threads();

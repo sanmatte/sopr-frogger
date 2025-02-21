@@ -154,7 +154,7 @@ void print_background(WINDOW *game, bool *dens){
 void print_frog(WINDOW *game, Item *frog){
 	static const char* sprite_matrix[FROG_DIM_Y][FROG_DIM_X] = {
         {"▄", "█", "", "▀", "▌", "▐", "▀", "", "█", "▄"},
-        {"", "▀", "▄", " ", "▄", " ", " ", "▄", "▀", ""},
+        {"", "▀", "█", " ", "▄", "▀", "▄", "▄", "▀", ""},
         {"", "", "▄", "█", "▄", "▀", "▄", "▄", "", ""},
         {"▀", "█", "▀", "", "", "", "", "▀", "█", "▀"},
 	};
@@ -166,14 +166,29 @@ void print_frog(WINDOW *game, Item *frog){
 				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
 				wattroff(game, COLOR_PAIR(12));
 			}
+			else if(i == 1 && (j >= 2 && j <= 7)){
+				wattron(game, COLOR_PAIR(20));
+				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
+				wattroff(game, COLOR_PAIR(20));
+			}
+			else if(i == 2 && (j >= 2 && j <= 7)){
+				wattron(game, COLOR_PAIR(20));
+				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
+				wattroff(game, COLOR_PAIR(20));
+			}
+			else if(i == 3 && ((j >= 0  && j <= 2) || (j >= 7 && j <= 9))){
+				wattron(game, COLOR_PAIR(20));
+				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
+				wattroff(game, COLOR_PAIR(20));
+			}
 			else{
 				wattron(game, COLOR_PAIR(13));  
 				mvwprintw(game, frog->y+i, frog->x+j, "%s", sprite_matrix[i][j]);
 				wattroff(game, COLOR_PAIR(13)); 
 			}
 		}
-        }
     }
+}
 	
 void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 	static const char* sprite_matrix_right[CROCODILE_DIM_Y][CROCODILE_DIM_X] = {
@@ -189,7 +204,7 @@ void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 		{"", "", "", "", "▄", "▄", "▄", "█", "█", "█", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "█", "█", "▄", "▄", "▄", "", "", ""},
 	};
 
-	if(crocodile->extra == 1){
+	if(crocodile->extra == -1){
 		for (int i = 0; i < CROCODILE_DIM_Y; i++) {
 			for (int j = 0; j < CROCODILE_DIM_X; j++) {
 				switch(current_difficulty.river_color){

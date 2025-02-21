@@ -68,37 +68,38 @@ void* Frog() {
 }
 
 void* bullet_right_fun(void *arg) {
-    Item* bullet = (Item *)arg;
-
+    Item bullet = *(Item *)arg;
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     // muove il proiettile fino al limite dello schermo
-    while (bullet->x < GAME_WIDTH + 1) {
-        bullet->x += 1;
+    while (bullet.x < GAME_WIDTH + 1) {
+        bullet.x += 1;
 
         suspend_thread();
 
-        buffer_push(&buffer, *bullet);
+        buffer_push(&buffer, bullet);
         usleep(current_difficulty.bullets_speed);
     }
-    bullet->extra = 0;
-    buffer_push(&buffer, *bullet);
+    bullet.extra = 0;
+    buffer_push(&buffer, bullet);
+    debuglog("bullet extra: %d\n", bullet.extra);
     return NULL;
 }
 
 void* bullet_left_fun(void *arg) {
-    Item* bullet = (Item *)arg;
+    Item bullet = *(Item *)arg;
     
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     // muove il proiettile fino al limite dello schermo
-    while (bullet->x >= 0) {
-        bullet->x -= 1;
+    while (bullet.x >= 0) {
+        bullet.x -= 1;
 
         suspend_thread();
 
-        buffer_push(&buffer, *bullet);
+        buffer_push(&buffer, bullet);
         usleep(current_difficulty.bullets_speed);
     }
-    bullet->extra = 0;
-    buffer_push(&buffer, *bullet);
+    bullet.extra = 0;
+    buffer_push(&buffer, bullet);
+    debuglog("bullet extra: %d\n", bullet.extra);
     return NULL;
 }
