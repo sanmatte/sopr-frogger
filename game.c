@@ -371,19 +371,23 @@ int play(WINDOW *game) {
                 }
             }
             // Collision between frog bullets and crocodile bullet
-            stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right->y) / FROG_DIM_Y);
-            for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
-                if((crocodiles_bullets[i].x - bullet_right->x) <= 1 && (crocodiles_bullets[i].x - bullet_right->x) >= -1 && crocodiles_bullets[i].y == bullet_right->y){
-                    kill(bullet_pid_right, SIGKILL);
-                    kill(child_pids[i+1], SIGUSR1);
-                    bullet_right->x = -8;
-                    crocodiles_bullets[i].x = -2;
-                }
-                if((crocodiles_bullets[i].x - bullet_left->x) <= 1 && (crocodiles_bullets[i].x - bullet_left->x) >= -1 && crocodiles_bullets[i].y == bullet_left->y){
-                    kill(bullet_pid_left, SIGKILL);
-                    kill(child_pids[i+1], SIGUSR1);
-                    bullet_left->x = -8;
-                    crocodiles_bullets[i].x = -2;
+            if(is_bullet_frog_active == 1){
+                stream = ((SIDEWALK_HEIGHT_2 + 1 - bullet_right->y) / FROG_DIM_Y);
+                if( stream >= 0 && stream < STREAM_NUMBER ) {
+                    for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
+                        if((crocodiles_bullets[i].x - bullet_right->x) <= 1 && (crocodiles_bullets[i].x - bullet_right->x) >= -1 && crocodiles_bullets[i].y == bullet_right->y){
+                            kill(bullet_pid_right, SIGKILL);
+                            kill(child_pids[i+1], SIGUSR1);
+                            bullet_right->x = -8;
+                            crocodiles_bullets[i].x = -2;
+                        }
+                        if((crocodiles_bullets[i].x - bullet_left->x) <= 1 && (crocodiles_bullets[i].x - bullet_left->x) >= -1 && crocodiles_bullets[i].y == bullet_left->y){
+                            kill(bullet_pid_left, SIGKILL);
+                            kill(child_pids[i+1], SIGUSR1);
+                            bullet_left->x = -8;
+                            crocodiles_bullets[i].x = -2;
+                        }
+                    }
                 }
             }
 
