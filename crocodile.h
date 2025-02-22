@@ -5,6 +5,7 @@
 #include "struct.h"
 #include "utils.h"
 #include "buffer.h"
+#include "game.h"
 
 extern pthread_mutex_t m_suspend_mutex;
 extern pthread_cond_t m_resume_cond;

@@ -1,5 +1,4 @@
 #include "menu.h"
-#include <stdlib.h>
 
 #define NUM_OPTIONS 4
 

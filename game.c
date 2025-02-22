@@ -1,19 +1,3 @@
-#include <unistd.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <ncurses.h>
-#include <stdlib.h>
-#include <sys/wait.h>
-#include <time.h>
-#include <errno.h>
-#include <locale.h>
-#include "design.h"
-#include "struct.h"
-#include "utils.h"
-#include "crocodile.h"
-#include "frog.h"
-#include "buffer.h"
-#include <stdatomic.h>
 #include "game.h"
 
 int pause_flag = 0;
@@ -229,7 +213,6 @@ int play(WINDOW *game) {
                             {
                                 is_bullet_frog_active = 0;
                             }
-                            debuglog("is_bullet_frog_active: %d\n", is_bullet_frog_active);
                         } 
                 }
                 break;
@@ -268,12 +251,10 @@ int play(WINDOW *game) {
                 pthread_mutex_lock(&m_suspend_mutex);
                 pause_flag = 1;
                 pthread_mutex_unlock(&m_suspend_mutex);
-                WINDOW *pause = newwin(5, 25, (GAME_HEIGHT/2) + 5,  (GAME_WIDTH/2) + 10);
-                box(pause, 0, 0);
-                mvwprintw(pause, 1, 1 , "Press Q to quit");
-                mvwprintw(pause, 2, 1 , "Press P to resume");
-                mvwprintw(pause, 3, 1 , "Press M to go to menu");
-                wrefresh(pause);
+
+                WINDOW *pause = newwin(5, 23, (GAME_HEIGHT/2) + 4,  (GAME_WIDTH/2) + 10);
+                print_pause(pause, game);
+
                 int ch = getchar();  // Wait for user input
                 while (ch != 'p' && ch != 'q' && ch != 'm') {
                     ch = getchar();
@@ -405,17 +386,17 @@ int play(WINDOW *game) {
                         pthread_cancel(thread_bullet_right);
                         pthread_join(thread_bullet_right, NULL);
                         atomic_store(&collided_bullet, crocodiles_bullets[i].id);
-                        bullet_right->x = -8;
+                        bullet_right->x = RESET_FROG_BULLET;
                         bullet_right->extra = 0;
-                        crocodiles_bullets[i].x = -18;
+                        crocodiles_bullets[i].x = RESET_CROCODILE_BULLET;
                     }
                     if((crocodiles_bullets[i].x - bullet_left->x) <= 1 && (crocodiles_bullets[i].x - bullet_left->x) >= -1 && crocodiles_bullets[i].y == bullet_left->y){
                         pthread_cancel(thread_bullet_left);
                         pthread_join(thread_bullet_left, NULL);
                         atomic_store(&collided_bullet, crocodiles_bullets[i].id);
-                        bullet_left->x = -8;
+                        bullet_left->x = RESET_FROG_BULLET;
                         bullet_left->extra = 0;
-                        crocodiles_bullets[i].x = -18;
+                        crocodiles_bullets[i].x = RESET_CROCODILE_BULLET;
                     }
                 }
             }
@@ -463,7 +444,6 @@ int play(WINDOW *game) {
         {
             break;
         }
-        
 
         print_score(game, manche, timer->x, score);
         print_background(game, dens);

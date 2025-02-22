@@ -1,8 +1,4 @@
-#include <locale.h>
 #include "design.h"
-#include "frog.h"
-#include "crocodile.h"
-#include "game.h"
 
 void print_score(WINDOW *game, int manche, int timer, int score){
 	//lives counter
@@ -193,14 +189,14 @@ void print_frog(WINDOW *game, Item *frog){
 void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 	static const char* sprite_matrix_right[CROCODILE_DIM_Y][CROCODILE_DIM_X] = {
         {"", "", "", "", "▀", "▀", "▀", "█", "█", "█", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "█", "█", "▀", "▀", "▀", "", "", ""},
-        {"▄", "▄", "▄", "▄", " ", "▄", " ", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", " ", "▀", "█", "▄", "▄", "▄"},
-        {"▀", "▀", "▀", "▀", " ", "▀", " ", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", " ", "▄", "█", "▀", "▀", "▀"},
+        {"▄", "▄", "▄", "▄", "▄", "▄", " ", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", " ", "▀", "█", "▄", "▄", "▄"},
+        {"▀", "▀", "▀", "▀", "▀", "▀", " ", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", " ", "▄", "█", "▀", "▀", "▀"},
         {"", "", "", "", "▄", "▄", "▄", "█", "█", "█", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "█", "█", "▄", "▄", "▄", "", "", ""},
     };
 	static const char* sprite_matrix_left[CROCODILE_DIM_Y][CROCODILE_DIM_X] = {
 		{"", "", "", "", "▀", "▀", "▀", "█", "█", "█", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "█", "█", "▀", "▀", "▀", "", "", ""},
-		{"▄", "▄", "▄", "█", "▀", " ", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", " ", "▄"," ","▄", "▄", "▄", "▄"},
-		{"▀", "▀", "▀", "█", "▄", " ", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", " ", "▀"," ","▀", "▀", "▀", "▀"},
+		{"▄", "▄", "▄", "█", "▀", " ", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", " ", "▄","▄","▄", "▄", "▄", "▄"},
+		{"▀", "▀", "▀", "█", "▄", " ", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", " ", "▀","▀","▀", "▀", "▀", "▀"},
 		{"", "", "", "", "▄", "▄", "▄", "█", "█", "█", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "█", "█", "▄", "▄", "▄", "", "", ""},
 	};
 
@@ -715,4 +711,35 @@ void print_frogger_sprite(WINDOW *win){
     }
 }
 
+void print_pause(WINDOW *pause, WINDOW *game){
+	for(int i=0; i<25; i++){
+		wattron(game, COLOR_PAIR(30));
+		mvwprintw(game, (GAME_HEIGHT/2) -1, (GAME_WIDTH/2) - 12 + i, "▄");
+		wattroff(game, COLOR_PAIR(30));
+	}
+	for(int i=0; i<25; i++){
+		wattron(game, COLOR_PAIR(30));
+		mvwprintw(game, (GAME_HEIGHT/2) + 5, (GAME_WIDTH/2) - 12 + i, "▀");
+		wattroff(game, COLOR_PAIR(30));
+	}
+	for(int i=0; i<7; i++){
+		wattron(game, COLOR_PAIR(30));
+		mvwprintw(game, (GAME_HEIGHT/2) + i, (GAME_WIDTH/2) - 12, "█");
+		wattroff(game, COLOR_PAIR(30));
+	}
+	for(int i=0; i<7; i++){
+		wattron(game, COLOR_PAIR(30));
+		mvwprintw(game, (GAME_HEIGHT/2) + i, (GAME_WIDTH/2) + 12, "█");
+		wattroff(game, COLOR_PAIR(30));
+	}
+
+	wbkgd(pause, COLOR_PAIR(29));
+	wattron(pause, COLOR_PAIR(29));
+	mvwprintw(pause, 1, 1 , "Press P to resume");
+	mvwprintw(pause, 2, 1 , "Press M to go to menu");
+	mvwprintw(pause, 3, 1 , "Press Q to quit");
+	wattroff(pause, COLOR_PAIR(29));
+	wrefresh(game);
+	wrefresh(pause);
+}
 

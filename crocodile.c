@@ -1,5 +1,4 @@
 #include "crocodile.h"
-#include "game.h"
 
 /**
  * @brief  Inizializza i coccodrilli

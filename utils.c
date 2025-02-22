@@ -1,7 +1,4 @@
-#include <sys/types.h>
-#include <unistd.h>
 #include "utils.h"
-#include <pthread.h>
 
 pthread_mutex_t m_suspend_mutex;  // mutex per sospendere i thread
 pthread_cond_t m_resume_cond;     // variabile per riprendere i thread dopo la pausa
@@ -76,7 +73,7 @@ void start_colors(){
     start_color();
     init_color(COLOR_DARKGREEN, 0, 400, 0);
     init_color(COLOR_GREY, 600, 600, 600);
-    init_color(COLOR_LIGHTDARKGREEN, 28, 163, 32);
+    init_color(COLOR_DEEPGREEN, 28, 163, 32);
     init_color(COLOR_SAND, 745, 588, 313);
     init_color(COLOR_FROG_EYE, 90, 113, 749);
     init_color(COLOR_FROG_BODY, 62, 568, 184);
@@ -87,6 +84,8 @@ void start_colors(){
     init_color(COLOR_BULLET_TRIGGER, 478, 4, 4);
     init_color(COLOR_RIVER_EASY, 125, 816, 839);
     init_color(COLOR_RIVER_HARD,75, 90, 369);
+    init_color(COLOR_ORANGE, 949, 61, 200);
+
     // Definizione delle coppie di colori
     init_pair(1, COLOR_GREEN, COLOR_GREEN);
     init_pair(2, COLOR_GREY, COLOR_GREY);  
@@ -94,7 +93,7 @@ void start_colors(){
     init_pair(4, COLOR_DARKGREEN, COLOR_BLUE);
     init_pair(5, COLOR_RED, COLOR_RED);
     init_pair(6, COLOR_RED, COLOR_BLACK);
-    init_pair(7, COLOR_LIGHTDARKGREEN, COLOR_DARKGREEN);
+    init_pair(7, COLOR_DEEPGREEN, COLOR_DARKGREEN);
     init_pair(8, COLOR_DARKGREEN, COLOR_DARKGREEN);
     init_pair(9, COLOR_BLACK, COLOR_GREEN);
     init_pair(10, COLOR_SAND, COLOR_SAND);
@@ -116,4 +115,6 @@ void start_colors(){
     init_pair(26, COLOR_BULLET_TRIGGER, COLOR_RIVER_HARD);
     init_pair(27, COLOR_BLACK, COLOR_DARKGREEN);
     init_pair(28, COLOR_BLACK, COLOR_BULLET_TRIGGER);
+    init_pair(29, COLOR_WHITE, COLOR_DARKGREEN);
+    init_pair(30, COLOR_WHITE, COLOR_BLUE);
 }

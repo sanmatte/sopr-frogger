@@ -2,7 +2,6 @@
 #define DESIGN_H
 
 #include <ncurses.h>
-#include "struct.h"
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -12,13 +11,15 @@
 #include <time.h>
 #include <locale.h>
 
-//#include "game.h"
-//#include "crocodile.h"
+#include "struct.h"
+#include "frog.h"
+#include "crocodile.h"
+#include "game.h"
 
 //colours define
 #define COLOR_GREY 10
 #define COLOR_DARKGREEN 11
-#define COLOR_LIGHTDARKGREEN 12
+#define COLOR_DEEPGREEN 12
 #define COLOR_SAND 13
 #define COLOR_FROG_EYE 14
 #define COLOR_FROG_BODY 15
@@ -29,8 +30,7 @@
 #define COLOR_FROG_BODY_DETAILS 20
 #define COLOR_RIVER_EASY 21
 #define COLOR_RIVER_HARD 22
-
-
+#define COLOR_ORANGE 23
 
 // function prototipes
 void print_score(WINDOW *game, int manche, int timer, int score);
@@ -40,5 +40,6 @@ void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger);
 void print_bullets(WINDOW *game, Item *bullet, int itemtype);
 void print_endgame(WINDOW *game, int manche, bool *dens, int score);
 void print_frogger_sprite(WINDOW *win);
+void print_pause(WINDOW *pause, WINDOW *game);
 
 #endif

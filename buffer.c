@@ -1,5 +1,5 @@
 #include "buffer.h"
-#include "utils.h"
+
 void buffer_init(shared_buffer_t *buf) {
     buf->in = buf->out = 0;
     sem_init(&buf->sem_spazi, 0, BUFFER_SIZE); // BUFFER_SIZE spazi inizialmente liberi

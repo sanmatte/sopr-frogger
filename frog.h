@@ -2,11 +2,15 @@
 #define FROG_H
 #include <stdbool.h>
 #include <errno.h>
-extern int manche;
-extern bool frog_on_crocodile;
+#include <sys/types.h>
 #include "design.h"
 #include "struct.h"
+#include "utils.h"
+#include "buffer.h"
+#include "game.h"
 
+extern int manche;
+extern bool frog_on_crocodile;
 extern pthread_mutex_t m_suspend_mutex;
 extern pthread_cond_t m_resume_cond;
 

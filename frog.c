@@ -1,8 +1,5 @@
 #include "frog.h"
-#include "utils.h"
-#include "buffer.h"
-#include "game.h"
-#include <sys/types.h>
+
 int newmanche = FALSE; 
 
 void* frog_controller() {
@@ -81,7 +78,6 @@ void* bullet_right_fun(void *arg) {
     }
     bullet.extra = 0;
     buffer_push(&buffer, bullet);
-    debuglog("bullet extra: %d\n", bullet.extra);
     return NULL;
 }
 

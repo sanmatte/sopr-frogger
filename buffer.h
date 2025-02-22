@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include "struct.h"
+#include "utils.h"
 
 #define BUFFER_SIZE 500
 
