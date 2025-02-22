@@ -5,7 +5,7 @@
 #include <sys/types.h>
 int newmanche = FALSE; 
 
-void* Frog() {
+void* frog_controller() {
     int ch;
     bool has_moved = TRUE;
     Item frog = {FROG_ID, 0, 0, 0, 0};

@@ -161,7 +161,7 @@ int play(WINDOW *game) {
 
     pthread_create(&thread_timer, NULL, game_timer, timer);
 
-    pthread_create(&thread_frog, NULL, Frog, NULL);
+    pthread_create(&thread_frog, NULL, frog_controller, NULL);
 
     for (int i = 0; i < STREAM_NUMBER; i++) {
         int distance = rand_range(0, stream_speed[i] * CROCODILE_DIM_X);

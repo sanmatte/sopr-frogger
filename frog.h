@@ -18,7 +18,7 @@ extern pthread_cond_t m_resume_cond;
 #define BULLETS_DIM 1
 #define BULLETS_SPEED 20000
 
-void* Frog();
+void* frog_controller();
 void* bullet_right_fun(void* args);
 void* bullet_left_fun(void* args);
 

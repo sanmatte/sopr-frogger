@@ -114,4 +114,6 @@ void start_colors(){
     init_pair(24, COLOR_DARKGREEN, COLOR_RIVER_HARD);
     init_pair(25, COLOR_BULLET_TRIGGER, COLOR_RIVER_EASY);
     init_pair(26, COLOR_BULLET_TRIGGER, COLOR_RIVER_HARD);
+    init_pair(27, COLOR_BLACK, COLOR_DARKGREEN);
+    init_pair(28, COLOR_BLACK, COLOR_BULLET_TRIGGER);
 }
