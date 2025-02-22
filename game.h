@@ -59,5 +59,5 @@
 // function prototipes
 void startGame(WINDOW *game);
 int play(WINDOW *game);
-void pkill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]);
+void pkill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], pthread_t bullet_left, pthread_t bullet_right);
 #endif

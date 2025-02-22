@@ -232,7 +232,7 @@ int play(WINDOW *game) {
             case TIMER_ID:
                 timer->x -= 1;
                 if(timer->x == 0){
-                    pkill_all(thread_timer, thread_frog, thread_crocodile);
+                     
                     manche_result = MANCHE_LOST;
                 }
                 break;
@@ -241,7 +241,7 @@ int play(WINDOW *game) {
 
                 // collisione tra rana e proiettile coccodrillo
                 if(frog->y == (crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].y - 1) && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x >= frog->x && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x <= frog->x + FROG_DIM_X){  
-                    pkill_all(thread_timer, thread_frog, thread_crocodile);
+                     
                     manche_result = MANCHE_LOST;
                 }
 
@@ -264,19 +264,19 @@ int play(WINDOW *game) {
                 }
                 else if(ch == 'q'){
                     resume_threads();
-                    pkill_all(thread_timer, thread_frog, thread_crocodile);
+                     
                     endwin();
                     manche_result = GAME_QUIT;
                 }
                 else if(ch == 'm'){
                     resume_threads();
-                    pkill_all(thread_timer, thread_frog, thread_crocodile);
+                     
                     manche_result = BACK_TO_MENU;
                 }
                 
                 break;
             case QUIT_ID:
-                pkill_all(thread_timer, thread_frog, thread_crocodile);
+                 
                 endwin();
                 manche_result = GAME_QUIT;
                 break;  
@@ -372,7 +372,7 @@ int play(WINDOW *game) {
             }
             if (frog_on_crocodile == FALSE)
             {
-                pkill_all(thread_timer, thread_frog, thread_crocodile);
+                 
                 manche_result = MANCHE_LOST;
                 break;
             }
@@ -408,35 +408,35 @@ int play(WINDOW *game) {
                 case DENS_1:
                     compute_score(timer->x);
                     dens[0] = FALSE;
-                    pkill_all(thread_timer, thread_frog, thread_crocodile);
+                     
                     manche_result = MANCHE_WON;
                     break;
                 case DENS_2:
                     compute_score(timer->x);
                     dens[1] = FALSE;
-                    pkill_all(thread_timer, thread_frog, thread_crocodile);
+                     
                     manche_result = MANCHE_WON;
                     break;
                 case DENS_3:
                     compute_score(timer->x);
                     dens[2] = FALSE;
-                    pkill_all(thread_timer, thread_frog, thread_crocodile);
+                     
                     manche_result = MANCHE_WON;
                     break;
                 case DENS_4:
                     compute_score(timer->x);
                     dens[3] = FALSE;
-                    pkill_all(thread_timer, thread_frog, thread_crocodile);
+                     
                     manche_result = MANCHE_WON;
                     break;
                 case DENS_5:
                     compute_score(timer->x);
                     dens[4] = FALSE;
-                    pkill_all(thread_timer, thread_frog, thread_crocodile);
+                     
                     manche_result = MANCHE_WON;
                     break;
                 default:
-                    pkill_all(thread_timer, thread_frog, thread_crocodile);
+                     
                     manche_result = MANCHE_LOST;
             }
         }
@@ -462,6 +462,7 @@ int play(WINDOW *game) {
         print_bullets(game, bullet_right, BULLET_ID_RIGHT);
         wrefresh(game);
     }
+    pkill_all(thread_timer, thread_frog, thread_crocodile, thread_bullet_left, thread_bullet_right);
     free(frog);
     for (int i = 0; i < STREAM_NUMBER; i++) {
         free(crocodiles[i]);
@@ -474,11 +475,18 @@ int play(WINDOW *game) {
     return manche_result;
 }
 
-void pkill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER]){
+void pkill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], pthread_t bullet_left, pthread_t bullet_right){
     pthread_cancel(thread_timer);
     pthread_join(thread_timer, NULL);
+
     pthread_cancel(thread_frog);
     pthread_join(thread_frog, NULL);
+
+    pthread_cancel(bullet_left);
+    pthread_join(bullet_left, NULL);
+    pthread_cancel(bullet_right);
+    pthread_join(bullet_right, NULL);
+
     for(int i=0; i < STREAM_NUMBER; i++){
         for(int j=0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
             if ((int)thread_crocodile[i][j] != -1)

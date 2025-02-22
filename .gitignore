@@ -2,3 +2,5 @@ output
 a.out
 .vscode
 *.log
+*.logs
+frogger_resurrection
