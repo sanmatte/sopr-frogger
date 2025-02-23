@@ -1,11 +1,49 @@
 #include "frog.h"
+#define SOCKET_PATH "/tmp/mysocket"
+#include <sys/socket.h>
+#include <sys/un.h>
 
 int newmanche = FALSE; 
+
+void frog_cleanup_function(void *arg) {
+    close(*(int *)arg);
+}
 
 /**
  * @brief  function that manages the frog movement
  */
 void* frog_controller() {
+    int client_fd;
+    struct sockaddr_un addr;
+
+    // Create socket
+    client_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (client_fd == -1) {
+        perror("socket");
+        exit(EXIT_FAILURE);
+    }
+
+    void *arg_cleanup;
+    arg_cleanup = &client_fd;
+    pthread_cleanup_push(frog_cleanup_function, arg_cleanup);
+
+    // Set up server address
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, SOCKET_PATH, sizeof(addr.sun_path) - 1);
+
+    int is_connected = -1;
+
+    do{
+        is_connected = connect(client_fd, (struct sockaddr*)&addr, sizeof(addr));
+    }while (is_connected == -1);
+    
+    // // Connect to server
+    // if (is_connected = connect(client_fd, (struct sockaddr*)&addr, sizeof(addr))) {
+    //     perror("connect");
+    //     exit(EXIT_FAILURE);
+    // }
+
     int ch;
     bool has_moved = TRUE;               // flag to check if the frog has moved
     Item frog = {FROG_ID, 0, 0, 0, 0};
@@ -54,12 +92,13 @@ void* frog_controller() {
         }
         suspend_thread();                // suspend the thread 
         if(has_moved){
-            buffer_push(&buffer, frog);
+            write(client_fd, &frog, sizeof(frog));
         }
         frog.extra = 0;
         has_moved = FALSE;
         usleep(current_difficulty.frog_movement_limit); //default 0
     }
+    pthread_cleanup_pop(1);
     return NULL;
 }
 

@@ -1,4 +1,9 @@
 #include "game.h"
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <fcntl.h>
+
+#define SOCKET_PATH "/tmp/mysocket"
 
 // Global variables
 int pause_flag = 0;
@@ -106,6 +111,10 @@ void startGame(WINDOW *game) {
  * @return int return value, 0 if you lose the manche or 1 if you enter a den
  */
 int play(WINDOW *game) {
+
+    int server_fd, client_fd;
+    struct sockaddr_un addr;
+
     int is_bullet_frog_active = 0;
     atomic_store(&collided_bullet, -1);
 
@@ -201,52 +210,87 @@ int play(WINDOW *game) {
         }
     }
 
+    // Create socket
+    server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (server_fd == -1) {
+        perror("socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Bind socket to an address
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, SOCKET_PATH, sizeof(addr.sun_path) - 1);
+    
+    unlink(SOCKET_PATH); // Remove any existing socket file
+
+    if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
+        perror("bind");
+        exit(EXIT_FAILURE);
+    }
+
+    // Listen for incoming connections
+    if (listen(server_fd, 5) == -1) {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
+
+    // Accept client connection
+    client_fd = accept(server_fd, NULL, NULL);
+    if (client_fd == -1) {
+        perror("accept");
+        exit(EXIT_FAILURE);
+    }
+
+    int flags = fcntl(client_fd, F_GETFL, 0);
+    fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
+
+
     Item msg;
     int manche_result = -1;
     while (TRUE) {
+        int bytes_received = read(client_fd, &msg, sizeof(msg));
+        if (bytes_received > 0) {
+            // frog movement if it is inside the game window
+            if (frog->x + msg.x >= 0 && frog->x + msg.x <= GAME_WIDTH - FROG_DIM_X && frog->y + msg.y >= 0 && frog->y + msg.y <= GAME_HEIGHT - FROG_DIM_Y) {
+                frog->y += msg.y;
+                frog->x += msg.x;
+                frog->extra = msg.extra;
+                // frog bullet activation
+                if (frog->extra == 1 && is_bullet_frog_active == 0) {
+                    is_bullet_frog_active = 1;
+                    // set right bullet properties
+                    bullet_right->x = frog->x + FROG_DIM_X;
+                    bullet_right->y = frog->y + 1;
+                    bullet_right->extra = 1;
+                    void *argr = bullet_right;  
+                    // create right bullet thread
+                    if (pthread_create(&thread_bullet_right, NULL, bullet_right_fun, argr) != 0) {
+                        perror("Errore nella creazione del thread per il proiettile destro");
+                    }
+                    // set right bullet properties
+                    bullet_left->x = frog->x - 1;
+                    bullet_left->y = frog->y + 1;
+                    bullet_left->extra = -1;
+                    void* argl = bullet_left;
+                    // create left bullet thread
+                    if (pthread_create(&thread_bullet_left, NULL, bullet_left_fun, argl) != 0) {
+                        perror("Errore nella creazione del thread per il proiettile destro");
+                    }
+                    
+                }
+                // frog bullet deactivation
+                else
+                    {
+                        if (bullet_left->extra == 0 && bullet_right->extra == 0)
+                        {
+                            is_bullet_frog_active = 0;
+                        }
+                    } 
+            }
+        }
         msg = buffer_pop(&buffer);
         switch (msg.id) {
-            // FROG case
-            case FROG_ID:
-                // frog movement if it is inside the game window
-                if (frog->x + msg.x >= 0 && frog->x + msg.x <= GAME_WIDTH - FROG_DIM_X && frog->y + msg.y >= 0 && frog->y + msg.y <= GAME_HEIGHT - FROG_DIM_Y) {
-                    frog->y += msg.y;
-                    frog->x += msg.x;
-                    frog->extra = msg.extra;
-                    // frog bullet activation
-                    if (frog->extra == 1 && is_bullet_frog_active == 0) {
-                        is_bullet_frog_active = 1;
-                        // set right bullet properties
-                        bullet_right->x = frog->x + FROG_DIM_X;
-                        bullet_right->y = frog->y + 1;
-                        bullet_right->extra = 1;
-                        void *argr = bullet_right;  
-                        // create right bullet thread
-                        if (pthread_create(&thread_bullet_right, NULL, bullet_right_fun, argr) != 0) {
-                            perror("Errore nella creazione del thread per il proiettile destro");
-                        }
-                        // set right bullet properties
-                        bullet_left->x = frog->x - 1;
-                        bullet_left->y = frog->y + 1;
-                        bullet_left->extra = -1;
-                        void* argl = bullet_left;
-                        // create left bullet thread
-                        if (pthread_create(&thread_bullet_left, NULL, bullet_left_fun, argl) != 0) {
-                            perror("Errore nella creazione del thread per il proiettile destro");
-                        }
-                        
-                    }
-                    // frog bullet deactivation
-                    else
-                        {
-                            if (bullet_left->extra == 0 && bullet_right->extra == 0)
-                            {
-                                is_bullet_frog_active = 0;
-                            }
-                        } 
-                }
-                break;
-
             case BULLET_ID_RIGHT:
                 //check if the bullet is still active and update its position
                 if(bullet_right->extra != 0){
@@ -502,6 +546,10 @@ int play(WINDOW *game) {
     free(bullet_left);
     free(timer);
     free(crocodiles_bullets);
+    
+    close(client_fd);
+    close(server_fd);
+
     return manche_result;
 }
 
