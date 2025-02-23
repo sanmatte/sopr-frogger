@@ -186,7 +186,6 @@ void* Crocodile(void *arg) {
         usleep(crocodile.speed);
     }
     pthread_cleanup_pop(1);
-    pthread_detach(pthread_self());
     return 0;
     //usleep(rand_range(0, crocodile.speed * (CROCODILE_DIM_X) / 3));
 }

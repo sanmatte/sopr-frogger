@@ -17,8 +17,8 @@ char *difficulties[] = {
 
 const Difficulty EASY = {
     .bullets_speed = 30000,
-    .crocodile_speed_max = 250000,
-    .crocodile_speed_min = 150000,
+    .crocodile_speed_max = 150000,
+    .crocodile_speed_min = 100000,
     .crocodile_bullet_speed = 30000,
     .shot_range = 100,
     .frog_movement_limit = 0,
@@ -38,10 +38,10 @@ const Difficulty MEDIUM = {
 
 const Difficulty HARD = {
     .bullets_speed = 30000,
-    .crocodile_speed_max = 90000,
+    .crocodile_speed_max = 250000,
     .crocodile_speed_min = 30000,
     .crocodile_bullet_speed = 20000,
-    .shot_range = 50,
+    .shot_range = 5,
     .frog_movement_limit = 50000,
     .river_color = 22,
     .shotload_time = 900000

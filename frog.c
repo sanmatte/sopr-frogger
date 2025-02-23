@@ -18,7 +18,7 @@ void* frog_controller() {
             case KEY_UP:
                 frog.y = -FROG_DIM_Y;
                 frog.x = 0;
-                has_moved = TRUE; //! move inside if
+                has_moved = TRUE;
                 break;
             case KEY_DOWN:
                 frog.y = +FROG_DIM_Y;
@@ -96,6 +96,5 @@ void* bullet_left_fun(void *arg) {
     }
     bullet.extra = 0;
     buffer_push(&buffer, bullet);
-    debuglog("bullet extra: %d\n", bullet.extra);
     return NULL;
 }

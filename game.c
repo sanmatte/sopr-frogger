@@ -140,7 +140,7 @@ int play(WINDOW *game) {
     
     initializeCrocodile(crocodiles, stream_speed);
 
-    pthread_t thread_timer, thread_frog, thread_bullet_right, thread_bullet_left;
+    pthread_t thread_timer, thread_frog, thread_bullet_right = -1, thread_bullet_left = -1;
     pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER];
 
     pthread_create(&thread_timer, NULL, game_timer, timer);
@@ -221,11 +221,22 @@ int play(WINDOW *game) {
                 if(bullet_right->extra != 0){
                     *bullet_right = msg;
                 }
+                else
+                {
+                    pthread_detach(thread_bullet_right);
+                    thread_bullet_right = -1;
+                }
+                
                 break;
 
             case BULLET_ID_LEFT:
                 if(bullet_left->extra != 0){
                     *bullet_left = msg;
+                }
+                else
+                {
+                    pthread_detach(thread_bullet_left);
+                    thread_bullet_left = -1;
                 }
                 break;
 
@@ -309,8 +320,9 @@ int play(WINDOW *game) {
                             //crocodile respawn
                             if(crocodiles[i][j].extra == 1 && crocodiles[i][j].x == GAME_WIDTH + 1){
                                 
-                                //pthread_join(thread_crocodile[i][j], NULL);
+                                pthread_detach(thread_crocodile[i][j]);
                                 thread_crocodile[i][j] = -1;
+                                
                                 crocodiles[i][j].x = - CROCODILE_DIM_X;
 
                                 int *distance_ptr = malloc(sizeof(int));
@@ -330,8 +342,9 @@ int play(WINDOW *game) {
                             }
                             else if(crocodiles[i][j].extra == -1 && crocodiles[i][j].x == - CROCODILE_DIM_X - 1){
                                 
-                                //pthread_join(thread_crocodile[i][j], NULL);
+                                pthread_detach(thread_crocodile[i][j]);
                                 thread_crocodile[i][j] = -1;
+
                                 crocodiles[i][j].x = GAME_WIDTH + CROCODILE_DIM_X;
 
                                 int *distance_ptr = malloc(sizeof(int));
@@ -386,6 +399,7 @@ int play(WINDOW *game) {
                         pthread_cancel(thread_bullet_right);
                         pthread_join(thread_bullet_right, NULL);
                         atomic_store(&collided_bullet, crocodiles_bullets[i].id);
+                        thread_bullet_right = -1;
                         bullet_right->x = RESET_FROG_BULLET;
                         bullet_right->extra = 0;
                         crocodiles_bullets[i].x = RESET_CROCODILE_BULLET;
@@ -393,6 +407,7 @@ int play(WINDOW *game) {
                     if((crocodiles_bullets[i].x - bullet_left->x) <= 1 && (crocodiles_bullets[i].x - bullet_left->x) >= -1 && crocodiles_bullets[i].y == bullet_left->y){
                         pthread_cancel(thread_bullet_left);
                         pthread_join(thread_bullet_left, NULL);
+                        thread_bullet_left = -1;
                         atomic_store(&collided_bullet, crocodiles_bullets[i].id);
                         bullet_left->x = RESET_FROG_BULLET;
                         bullet_left->extra = 0;
@@ -475,17 +490,24 @@ int play(WINDOW *game) {
     return manche_result;
 }
 
-void pkill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], pthread_t bullet_left, pthread_t bullet_right){
+void pkill_all(pthread_t thread_timer, pthread_t thread_frog, pthread_t thread_crocodile[STREAM_NUMBER][CROCODILE_STREAM_MAX_NUMBER], pthread_t thread_bullet_left, pthread_t thread_bullet_right){
     pthread_cancel(thread_timer);
     pthread_join(thread_timer, NULL);
 
     pthread_cancel(thread_frog);
     pthread_join(thread_frog, NULL);
-
-    pthread_cancel(bullet_left);
-    pthread_join(bullet_left, NULL);
-    pthread_cancel(bullet_right);
-    pthread_join(bullet_right, NULL);
+    
+    if ((int)thread_bullet_right != -1 && is_thread_active(thread_bullet_right))
+    {
+        pthread_cancel(thread_bullet_right);
+        pthread_join(thread_bullet_right, NULL);
+    }
+    if ((int)thread_bullet_left != -1 && is_thread_active(thread_bullet_left))
+    {
+        pthread_cancel(thread_bullet_left);
+        pthread_join(thread_bullet_left, NULL);
+    }
+    
 
     for(int i=0; i < STREAM_NUMBER; i++){
         for(int j=0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
