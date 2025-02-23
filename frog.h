@@ -15,7 +15,8 @@ extern bool frog_on_crocodile;
 #define FROG_ON_CROCODILE_SIG SIGUSR1
 
 // define bullets
-#define BULLETS_ID 26
+#define BULLET_ID_RIGHT 26
+#define BULLET_ID_LEFT 27
 #define BULLETS_DIM 1
 #define BULLETS_SPEED 20000
 

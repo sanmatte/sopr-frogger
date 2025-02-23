@@ -188,26 +188,48 @@ void print_frog(WINDOW *game, Item *frog){
     }
 }
 	
+/**
+ * @brief  function for printing the crocodile
+ * @param  game window game
+ * @param  crocodile crocodile object
+ * @param  color_trigger trigger for the color change
+ */
 void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
+	// right crocodile sprite
 	static const char* sprite_matrix_right[CROCODILE_DIM_Y][CROCODILE_DIM_X] = {
         {"", "", "", "", "▀", "▀", "▀", "█", "█", "█", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "█", "█", "▀", "▀", "▀", "", "", ""},
-        {"▄", "▄", "▄", "▄", " ", "▄", " ", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", " ", "▀", "█", "▄", "▄", "▄"},
-        {"▀", "▀", "▀", "▀", " ", "▀", " ", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", " ", "▄", "█", "▀", "▀", "▀"},
+        {"▄", "▄", "▄", "▄", "▄", "▄", " ", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", " ", "▀", "█", "▄", "▄", "▄"},
+        {"▀", "▀", "▀", "▀", "▀", "▀", " ", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", " ", "▄", "█", "▀", "▀", "▀"},
         {"", "", "", "", "▄", "▄", "▄", "█", "█", "█", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "█", "█", "▄", "▄", "▄", "", "", ""},
     };
+	// left crocodile sprite
 	static const char* sprite_matrix_left[CROCODILE_DIM_Y][CROCODILE_DIM_X] = {
 		{"", "", "", "", "▀", "▀", "▀", "█", "█", "█", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "▄", "█", "█", "▀", "▀", "▀", "", "", ""},
-		{"▄", "▄", "▄", "█", "▀", " ", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", " ", "▄"," ","▄", "▄", "▄", "▄"},
-		{"▀", "▀", "▀", "█", "▄", " ", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", " ", "▀"," ","▀", "▀", "▀", "▀"},
+		{"▄", "▄", "▄", "█", "▀", " ", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", " ", "▄","▄","▄", "▄", "▄", "▄"},
+		{"▀", "▀", "▀", "█", "▄", " ", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", "▄", "▀", " ", "▀","▀","▀", "▀", "▀", "▀"},
 		{"", "", "", "", "▄", "▄", "▄", "█", "█", "█", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "▀", "█", "█", "▄", "▄", "▄", "", "", ""},
 	};
 
-	if(crocodile->extra == 1){
+	// print of the left crocodile sprite
+	if(crocodile->extra == -1){
 		for (int i = 0; i < CROCODILE_DIM_Y; i++) {
 			for (int j = 0; j < CROCODILE_DIM_X; j++) {
+				// background color change based on the difficulty
 				switch(current_difficulty.river_color){
-					case 3:
-						if((i == 1 || i == 2) && (j > 5 && j < 24)){
+					case 3:  // medium difficulty
+						if((i == 1 || i == 2) && j == 4){
+							if(color_trigger == 0){
+								wattron(game, COLOR_PAIR(27));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_left[i][j]);
+								wattroff(game, COLOR_PAIR(27));
+							}
+							else if (color_trigger == 1){
+								wattron(game, COLOR_PAIR(28));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_left[i][j]);
+								wattroff(game, COLOR_PAIR(28));
+							}
+						}
+						else if((i == 1 || i == 2) && (j > 5 && j < 24)){
 							if(color_trigger == 0){
 								wattron(game, COLOR_PAIR(7));
 								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_left[i][j]);
@@ -232,8 +254,20 @@ void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 							}
 						}
 						break;
-					case 21:
-						if((i == 1 || i == 2) && (j > 5 && j < 24)){
+					case 21:  // easy difficulty
+						if((i == 1 || i == 2) && j == 4){
+							if(color_trigger == 0){
+								wattron(game, COLOR_PAIR(27));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_left[i][j]);
+								wattroff(game, COLOR_PAIR(27));
+							}
+							else if (color_trigger == 1){
+								wattron(game, COLOR_PAIR(28));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_left[i][j]);
+								wattroff(game, COLOR_PAIR(28));
+							}
+						}
+						else if((i == 1 || i == 2) && (j > 5 && j < 24)){
 							if(color_trigger == 0){
 								wattron(game, COLOR_PAIR(7));
 								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_left[i][j]);
@@ -258,8 +292,20 @@ void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 							}
 						}
 						break;
-					case 22:
-						if((i == 1 || i == 2) && (j > 5 && j < 24)){
+					case 22:  // hard difficulty
+						if((i == 1 || i == 2) && j == 4){
+							if(color_trigger == 0){
+								wattron(game, COLOR_PAIR(27));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_left[i][j]);
+								wattroff(game, COLOR_PAIR(27));
+							}
+							else if (color_trigger == 1){
+								wattron(game, COLOR_PAIR(28));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_left[i][j]);
+								wattroff(game, COLOR_PAIR(28));
+							}
+						}
+						else if((i == 1 || i == 2) && (j > 5 && j < 24)){
 							if(color_trigger == 0){
 								wattron(game, COLOR_PAIR(7));
 								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_left[i][j]);
@@ -289,12 +335,26 @@ void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 			}
 		}
 	}
+	// print of the right crocodile sprite
 	else{
 		for (int i = 0; i < CROCODILE_DIM_Y; i++) {
 			for (int j = 0; j < CROCODILE_DIM_X; j++) {
+				// background color change based on the difficulty
 				switch(current_difficulty.river_color){
-					case 3:
-						if((i == 1 || i == 2) && (j > 5 && j < 24)){
+					case 3:   // medium difficulty
+						if((i == 1 || i == 2) && j == 25){
+							if(color_trigger == 0){
+								wattron(game, COLOR_PAIR(27));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_right[i][j]);
+								wattroff(game, COLOR_PAIR(27));
+							}
+							else if (color_trigger == 1){
+								wattron(game, COLOR_PAIR(28));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_right[i][j]);
+								wattroff(game, COLOR_PAIR(28));
+							}
+						}
+						else if((i == 1 || i == 2) && (j > 5 && j < 24)){
 							if(color_trigger == 0){
 								wattron(game, COLOR_PAIR(7));
 								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_right[i][j]);
@@ -319,8 +379,20 @@ void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 							}
 						}
 						break;
-					case 21:
-						if((i == 1 || i == 2) && (j > 5 && j < 24)){
+					case 21:   // easy difficulty
+						if((i == 1 || i == 2) && j == 25){
+							if(color_trigger == 0){
+								wattron(game, COLOR_PAIR(27));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_right[i][j]);
+								wattroff(game, COLOR_PAIR(27));
+							}
+							else if (color_trigger == 1){
+								wattron(game, COLOR_PAIR(28));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_right[i][j]);
+								wattroff(game, COLOR_PAIR(28));
+							}
+						}
+						else if((i == 1 || i == 2) && (j > 5 && j < 24)){
 							if(color_trigger == 0){
 								wattron(game, COLOR_PAIR(7));
 								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_right[i][j]);
@@ -345,8 +417,20 @@ void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 							}
 						}
 						break;
-					case 22:
-						if((i == 1 || i == 2) && (j > 5 && j < 24)){
+					case 22:   // hard difficulty
+						if((i == 1 || i == 2) && j == 25){
+							if(color_trigger == 0){
+								wattron(game, COLOR_PAIR(27));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_right[i][j]);
+								wattroff(game, COLOR_PAIR(27));
+							}
+							else if (color_trigger == 1){
+								wattron(game, COLOR_PAIR(28));
+								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_right[i][j]);
+								wattroff(game, COLOR_PAIR(28));
+							}
+						}
+						else if((i == 1 || i == 2) && (j > 5 && j < 24)){
 							if(color_trigger == 0){
 								wattron(game, COLOR_PAIR(7));
 								mvwprintw(game, crocodile->y+i, crocodile->x+j, "%s", sprite_matrix_right[i][j]);
@@ -374,17 +458,26 @@ void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 				}
 			}
 		}
-	}
 	
+	}
 }
 
-void print_bullets(WINDOW *game, Item *bullets){
-	static const char* sprite_matrix[BULLETS_DIM] = {"▄"};
-	wattron(game, COLOR_PAIR(5));
-	for (int i = 0; i < BULLETS_DIM; i++) {
-		mvwprintw(game, bullets->y+i, bullets->x, "%s", sprite_matrix[i]);
+void print_bullets(WINDOW *game, Item *bullets, int itemtype){
+	static const char* sprite_matrix[BULLETS_DIM] = {"█"};
+	// print of the frog bullets
+	if(itemtype == BULLET_ID_LEFT || itemtype == BULLET_ID_RIGHT){
+		wattron(game, COLOR_PAIR(17));
+		mvwprintw(game, bullets->y, bullets->x, "%s", sprite_matrix[0]);
+		wattroff(game, COLOR_PAIR(17));
 	}
-	wattroff(game, COLOR_PAIR(5));
+	// print of the crocodile bullets
+	else{
+		wattron(game, COLOR_PAIR(5));
+		for (int i = 0; i < BULLETS_DIM; i++) {
+			mvwprintw(game, bullets->y+i, bullets->x, "%s", sprite_matrix[i]);
+		}
+		wattroff(game, COLOR_PAIR(5));
+	}
 }
 
 void print_endgame(WINDOW *game, int manche, bool *dens, int score){
@@ -632,6 +725,39 @@ void print_frogger_sprite(WINDOW *win){
     for(int i=0; i<5; i++){
         mvwprintw(win, (GAME_HEIGHT/2) + i, 20, "%s", sprite_matrix_resurraction[0][i]);
     }
+}
+
+void print_pause(WINDOW *pause, WINDOW *game){
+	// print of the edges of the pause sign
+	for(int i=0; i<25; i++){
+		wattron(game, COLOR_PAIR(30));
+		mvwprintw(game, (GAME_HEIGHT/2) -1, (GAME_WIDTH/2) - 12 + i, "▄");
+		wattroff(game, COLOR_PAIR(30));
+	}
+	for(int i=0; i<25; i++){
+		wattron(game, COLOR_PAIR(30));
+		mvwprintw(game, (GAME_HEIGHT/2) + 5, (GAME_WIDTH/2) - 12 + i, "▀");
+		wattroff(game, COLOR_PAIR(30));
+	}
+	for(int i=0; i<7; i++){
+		wattron(game, COLOR_PAIR(30));
+		mvwprintw(game, (GAME_HEIGHT/2) + i, (GAME_WIDTH/2) - 12, "█");
+		wattroff(game, COLOR_PAIR(30));
+	}
+	for(int i=0; i<7; i++){
+		wattron(game, COLOR_PAIR(30));
+		mvwprintw(game, (GAME_HEIGHT/2) + i, (GAME_WIDTH/2) + 12, "█");
+		wattroff(game, COLOR_PAIR(30));
+	}
+	// print of the pause sign
+	wbkgd(pause, COLOR_PAIR(29));
+	wattron(pause, COLOR_PAIR(29));
+	mvwprintw(pause, 1, 1 , "Press P to resume");
+	mvwprintw(pause, 2, 1 , "Press M to go to menu");
+	mvwprintw(pause, 3, 1 , "Press Q to quit");
+	wattroff(pause, COLOR_PAIR(29));
+	wrefresh(game);
+	wrefresh(pause);
 }
 
 

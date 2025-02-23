@@ -3,20 +3,25 @@
 #include "utils.h"
 
 /**
- * @brief  Genera un numero casuale compreso tra min e max
- * @param  min: valore minimo
- * @param  max: valore massimo
-*/
+ * @brief  generate a random number between min and max
+ * @param  min minimum value
+ * @param  max maximum value
+ * @return random number
+ */
 int rand_range(int min, int max) {
     return rand() % (max - min + 1) + min;
 }
 
+/**
+ * @brief  function to start the colors
+ */
 void start_colors(){
     start_color();
 
+    // define new colors
     init_color(COLOR_DARKGREEN, 0, 400, 0);
     init_color(COLOR_GREY, 600, 600, 600);
-    init_color(COLOR_LIGHTDARKGREEN, 28, 163, 32);
+    init_color(COLOR_DEEPGREEN, 28, 163, 32);
     init_color(COLOR_SAND, 745, 588, 313);
     init_color(COLOR_FROG_EYE, 90, 113, 749);
     init_color(COLOR_FROG_BODY, 62, 568, 184);
@@ -27,16 +32,16 @@ void start_colors(){
     init_color(COLOR_BULLET_TRIGGER, 478, 4, 4);
     init_color(COLOR_RIVER_EASY, 125, 816, 839);
     init_color(COLOR_RIVER_HARD,75, 90, 369);
-    init_color(COLOR_PAUSE_MENU, 780, 674, 86);
+    init_color(COLOR_ORANGE, 949, 61, 200);
 
-    // Definizione delle coppie di colori
+    // define new color pairs
     init_pair(1, COLOR_GREEN, COLOR_GREEN);
     init_pair(2, COLOR_GREY, COLOR_GREY);  
     init_pair(3, COLOR_BLACK, COLOR_BLUE);
     init_pair(4, COLOR_DARKGREEN, COLOR_BLUE);
     init_pair(5, COLOR_RED, COLOR_RED);
     init_pair(6, COLOR_RED, COLOR_BLACK);
-    init_pair(7, COLOR_LIGHTDARKGREEN, COLOR_DARKGREEN);
+    init_pair(7, COLOR_DEEPGREEN, COLOR_DARKGREEN);
     init_pair(8, COLOR_DARKGREEN, COLOR_DARKGREEN);
     init_pair(9, COLOR_BLACK, COLOR_GREEN);
     init_pair(10, COLOR_SAND, COLOR_SAND);
@@ -56,12 +61,15 @@ void start_colors(){
     init_pair(24, COLOR_DARKGREEN, COLOR_RIVER_HARD);
     init_pair(25, COLOR_BULLET_TRIGGER, COLOR_RIVER_EASY);
     init_pair(26, COLOR_BULLET_TRIGGER, COLOR_RIVER_HARD);
-    init_pair(27, COLOR_PAUSE_MENU, COLOR_PAUSE_MENU);
+    init_pair(27, COLOR_BLACK, COLOR_DARKGREEN);
+    init_pair(28, COLOR_BLACK, COLOR_BULLET_TRIGGER);
+    init_pair(29, COLOR_WHITE, COLOR_DARKGREEN);
+    init_pair(30, COLOR_WHITE, COLOR_BLUE);
 }
 
 /**
- * @brief Sleep ma non viene fermata dai segnali
- * @param microseconds tempo in microsecondi
+ * @brief  usleep function not interruptible by signal
+ * @param  microseconds time to sleep
  */
 void continue_usleep(long microseconds) {
     long elapsed = 0;

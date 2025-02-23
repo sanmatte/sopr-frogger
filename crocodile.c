@@ -13,10 +13,9 @@ void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]){
         for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
             crocodiles[i][j].id = CROCODILE_MIN_ID + (i * CROCODILE_STREAM_MAX_NUMBER) + j;
             crocodiles[i][j].y = SIDEWALK_HEIGHT_2 - CROCODILE_DIM_Y + 1 - (i * CROCODILE_DIM_Y);  
-            crocodiles[i][j].x = direction == -1 ? -CROCODILE_DIM_X : GAME_WIDTH; // Da sinistra verso destra se TRUE
+            crocodiles[i][j].x = direction == 1 ? -CROCODILE_DIM_X : GAME_WIDTH; // Da sinistra verso destra se TRUE
             crocodiles[i][j].speed = stream_speed[i];
             crocodiles[i][j].extra = direction;
-            
         }
         direction = - direction;
     }
@@ -67,7 +66,7 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
     pid_t bullet_pid = -1; // Store the bullet's PID
     signal(SIGUSR1, handlesignal); // Ignore SIGUSR1 signal
     while (1) {
-        
+
         random_shot = rand_range(0, current_difficulty.shot_range);
         int shot_speed = crocodile->speed - current_difficulty.crocodile_bullet_speed;
 
@@ -92,7 +91,7 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
         }
         
 
-        if (crocodile->extra == -1 && crocodile->x < GAME_WIDTH+1) {
+        if (crocodile->extra == 1 && crocodile->x < GAME_WIDTH+1) {
             crocodile->x += 1;
             if (random_shot == 1 && active == FALSE) {
                 bullet_pid = fork();
@@ -101,7 +100,7 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
                     setpgid(0, group_pid); 
                     // x offset = space that the crocodile moves in the 1 sec
                     int x_offset = current_difficulty.shotload_time / crocodile->speed + 1;
-                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, -5, crocodile->x + CROCODILE_DIM_X + x_offset, shot_speed, 0};
+                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, BULLET_BEFORE_SHOT, crocodile->x + CROCODILE_DIM_X + x_offset, shot_speed, 0};
                     bullet.extra = 1;
                     write(pipe_fds[1], &bullet, sizeof(Item));
                     usleep(current_difficulty.shotload_time);
@@ -114,7 +113,7 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
                 crocodile->x = -CROCODILE_DIM_X;
                 usleep(rand_range(0, crocodile->speed * (CROCODILE_DIM_X) / 3));
             }
-        } else if (crocodile->extra == 1 && crocodile->x > -CROCODILE_DIM_X-1) {
+        } else if (crocodile->extra == -1 && crocodile->x > -CROCODILE_DIM_X-1) {
             crocodile->x -= 1;
             random_shot = rand_range(0, current_difficulty.shot_range);
             if (random_shot == 1 && active == FALSE) {
@@ -122,7 +121,7 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
                 if (bullet_pid == 0) {
                     setpgid(0, group_pid); 
                     int x_offset = current_difficulty.shotload_time / crocodile->speed + 1;
-                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, -5, crocodile->x - x_offset, shot_speed, 0};
+                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, BULLET_BEFORE_SHOT, crocodile->x - x_offset, shot_speed, 0};
                     bullet.extra = 1;
                     write(pipe_fds[1], &bullet, sizeof(Item));
                     usleep(current_difficulty.shotload_time);

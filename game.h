@@ -28,15 +28,23 @@
 #define STREAM_NUMBER 8
 
 // timer
-#define TIMER_ID 27
+#define TIMER_ID 28
 #define TIMER_SPEED 1000000
 #define TIMER_MAX 60
 
+// define reset bullets
+#define RESET_FROG_BULLET -8
+#define RESET_CROCODILE_BULLET -18
+#define BULLET_BEFORE_SHOT -5
+
 #define ESC 27
 #define PAUSE_ID 69
-
 #define QUIT_ID 55
 
+#define MANCHE_LOST 0
+#define MANCHE_WON 1
+#define GAME_QUIT 2
+#define BACK_TO_MENU 3
 // function prototipes
 void startGame(WINDOW *game);
 int play(WINDOW *game);
