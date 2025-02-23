@@ -1,77 +1,79 @@
 #include "crocodile.h"
 
 /**
- * @brief  Inizializza i coccodrilli
- * @param  crocodiles[][] matrice di coccodrilli
- * @param  stream_speed[] vettore delle velocità dei coccodrilli
+ * @brief  Initialization of the crocodile matrix
+ * @param  crocodiles[][] matrix of crocodiles
+ * @param  stream_speed[] array of stream speed
  */
 void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]){
-    
-    int direction = (rand() % 2)? 1: -1; // direzione random iniziale
-    
+    int direction = (rand() % 2)? 1: -1;    // random direction for the first stream
     for (int i = 0; i < STREAM_NUMBER; i++) {
         for (int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++) {
+            // set crocodile properties
             crocodiles[i][j].id = CROCODILE_MIN_ID + (i * CROCODILE_STREAM_MAX_NUMBER) + j;
             crocodiles[i][j].y = SIDEWALK_HEIGHT_2 - CROCODILE_DIM_Y + 1 - (i * CROCODILE_DIM_Y);  
-            crocodiles[i][j].x = direction == 1 ? -CROCODILE_DIM_X : GAME_WIDTH; // da sinistra a destra se true
+            crocodiles[i][j].x = direction == 1 ? -CROCODILE_DIM_X : GAME_WIDTH; 
             crocodiles[i][j].speed = stream_speed[i];
             crocodiles[i][j].extra = direction;
         }
-        direction = - direction;
+        direction = - direction;           // change direction for the next stream
     }
 }
 
+/**
+ * @brief  Function to free crocodile bullets
+ * @param  arg arguments
+ */
 void bullet_cleanup_function(void *arg) {
     free(arg);
 }
 
 /**
- * @brief  Funzione per il movimento dei proiettili dei coccodrilli verso destra
+ * @brief  Function for the movement of the crocodile bullets to the right
  * @param  arg bullet_obj
  */
 void* bullet_right_crocodile(void *arg) {
     Item* bullet = (Item *)arg;
-
     pthread_cleanup_push(bullet_cleanup_function, arg);
-
     int expected = bullet->id;
-    //gestione  del cambio colore prima di sparare
+
+    // management of the crocodile bullet before shooting
     int  tmp_y = bullet->y;
-    bullet->y = -5;
+    bullet->y = BULLET_BEFORE_SHOT;
     buffer_push(&buffer, *bullet);
     usleep(current_difficulty.shotload_time);
     bullet->y = tmp_y;
     bullet->extra = 0;
 
+    // movement of the bullet
     while (bullet->x < GAME_WIDTH + 1) {
         bullet->x += 1;
         expected = bullet->id;
-        // controllo atomico (più efficiente della mutex) se true esce dal ciclo e imposta collided_bullet a -1
+        // atomic control (more efficient than mutex) if true exits the loop and sets collided_bullet to -1
         if ( atomic_compare_exchange_strong(&collided_bullet, &expected, -1) ) {
             break;
         }
-        
         suspend_thread();
-        
         buffer_push(&buffer, *bullet);
         usleep(bullet->speed);
     }
+    // reset bullet position to avoid collisions
     bullet->x = GAME_WIDTH + 10;
     buffer_push(&buffer, *bullet);
     pthread_cleanup_pop(arg);
     return NULL;
 }
+
 /**
- * @brief  Funzione per il movimento dei proiettili dei coccodrilli verso sinistra
+ * @brief  Function for the movement of the crocodile bullets to the left
  * @param  arg bullet_obj
  */
 void* bullet_left_crocodile(void *arg) {
     Item* bullet = (Item *)arg;
-
     pthread_cleanup_push(bullet_cleanup_function, arg);
-
     int expected = bullet->id;
-    // gestione del cambio colore prima di sparare
+
+    // management of the crocodile bullet before shooting
     int  tmp_y = bullet->y;
     bullet->y = -5;
     buffer_push(&buffer, *bullet);
@@ -79,27 +81,28 @@ void* bullet_left_crocodile(void *arg) {
     bullet->y = tmp_y;
     bullet->extra = 0;
 
+    // movement of the bullet
     while (bullet->x >= 0) {
         bullet->x -= 1;
         expected = bullet->id;
-        // controllo atomico (più efficiente della mutex) se true esce dal ciclo e imposta collided_bullet a -1
+        // atomic control (more efficient than mutex) if true exits the loop and sets collided_bullet to -1
         if ( atomic_compare_exchange_strong(&collided_bullet, &expected, -1) ) {
             break;
         }
-
         suspend_thread();
-
         buffer_push(&buffer, *bullet);
         usleep(bullet->speed);
     }
+
     bullet->x = GAME_WIDTH + 10;
     buffer_push(&buffer, *bullet);
     pthread_cleanup_pop(arg);
     return NULL;
 }
+
 /**
- * @brief  cleanup per il thread croccodrillo che uccide il thread bullet se non è terminato
- * @param  arg array di argomenti
+ * @brief  cleanup for the crocodile thread which kills the bullet thread if it is not terminated
+ * @param  arg arguments
  */
 void crocodile_cleanup_function(void *arg) {
     void **args = (void **)arg;
@@ -107,6 +110,7 @@ void crocodile_cleanup_function(void *arg) {
     int active = *(int *)args[1];
     if (child_thread != 0) {
         if(active == TRUE){
+            // if the bullet thread is not terminated it is killed
             if(pthread_tryjoin_np(child_thread, NULL) != 0){
                 pthread_cancel(child_thread);
                 pthread_join(child_thread, NULL);
@@ -115,58 +119,52 @@ void crocodile_cleanup_function(void *arg) {
     }
     free(args);
 }
+
 /**
- * @brief  Funzione per il movimento dei coccodrilli
+ * @brief  Function for the movement of the crocodile
  * @param  arg -> crocodile_obj, distance
  */
-void* Crocodile(void *arg) {
-
+void* crocodile_fun(void *arg) {
     void **args = (void **)arg;
     Item crocodile = *(Item *)args[0];
     int distance = *(int*)args[1];
     free(args[1]);
     free(args);
-
     int random_shot, active = FALSE;
-
     pthread_t thread_bullet = 0;
+    continue_usleep(distance);        // wait for the spawn of the crocodile
 
-    continue_usleep(distance);
-
-    // set cleanup function che uccide il thread bullet se non è terminato 
+    // cleanup function that kills the bullet thread if it is not terminated
     void **args_cleanup = malloc(2 * sizeof(void*));
     args_cleanup[0] = &thread_bullet;
     args_cleanup[1] = &active;
     pthread_cleanup_push(crocodile_cleanup_function, args_cleanup);
 
+    // movement of the crocodile
     while ( (crocodile.extra == 1) ? crocodile.x < GAME_WIDTH + 1 : crocodile.x > -CROCODILE_DIM_X-1 ) {
-        
-        random_shot = rand_range(0, current_difficulty.shot_range);
-        int shot_speed = crocodile.speed - current_difficulty.crocodile_bullet_speed;
-
+        random_shot = rand_range(0, current_difficulty.shot_range);                      // generate a random number to shoot
+        int shot_speed = crocodile.speed - current_difficulty.crocodile_bullet_speed;    // calculate and set the speed of the bullet
         crocodile.x += crocodile.extra;
-
+        // if the random number is 1 and the crocodile is not active, a bullet is shot
         if(random_shot == 1 && active == FALSE) {
-
             void *arg;
             Item* bullet = malloc(sizeof(Item));
-
             int x_offset = current_difficulty.shotload_time / crocodile.speed + 1;
-
+            // set bullet properties
             bullet->id = crocodile.id - 2 + CROCODILE_MIN_BULLETS_ID;
             bullet->y = crocodile.y + 1;
             bullet->x = crocodile.extra == 1 ? crocodile.x + CROCODILE_DIM_X + 1 + x_offset : crocodile.x - x_offset;
             bullet->speed = shot_speed;
             bullet->extra = 1;
-
             arg = bullet;
+            // create the bullet thread and set active to TRUE
             if (crocodile.extra == 1)
                 pthread_create(&thread_bullet, NULL, bullet_right_crocodile, arg);
             else
                 pthread_create(&thread_bullet, NULL, bullet_left_crocodile, arg);
-
             active = TRUE;
         }
+        //check if the bullet is still active
         else if (active == TRUE)
         {   
             if(pthread_tryjoin_np(thread_bullet, NULL) == 0)
@@ -175,17 +173,14 @@ void* Crocodile(void *arg) {
             }
         }
 
-        // test per punti di cancellazione in sospeso prima di scrivere sul buffer e prima di una probabile pausa
+        // check if there are any pending threads
         pthread_testcancel();
-        
-        // eseguita se la pausa è stata chiamata dall'utente
+        // pause the thread (runs if the user requests a break)
         suspend_thread();
 
-        // scrittura sul buffer
         buffer_push(&buffer, crocodile); 
         usleep(crocodile.speed);
     }
     pthread_cleanup_pop(1);
     return 0;
-    //usleep(rand_range(0, crocodile.speed * (CROCODILE_DIM_X) / 3));
 }

@@ -2,34 +2,32 @@
 
 #define NUM_OPTIONS 4
 
-
+/**
+ * @brief  Home menu function
+ * @param  win start window 
+ * @param  menu_options[] array of menu options
+ */
 int showMenu(WINDOW *win, char *menu_options[]) {
     ITEM *items[NUM_OPTIONS + 1]; // (+1 for NULL termination)
     MENU *menu;
     int choice, selected;
-
     // Create menu items
     for (int i = 0; i < NUM_OPTIONS; i++) {
         items[i] = new_item(menu_options[i], NULL);
     }
-    items[NUM_OPTIONS] = NULL; // NULL per termination
+    items[NUM_OPTIONS] = NULL;
 
-    // crea il menu
+    // create menu
     menu = new_menu(items);
     set_menu_win(menu, win);
     set_menu_sub(menu, derwin(win, NUM_OPTIONS + 2, 30, 2, 5)); // suubwindow
     set_menu_mark(menu, " > ");
-
     keypad(win, TRUE);
-
     box(win, 0, 0);
-    wrefresh(win);
-
-    // Display menu
     post_menu(menu);
     wrefresh(win);
-
-    while ((choice = wgetch(win)) != 10) { // aspetta il tasto ENTER
+    // menu navigation
+    while ((choice = wgetch(win)) != 10) { // 10 is the enter key
         switch (choice) {
             case KEY_DOWN:
                 menu_driver(menu, REQ_DOWN_ITEM);
@@ -40,24 +38,23 @@ int showMenu(WINDOW *win, char *menu_options[]) {
         }
         wrefresh(win);
     }
-
     selected = item_index(current_item(menu));
-
-
     unpost_menu(menu);
     free_menu(menu);
     for (int i = 0; i < NUM_OPTIONS; i++) {
         free_item(items[i]);
     }
-
     return selected;
 }
 
 
+/**
+ * @brief  Print the rules of the game
+ * @param  win start window 
+ */
 void print_rules(WINDOW *win){
     werase(win); 
     box(win, 0, 0); 
-
     int y = 2; // Start position
     mvwprintw(win, y++, 2, "RULES:");
     mvwprintw(win, y++, 2, "1. Move the frog using arrow keys.");
@@ -70,20 +67,21 @@ void print_rules(WINDOW *win){
     mvwprintw(win, y++, 2, "8. The higher the difficulty, the faster the enemies will be, and the slower you will be.");
     mvwprintw(win, y++, 2, "9. Everyone loves cats, right?.");
     mvwprintw(win, y++, 2, "10. Press 'q' to quit at any time to quit the game.");
-    
     mvwprintw(win, y + 2, 2, "Press any key to return...");
-
     wrefresh(win); 
     wgetch(win);  
 }
 
+
+/**
+ * @brief  Print kitten sprite
+ * @param  game game window 
+ */
 void printkitten(WINDOW *game) {
     werase(game);  
     box(game, 0, 0);
-
     int start_y = 1; 
     int start_x = 2;
-
     mvwprintw(game, start_y++, start_x, "                                                                                                    ");
     mvwprintw(game, start_y++, start_x, "                                                                                                    ");
     mvwprintw(game, start_y++, start_x, "                                                                                                    ");
@@ -123,10 +121,7 @@ void printkitten(WINDOW *game) {
     mvwprintw(game, start_y++, start_x, "                   ~????77!7!!?J?JJ7!!!!!!!??7??77!~~~!!!!!!!!~!!!77~.                              ");
     mvwprintw(game, start_y++, start_x, "                   ~777777?JJ?7J???7!!777!7?J??77!!!!~!!!!7!!!!!!!!77~.                             ");
     mvwprintw(game, start_y++, start_x, "                   ^!!!!~~!!7JJJYJ?7!!!7!!7JYJJJY?77!!~~!!!!!!!!!!7777~:.                           ");
-
     mvwprintw(game, start_y + 2, start_x, "Press any key to exit...");
-
     wrefresh(game); 
-
     wgetch(game); 
 }

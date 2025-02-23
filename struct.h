@@ -11,7 +11,7 @@ typedef struct {
     int y;
     int x;
     int speed;
-    int extra; // direzione per il coccodrillo, tipo per il proiettile o stato del proiettile
+    int extra; // is used for crocodile direction, projectile type and status
 } Item;
 
 typedef struct {
@@ -28,8 +28,8 @@ typedef struct {
 typedef struct {
     Item buffer[BUFFER_SIZE];
     int in, out;
-    sem_t sem_spazi;    // Semaforo per gli spazi liberi
-    sem_t sem_elementi; // Semaforo per gli elementi disponibili
+    sem_t sem_spazi;    
+    sem_t sem_elementi; 
     pthread_mutex_t mutex;
 } shared_buffer_t;
 

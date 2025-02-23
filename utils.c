@@ -3,23 +3,24 @@
 pthread_mutex_t m_suspend_mutex;  // mutex per sospendere i thread
 pthread_cond_t m_resume_cond;     // variabile per riprendere i thread dopo la pausa
 
+
 /**
- * Funzione per generare un numero casuale compreso tra min e max
- * @param min valore minimo
- * @param max valore massimo
- * @return numero casuale
-*/
+ * @brief  Generate a random number between min and max
+ * @param  min minimum value
+ * @param  max maximum value
+ * @return random number
+ */
 int rand_range(int min, int max) {
     return rand() % (max - min + 1) + min;
 }
 
+
 /**
- * Funziona come la sleep ma non viene interrotta da un segnale
- * @param microseconds numero di microsecondi
-*/
+ * @brief  usleep function not interruptible by signal
+ * @param  microseconds time to sleep
+ */
 void continue_usleep(long microseconds) {
     long elapsed = 0;
-
     while (elapsed < microseconds) {
         suspend_thread();
         usleep(1000);
@@ -27,50 +28,42 @@ void continue_usleep(long microseconds) {
     }
 }
 
+
 void init_suspend_resume() {
     pthread_mutex_init(&m_suspend_mutex, NULL);
     pthread_cond_init(&m_resume_cond, NULL);
 }
 
 /**
- * Sospende i thread se pause_flag == 1 (usata per le pause del gioco)
-*/
+ * @brief  Pause threads if pause_flag == 1 (used for game pauses)
+ */
 void suspend_thread() {
     pthread_mutex_lock(&m_suspend_mutex);
-    
     while (pause_flag == 1) {
         pthread_cond_wait(&m_resume_cond, &m_suspend_mutex);
     }
-
     pthread_mutex_unlock(&m_suspend_mutex);
 }
+
 
 /**
- * Riprende i thread impostando pause_flag = 0 e inviando un segnale a tutti i thread in attesa
-*/
+ * @brief  Resume threads if pause_flag == 0 
+ */
 void resume_threads() {
     pthread_mutex_lock(&m_suspend_mutex);
-    
     pause_flag = 0;
-    
     pthread_cond_broadcast(&m_resume_cond);
-    
     pthread_mutex_unlock(&m_suspend_mutex);
 }
 
-void debuglog(char *message, int arg){
-    FILE *f = fopen("debuglog.logs", "a");
-    if (f == NULL)
-    {
-        printf("Error opening file!\n");
-        exit(1);
-    }
-    fprintf(f, message, arg);
-    fclose(f);
-}
 
+/**
+ * @brief  Function to start the colors
+ */
 void start_colors(){
     start_color();
+
+    // define new colors
     init_color(COLOR_DARKGREEN, 0, 400, 0);
     init_color(COLOR_GREY, 600, 600, 600);
     init_color(COLOR_DEEPGREEN, 28, 163, 32);
@@ -86,7 +79,7 @@ void start_colors(){
     init_color(COLOR_RIVER_HARD,75, 90, 369);
     init_color(COLOR_ORANGE, 949, 61, 200);
 
-    // Definizione delle coppie di colori
+    // define new color pairs
     init_pair(1, COLOR_GREEN, COLOR_GREEN);
     init_pair(2, COLOR_GREY, COLOR_GREY);  
     init_pair(3, COLOR_BLACK, COLOR_BLUE);

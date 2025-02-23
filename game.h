@@ -49,6 +49,7 @@
 // define reset bullets
 #define RESET_FROG_BULLET -8
 #define RESET_CROCODILE_BULLET -18
+#define BULLET_BEFORE_SHOT -5
 
 // endgame ids
 #define MANCHE_LOST 0

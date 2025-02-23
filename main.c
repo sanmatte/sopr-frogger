@@ -1,6 +1,6 @@
 #include "main.h"
 
-// Menu options
+// menu options
 char *menu_options[] = {
     "GIOCA",
     "Seleziona Difficoltà",
@@ -8,6 +8,7 @@ char *menu_options[] = {
     "Esci"
 };
 
+// difficulty options
 char *difficulties[] = {
     "Facile",
     "Medio",
@@ -15,6 +16,7 @@ char *difficulties[] = {
     "Torna al menu"
 };
 
+// difficulty levels and their settings
 const Difficulty EASY = {
     .bullets_speed = 30000,
     .crocodile_speed_max = 150000,
@@ -35,7 +37,6 @@ const Difficulty MEDIUM = {
     .river_color = 3,
     .shotload_time = 1200000
 };
-
 const Difficulty HARD = {
     .bullets_speed = 30000,
     .crocodile_speed_max = 250000,
@@ -48,17 +49,17 @@ const Difficulty HARD = {
 };
 
 extern Difficulty current_difficulty;
-
-
 Difficulty current_difficulty;
 
 
+/**
+ * @brief  home screen management function
+ */
 int main(){
     setlocale(LC_ALL, "");
     initscr();start_colors();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
-    
-    current_difficulty = MEDIUM;
-
+    current_difficulty = MEDIUM; // default difficulty
+    //check if the window is too small
     if(LINES < GAME_HEIGHT || COLS < GAME_WIDTH){
         WINDOW *err_screen = newwin(0, 0, 0, 0);
         while(LINES < GAME_HEIGHT || COLS < GAME_WIDTH){
@@ -71,21 +72,16 @@ int main(){
         wrefresh(err_screen);
         delwin(err_screen);
     }
-    
-    // finestra di gioco centrata
-    WINDOW *win = newwin(GAME_HEIGHT, GAME_WIDTH, (LINES - GAME_HEIGHT)/2, (COLS - GAME_WIDTH)/2);
 
+    WINDOW *win = newwin(GAME_HEIGHT, GAME_WIDTH, (LINES - GAME_HEIGHT)/2, (COLS - GAME_WIDTH)/2);
     box(win, 0, 0);
     wrefresh(win);
     keypad(win, TRUE);
-
     int return_to_menu = 0;
-
     do{
         return_to_menu = 0;
         print_frogger_sprite(win);
         int selection = showMenu(win, menu_options);
-
         switch (selection)
         {
         case 0: //play
@@ -93,9 +89,8 @@ int main(){
             return_to_menu = 1;
             werase(win);
             wrefresh(win);
-            //! TOFIX
             break;
-        case 1:
+        case 1: 
             selection = showMenu(win, difficulties);
             switch (selection) {
             case 0:
@@ -107,7 +102,7 @@ int main(){
             case 2:
                 current_difficulty = HARD;
                 break;
-            case 3: // return to menu
+            case 3:
                 break;
             }
             return_to_menu = 1;

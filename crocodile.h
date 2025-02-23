@@ -30,7 +30,7 @@ extern int manche;
 #define STREAM_NUMBER 8
 
 void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]);
-void* Crocodile(void* args);
+void* crocodile_fun(void* args);
 
 extern shared_buffer_t buffer;
 
