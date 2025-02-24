@@ -7,7 +7,7 @@ LIBS = -lncursesw -lmenuw
 
 SRC = $(wildcard *.c) # compile all .c files in the directory
 HEADERS = $(wildcard *.h)
-TARGET = output
+TARGET = frogger_resurrection
 
 all: $(TARGET)
 

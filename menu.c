@@ -7,11 +7,11 @@
  * @param  menu_options[] array of menu options
  */
 int showMenu(WINDOW *win, char *menu_options[]) {
-    ITEM *items[NUM_OPTIONS + 1]; //+1 for NULL termination
+    ITEM *items[NUM_OPTIONS + 1]; // +1 for NULL termination
     MENU *menu;
     int choice, selected;
 
-    // Create menu items
+    // create menu items
     for (int i = 0; i < NUM_OPTIONS; i++) {
         items[i] = new_item(menu_options[i], NULL);
     }
@@ -19,19 +19,18 @@ int showMenu(WINDOW *win, char *menu_options[]) {
 
     menu = new_menu(items);
     set_menu_win(menu, win);
-    set_menu_sub(menu, derwin(win, NUM_OPTIONS + 2, 30, 2, 5)); // Subwindow for items
-    set_menu_mark(menu, " > "); // Highlight marker
-
+    set_menu_sub(menu, derwin(win, NUM_OPTIONS + 2, 30, 2, 5)); // subwindow for items
+    set_menu_mark(menu, " > ");
     keypad(win, TRUE);
 
+    // display menu
     box(win, 0, 0);
     wrefresh(win);
-
-    // Display menu
     post_menu(menu);
     wrefresh(win);
 
-    while ((choice = wgetch(win)) != 10) { // loop fino a che l'utente preme invio
+    // loop until the user press enter
+    while ((choice = wgetch(win)) != 10) { 
         switch (choice) {
             case KEY_DOWN:
                 menu_driver(menu, REQ_DOWN_ITEM);
@@ -44,13 +43,11 @@ int showMenu(WINDOW *win, char *menu_options[]) {
     }
 
     selected = item_index(current_item(menu));
-
     unpost_menu(menu);
     free_menu(menu);
     for (int i = 0; i < NUM_OPTIONS; i++) {
         free_item(items[i]);
     }
-
     return selected; 
 }
 

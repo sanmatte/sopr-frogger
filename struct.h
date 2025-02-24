@@ -6,7 +6,7 @@ typedef struct {
     int y;
     int x;
     int speed;
-    int extra; // direzione per il coccodrillo e stato per la rana
+    int extra;   // is used for crocodile direction, projectile type and status
 } Item;
 
 typedef struct {

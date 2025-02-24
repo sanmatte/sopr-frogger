@@ -87,7 +87,7 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
     int active = FALSE;            // Check if the bullet is active
     pid_t bullet_pid = -1; 
     signal(SIGUSR1, handlesignal); // Ignore SIGUSR1 signal
-    while (1) {
+    while ((crocodile->extra == 1) ? crocodile->x < GAME_WIDTH + 1 : crocodile->x > -CROCODILE_DIM_X-1) {
         random_shot = rand_range(0, current_difficulty.shot_range); 
         int shot_speed = crocodile->speed - current_difficulty.crocodile_bullet_speed;
         // Check if the bullet process has exited
@@ -98,7 +98,6 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
                 active = FALSE; // Reset active when the bullet exits
             }
         }
-
         // Check if the bullet has exploded
         if (bullet_pid != -1 && exploded)
         {
@@ -111,44 +110,27 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
             bullet_pid = -1;
             exploded = FALSE;
         }
-        
-        // Move the crocodile
-        if (crocodile->extra == 1 && crocodile->x < GAME_WIDTH+1) {
-            crocodile->x += 1;
-            // Shoot bullet
-            if (random_shot == 1 && active == FALSE) {
-                bullet_pid = fork();
-                if (bullet_pid == 0) {
-                    setpgid(0, group_pid); 
-                    int x_offset = current_difficulty.shotload_time / crocodile->speed + 1;    // space that the crocodile moves in the 1 sec
-                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, BULLET_BEFORE_SHOT, crocodile->x + CROCODILE_DIM_X + x_offset, shot_speed, 0};
-                    bullet.extra = 1;
-                    write(pipe_fds[1], &bullet, sizeof(Item));
-                    usleep(current_difficulty.shotload_time);     // time to load the bullet 
-                    bullet.y = crocodile->y + 1;
+
+        crocodile->x += crocodile->extra; // move crocodile
+        // shoot bullet
+        if (random_shot == 1 && active == FALSE) {
+            bullet_pid = fork();
+            if (bullet_pid == 0) {
+                setpgid(0, group_pid); 
+                int x_offset = current_difficulty.shotload_time / crocodile->speed + 1;    // space that the crocodile moves in the 1 sec
+                Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, BULLET_BEFORE_SHOT, crocodile->x + CROCODILE_DIM_X + x_offset, shot_speed, 1};
+                bullet.x = crocodile->extra == 1 ? crocodile->x + CROCODILE_DIM_X +1 + x_offset : crocodile->x - x_offset;  // set the x of the projectile based on the direction of the crocodile
+                write(pipe_fds[1], &bullet, sizeof(Item));
+                usleep(current_difficulty.shotload_time);     // time to load the bullet 
+                bullet.y = crocodile->y + 1;
+                if(crocodile->extra == 1){
                     crocodile_bullet_right_controller(&bullet, pipe_fds);
                 }
-                active = TRUE;
-            }
-        // Move the crocodile
-        } else if (crocodile->extra == -1 && crocodile->x > -CROCODILE_DIM_X-1) {
-            crocodile->x -= 1;
-            random_shot = rand_range(0, current_difficulty.shot_range);
-            // Shoot bullet
-            if (random_shot == 1 && active == FALSE) {
-                bullet_pid = fork();
-                if (bullet_pid == 0) {
-                    setpgid(0, group_pid); 
-                    int x_offset = current_difficulty.shotload_time / crocodile->speed + 1;
-                    Item bullet = {crocodile->id - 2 + CROCODILE_MIN_BULLETS_ID, BULLET_BEFORE_SHOT, crocodile->x - x_offset, shot_speed, 0};
-                    bullet.extra = 1;
-                    write(pipe_fds[1], &bullet, sizeof(Item));
-                    usleep(current_difficulty.shotload_time);
-                    bullet.y = crocodile->y + 1;
+                else{
                     crocodile_bullet_left_controller(&bullet, pipe_fds);
                 }
-                active = TRUE; // Set active when a bullet is fired
             }
+            active = TRUE;
         }
         // Write crocodile position to the pipe
         if (pipe_fds != NULL) {
@@ -158,4 +140,3 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
         usleep(crocodile->speed);
     }
 }
-

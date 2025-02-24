@@ -22,9 +22,9 @@
  * @param  score current score
  */
 void print_score(WINDOW *game, int manche, int timer, int score){
-	//lives counter
 	mvwprintw(game, 0, 1, "                  ");
 	wattron(game, COLOR_PAIR(6));
+	// print of remaining lives
 	switch(manche){
 		case 3:
 			mvwprintw(game, 0, 1, "LIFES: %s", "♥ ♥ ♥");
@@ -43,7 +43,7 @@ void print_score(WINDOW *game, int manche, int timer, int score){
 	}
 	wattroff(game, COLOR_PAIR(2));
 	
-	//score counter
+	// print of the score based on the current value
 	switch(score){
 		case 0 ... 49:
 			wattron(game, COLOR_PAIR(6));
@@ -65,25 +65,20 @@ void print_score(WINDOW *game, int manche, int timer, int score){
 			break;
 	}
 	
-	//timer
-	// Cancella la riga del timer
+	// deprint of the timer
 	for(int i = 0; i < 60; i++){
 		mvwprintw(game, 0, GAME_WIDTH-60+i, " ");
 	}
-
-	// Se il timer è sotto i 10 secondi, cambia colore e lampeggia
-	if(timer <= 10){
+	// if the timer is less than 15 seconds, it starts to blink
+	if(timer <= 15){
 		wattron(game, COLOR_PAIR(6) | A_BLINK);
 	} else {
 		wattron(game, COLOR_PAIR(1));
 	}
-
-	// Disegna il timer
+	// print of the timer
 	for(int i = GAME_WIDTH-1; i > GAME_WIDTH-1-timer; i--){
 		mvwprintw(game, 0, i, "█");
 	}
-
-	// Spegne gli attributi
 	wattroff(game, COLOR_PAIR(1));
 	wattroff(game, COLOR_PAIR(6) | A_BLINK);
 }
@@ -100,6 +95,7 @@ void print_background(WINDOW *game, bool *dens){
 		mvwhline(game, y, 0, ' ', GAME_WIDTH);
 		wattroff(game, COLOR_PAIR(8));
 		for(int i = 0; i < DENS_NUMBER; i++){
+			// print the dens that are still open
 			if(dens[i] == TRUE){
 				switch(i){
 					case 0:
@@ -151,20 +147,19 @@ void print_background(WINDOW *game, bool *dens){
 			}
 		}
 	}
-	 
-
+	// print of the sidewalk
 	wattron(game, COLOR_PAIR(10));  
 	for (int y = DENS_HEIGHT; y < SIDEWALK_HEIGHT_1; y++) {
 		mvwhline(game, y, 0, ' ', GAME_WIDTH);
 	}
 	wattroff(game, COLOR_PAIR(10)); 
-
+	// print of the river based on the difficulty
 	wattron(game, COLOR_PAIR(current_difficulty.river_color));  
 	for (int y = SIDEWALK_HEIGHT_1; y <= SIDEWALK_HEIGHT_2; y++) {
 		mvwhline(game, y, 0, ' ', GAME_WIDTH);
 	}
 	wattroff(game, COLOR_PAIR(current_difficulty.river_color));
-	
+	// print of the sidewalk
 	wattron(game, COLOR_PAIR(10));  
 	for (int y = GAME_HEIGHT-1; y > SIDEWALK_HEIGHT_2; y--) {
 		mvwhline(game, y, 0, ' ', GAME_WIDTH);
@@ -179,6 +174,7 @@ void print_background(WINDOW *game, bool *dens){
  * @param  frog frog object
  */
 void print_frog(WINDOW *game, Item *frog){
+	// frog sprite
 	static const char* sprite_matrix[FROG_DIM_Y][FROG_DIM_X] = {
         {"▄", "█", "", "▀", "▌", "▐", "▀", "", "█", "▄"},
         {"", "▀", "█", " ", "▄", "▀", "▄", "▄", "▀", ""},
@@ -186,6 +182,7 @@ void print_frog(WINDOW *game, Item *frog){
         {"▀", "█", "▀", "", "", "", "", "▀", "█", "▀"},
 	};
     
+	// print of the frog sprite
     for (int i = 0; i < FROG_DIM_Y; i++) {
         for (int j = 0; j < FROG_DIM_X; j++) {
 			if(i == 0 && (j > 2 && j < 7)){
@@ -555,80 +552,77 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 	};
 
 	char *numbers[10][5] = {
-    {
-        " ██████╗  ", 
-        "██╔═══██╗ ", 
-        "██║   ██║ ", 
-        "██╚═══██║ ", 
-        "╚██████╔╝"
-    }, // 0
-    {
-        "  ██╗ ", 
-        " ███║ ", 
-        " ╚██║ ", 
-        "  ██║ ", 
-        "  ██║ "
-    }, // 1
-    {
-        "██████╗  ", 
-        "╚════██╗ ", 
-        " █████╔╝ ", 
-        "██╔═══╝  ", 
-        "███████╗ "
-    }, // 2
-    {
-        "██████╗  ", 
-        "╚════██╗ ", 
-        " █████╔╝ ", 
-        " ╚═══██╗ ", 
-        "██████╔╝ "
-    }, // 3
-    {
-        "██╗  ██╗ ", 
-        "██║  ██║ ", 
-        "███████║ ", 
-        "╚════██║ ", 
-        "     ██║ "
-    }, // 4
-    {
-        "███████╗ ", 
-        "██╔════╝ ", 
-        "███████╗ ", 
-        "╚════██║ ", 
-        "███████║ "
-    }, // 5
-    {
-        " ██████╗ ", 
-        "██╔════╝ ", 
-        "███████╗ ", 
-        "██╔═══██╗", 
-        "╚██████╔╝"
-    }, // 6
-    {
-        "███████╗ ", 
-        "╚════██║ ", 
-        "    ██╔╝ ", 
-        "   ██╔╝  ", 
-        "   ██║   "
-    }, // 7
-    {
-        " █████╗  ", 
-        "██╔══██╗ ", 
-        " █████╔╝ ", 
-        "██╔══██╗ ", 
-        "╚█████╔╝ "
-    }, // 8
-    {
-        " ██████╗ ", 
-        "██╔═══██╗", 
-        " ███████║", 
-        " ╚════██║", 
-        " ██████╔╝"
-    }  // 9
-};
-
-	
-
+		{
+			" ██████╗  ", 
+			"██╔═══██╗ ", 
+			"██║   ██║ ", 
+			"██╚═══██║ ", 
+			"╚██████╔╝"
+		}, // 0
+		{
+			"  ██╗ ", 
+			" ███║ ", 
+			" ╚██║ ", 
+			"  ██║ ", 
+			"  ██║ "
+		}, // 1
+		{
+			"██████╗  ", 
+			"╚════██╗ ", 
+			" █████╔╝ ", 
+			"██╔═══╝  ", 
+			"███████╗ "
+		}, // 2
+		{
+			"██████╗  ", 
+			"╚════██╗ ", 
+			" █████╔╝ ", 
+			" ╚═══██╗ ", 
+			"██████╔╝ "
+		}, // 3
+		{
+			"██╗  ██╗ ", 
+			"██║  ██║ ", 
+			"███████║ ", 
+			"╚════██║ ", 
+			"     ██║ "
+		}, // 4
+		{
+			"███████╗ ", 
+			"██╔════╝ ", 
+			"███████╗ ", 
+			"╚════██║ ", 
+			"███████║ "
+		}, // 5
+		{
+			" ██████╗ ", 
+			"██╔════╝ ", 
+			"███████╗ ", 
+			"██╔═══██╗", 
+			"╚██████╔╝"
+		}, // 6
+		{
+			"███████╗ ", 
+			"╚════██║ ", 
+			"    ██╔╝ ", 
+			"   ██╔╝  ", 
+			"   ██║   "
+		}, // 7
+		{
+			" █████╗  ", 
+			"██╔══██╗ ", 
+			" █████╔╝ ", 
+			"██╔══██╗ ", 
+			"╚█████╔╝ "
+		}, // 8
+		{
+			" ██████╗ ", 
+			"██╔═══██╗", 
+			" ███████║", 
+			" ╚════██║", 
+			" ██████╔╝"
+		}  // 9
+	};
 
 	//lose screen
 	if(manche == 0){
@@ -680,9 +674,9 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 		sleep(3);
 	}
 
-	//win screen
+	// win screen
 
-	// Controlla se tutti i valori di dens[] sono FALSE
+	// check if all the dens are FALSE
 	bool all_false = true;
 	for(int i = 0; i < 5; i++){
 		if (dens[i] != FALSE) {
@@ -691,7 +685,7 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 		}
 	}
 
-	// Se tutti i valori sono FALSE, stampa la schermata di vittoria
+	// if all the dens are FALSE, print the win screen
 	if (all_false) {
 		wattron(game, COLOR_PAIR(13));
 		for(int i=0; i<GAME_HEIGHT; i++){

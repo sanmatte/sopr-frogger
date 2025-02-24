@@ -73,8 +73,9 @@ Difficulty current_difficulty;
 int main(){
     setlocale(LC_ALL, "");
     initscr();start_colors();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
-    current_difficulty = MEDIUM;
+    current_difficulty = MEDIUM;      // default difficulty
     if(LINES < GAME_HEIGHT || COLS < GAME_WIDTH){
+        //check if the window is too small
         WINDOW *err_screen = newwin(0, 0, 0, 0);
         while(LINES < GAME_HEIGHT || COLS < GAME_WIDTH){
             mvwprintw(err_screen, 1, 3, "La finestra è troppo piccola per giocare");
@@ -88,16 +89,13 @@ int main(){
         delwin(err_screen);
     }
     
-    // finestra di gioco centrata
+    // menu window
     WINDOW *win = newwin(GAME_HEIGHT, GAME_WIDTH, (LINES - GAME_HEIGHT)/2, (COLS - GAME_WIDTH)/2);
-
-    // Draw a border and refresh
     box(win, 0, 0);
     wrefresh(win);
     keypad(win, TRUE);
-
     int return_to_menu = 0;
-    // Call menu function and get user selection
+    // call menu function and get user selection
     do{
         return_to_menu = 0;
         print_frogger_sprite(win);
@@ -108,8 +106,8 @@ int main(){
         case 0: //play
             startGame(win);
             return_to_menu = 1;
-            werase(win);  // Clear the window
-            wrefresh(win);  // Refresh window
+            werase(win);  
+            wrefresh(win);  
             break;
         case 1:
             selection = showMenu(win, difficulties);
