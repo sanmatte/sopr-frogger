@@ -6,14 +6,16 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <locale.h>
+
 #include "design.h"
 #include "struct.h"
 #include "utils.h"
 #include "crocodile.h"
 #include "frog.h"
 #include "menu.h"
+#include "game.h"
 
-// Menu options
+// menu options
 char *menu_options[] = {
     "GIOCA",
     "Seleziona Difficoltà",
@@ -21,6 +23,7 @@ char *menu_options[] = {
     "Esci"
 };
 
+// difficulty options
 char *difficulties[] = {
     "Facile",
     "Medio",
@@ -28,6 +31,7 @@ char *difficulties[] = {
     "Torna al menu"
 };
 
+// difficulty levels and their settings
 const Difficulty EASY = {
     .bullets_speed = 30000,
     .crocodile_speed_max = 150000,
@@ -48,7 +52,6 @@ const Difficulty MEDIUM = {
     .river_color = 3,
     .shotload_time = 1200000
 };
-
 const Difficulty HARD = {
     .bullets_speed = 30000,
     .crocodile_speed_max = 250000,
@@ -64,12 +67,13 @@ extern Difficulty current_difficulty;
 Difficulty current_difficulty;
 
 
+/**
+ * @brief  home screen management function
+ */
 int main(){
     setlocale(LC_ALL, "");
     initscr();start_colors();curs_set(0);keypad(stdscr, TRUE);noecho();cbreak();nodelay(stdscr, TRUE);srand(time(NULL));
-
     current_difficulty = MEDIUM;
-
     if(LINES < GAME_HEIGHT || COLS < GAME_WIDTH){
         WINDOW *err_screen = newwin(0, 0, 0, 0);
         while(LINES < GAME_HEIGHT || COLS < GAME_WIDTH){
@@ -87,7 +91,7 @@ int main(){
     // finestra di gioco centrata
     WINDOW *win = newwin(GAME_HEIGHT, GAME_WIDTH, (LINES - GAME_HEIGHT)/2, (COLS - GAME_WIDTH)/2);
 
-   // Draw a border and refresh
+    // Draw a border and refresh
     box(win, 0, 0);
     wrefresh(win);
     keypad(win, TRUE);

@@ -1,8 +1,26 @@
-#include <locale.h>
 #include "design.h"
 #include "frog.h"
 #include "crocodile.h"
+#include "game.h"
+#include "menu.h"
 
+#include <signal.h>
+#include <sys/types.h>
+#include <ncurses.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <time.h>
+#include <locale.h>
+
+
+/**
+ * @brief  function for printing lives, time and score
+ * @param  game window game
+ * @param  manche number of lives left
+ * @param  timer time left
+ * @param  score current score
+ */
 void print_score(WINDOW *game, int manche, int timer, int score){
 	//lives counter
 	mvwprintw(game, 0, 1, "                  ");
@@ -71,6 +89,11 @@ void print_score(WINDOW *game, int manche, int timer, int score){
 }
 
 
+/**
+ * @brief  function for printing the background
+ * @param  game window game
+ * @param  dens array of bools that represent the presence of the dens
+ */
 void print_background(WINDOW *game, bool *dens){
 	for (int y = SCORE_HEIGHT; y < DENS_HEIGHT ; y++) {
 		wattron(game, COLOR_PAIR(8));  
@@ -149,6 +172,12 @@ void print_background(WINDOW *game, bool *dens){
 	wattroff(game, COLOR_PAIR(10));
 }
 
+
+/**
+ * @brief  function for printing the frog
+ * @param  game window game
+ * @param  frog frog object
+ */
 void print_frog(WINDOW *game, Item *frog){
 	static const char* sprite_matrix[FROG_DIM_Y][FROG_DIM_X] = {
         {"▄", "█", "", "▀", "▌", "▐", "▀", "", "█", "▄"},
@@ -462,6 +491,13 @@ void print_crocodile(WINDOW *game, Item *crocodile, int color_trigger){
 	}
 }
 
+
+/**
+ * @brief  function for printing the bullets
+ * @param  game window game
+ * @param  bullets bullets object
+ * @param  itemtype define the color of the bullets
+ */
 void print_bullets(WINDOW *game, Item *bullets, int itemtype){
 	static const char* sprite_matrix[BULLETS_DIM] = {"█"};
 	// print of the frog bullets
@@ -480,6 +516,14 @@ void print_bullets(WINDOW *game, Item *bullets, int itemtype){
 	}
 }
 
+
+/**
+ * @brief  function for printing the endgame screen
+ * @param  game window game
+ * @param  manche number of lives left
+ * @param  dens array of bools that represent the presence of the dens
+ * @param  score current score
+ */
 void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 	static const char* sprite_matrix_lose[1][5] = {
 		{
@@ -622,18 +666,16 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 		else {
 			int temp = (score/10)-10;
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 20, "%s", numbers[1][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 15, "%s", numbers[1][i]);
 			}
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 30, "%s", numbers[temp][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 22, "%s", numbers[temp][i]);
 			}
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 40, "%s", numbers[0][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 32, "%s", numbers[0][i]);
 			}
 		}
-
 		wattroff(game, COLOR_PAIR(6));
-
 		wrefresh(game);
 		sleep(3);
 	}
@@ -679,13 +721,13 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 		else {
 			int temp = (score/10)-10;
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 20, "%s", numbers[1][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 15, "%s", numbers[1][i]);
 			}
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 30, "%s", numbers[temp][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 22, "%s", numbers[temp][i]);
 			}
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 40, "%s", numbers[0][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 32, "%s", numbers[0][i]);
 			}
 		}
 		
@@ -697,6 +739,10 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 }
 
 
+/**
+ * @brief  function for printing the frogger sprite
+ * @param  win window game
+ */
 void print_frogger_sprite(WINDOW *win){
     static const char* sprite_matrix_frogger[1][5] = {
         {
@@ -759,6 +805,3 @@ void print_pause(WINDOW *pause, WINDOW *game){
 	wrefresh(game);
 	wrefresh(pause);
 }
-
-
-

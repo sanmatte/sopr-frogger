@@ -9,10 +9,15 @@
 #include <locale.h>
 #include "game.h"
 
+// Define global variables
 bool sigintdetected = FALSE;
 int manche = 3, score = 0;
 bool endgame = FALSE, dens[DENS_NUMBER] = {TRUE, TRUE, TRUE, TRUE, TRUE};
 
+/**
+ * @brief  function for the timer
+ * @param  pipe_fds: pipe file descriptors
+ */
 void game_timer(int *pipe_fds){
     Item msg = {TIMER_ID, 0, 0, 0, 0};
     while(1){
@@ -21,6 +26,12 @@ void game_timer(int *pipe_fds){
     }
 }
 
+
+/**
+ * @brief  function for calculating the score
+ * @param  timer time left
+ * @return score value
+ */
 int compute_score(int timer){
     switch(timer){
         case 31 ... TIMER_MAX:
@@ -36,6 +47,12 @@ int compute_score(int timer){
     return score;
 }
 
+
+/**
+ * @brief  function for killing all processes
+ * @param  frog: frog process id
+ * @param  pidgroup: process group id of remaining process
+ */
 void kill_all(pid_t frog, pid_t pidgroup){
     killpg(pidgroup, SIGKILL);
     pid_t pid;
@@ -45,6 +62,10 @@ void kill_all(pid_t frog, pid_t pidgroup){
     waitpid(frog, NULL, 0);
 }
 
+/**
+ * @brief  ctrl+c signal handler
+ * @param  signum: signal number
+ */
 void ctrlc_handler(int signum){
     if (signum == SIGINT)
     {
@@ -52,9 +73,13 @@ void ctrlc_handler(int signum){
     }
 }
 
+
+/**
+ * @brief  function for the start of the game
+ * @param  game game window
+ */
 void startGame(WINDOW *game) {
     setlocale(LC_ALL, "");
-    
     werase(game);  // Clear the window
     while (endgame == FALSE)
     {
@@ -96,6 +121,11 @@ void startGame(WINDOW *game) {
 }
 
 
+/**
+ * @brief  run management function
+ * @param  game game window
+ * @return int return value, 0 if you lose the manche or 1 if you enter a den
+ */
 int play(WINDOW *game) {
     /* Ritorna 0 se la manche è persa (manche --), ritorna 1 se è stata presa una tana */
     Item *frog = malloc(sizeof(Item));
@@ -312,7 +342,7 @@ int play(WINDOW *game) {
                                     int stream = i;
                                     if(frog->y >= SIDEWALK_HEIGHT_1 && frog->y < SIDEWALK_HEIGHT_2){
                                         if(frog->y == crocodiles[stream][j].y && frog->x >= crocodiles[stream][j].x && frog->x <= crocodiles[stream][j].x + CROCODILE_DIM_X - FROG_DIM_X){
-                                            if (crocodiles[stream][j].extra == 1)
+                                            if (crocodiles[stream][j].extra == -1)
                                             {
                                                 if(frog->x == 0) continue;                                                   
                                                 else frog->x += crocodiles[stream][j].extra;
@@ -325,6 +355,38 @@ int play(WINDOW *game) {
                                             print_frog(game, frog);
                                             wrefresh(game);
                                         }
+                                    }
+                                }
+
+                                // crocodiles respawn when they reach the end of the screen
+                                if(crocodiles[i][j].extra == 1 && crocodiles[i][j].x == GAME_WIDTH+1){
+                                    kill(child_pids[i*CROCODILE_STREAM_MAX_NUMBER+j+1], SIGKILL);
+                                    crocodiles[i][j].x = -CROCODILE_DIM_X;
+                                    pid_t pid_croc = fork();
+                                    if(pid_croc == 0){
+                                        setpgid(0, group_pid);
+                                        continue_usleep(rand_range(0, crocodiles[i][j].speed * (CROCODILE_DIM_X) / 3));
+                                        crocodile(pipe_fds, &crocodiles[i][j], group_pid);
+                                        _exit(0);
+                                    }
+                                    else{
+                                        setpgid(pid_croc, group_pid);
+                                        child_pids[i*CROCODILE_STREAM_MAX_NUMBER+j+1] = pid_croc;
+                                    }
+                                }
+                                else if(crocodiles[i][j].extra == -1 && crocodiles[i][j].x == -CROCODILE_DIM_X-1){
+                                    kill(child_pids[i*CROCODILE_STREAM_MAX_NUMBER+j+1], SIGKILL);
+                                    crocodiles[i][j].x = GAME_WIDTH;
+                                    pid_t pid_croc = fork();
+                                    if(pid_croc == 0){
+                                        setpgid(0, group_pid);
+                                        continue_usleep(rand_range(0, crocodiles[i][j].speed * (CROCODILE_DIM_X) / 3));
+                                        crocodile(pipe_fds, &crocodiles[i][j], group_pid);
+                                        _exit(0);
+                                    }
+                                    else{
+                                        setpgid(pid_croc, group_pid);
+                                        child_pids[i*CROCODILE_STREAM_MAX_NUMBER+j+1] = pid_croc;
                                     }
                                 }
                             }
@@ -432,7 +494,6 @@ int play(WINDOW *game) {
                         manche_result = MANCHE_LOST;
                 }
             }
-
             if (manche_result != -1)
             {
                 break;

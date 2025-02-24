@@ -3,18 +3,9 @@
 
 #include <ncurses.h>
 #include <unistd.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <ncurses.h>
-#include <stdlib.h>
-#include <sys/wait.h>
-#include <sys/time.h>
-#include <time.h>
-#include <locale.h>
 
 #include "struct.h"
-#include "game.h"
-#include "menu.h"
+
 
 //colours define
 #define COLOR_GREY 10
@@ -31,8 +22,6 @@
 #define COLOR_RIVER_EASY 21
 #define COLOR_RIVER_HARD 22
 #define COLOR_ORANGE 23
-
-
 
 // function prototipes
 void print_score(WINDOW *game, int manche, int timer, int score);

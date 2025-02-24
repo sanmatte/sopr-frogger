@@ -1,6 +1,9 @@
 #ifndef CROCODILE_H
 #define CROCODILE_H
 
+#include "struct.h"
+
+//crocodiles macros
 #define CROCODILE_MIN_ID 2
 #define CROCODILE_MAX_ID STREAM_NUMBER * CROCODILE_STREAM_MAX_NUMBER + CROCODILE_MIN_ID - 1
 #define CROCODILE_DIM_Y 4
@@ -8,6 +11,7 @@
 #define CROCODILE_SPEED_MAX 200000
 #define CROCODILE_SPEED_MIN 100000
 #define CROCODILE_STREAM_MAX_NUMBER 3
+#define STREAM_NUMBER 8
 
 //crocodiles bullets
 #define CROCODILE_MIN_BULLETS_ID 29
@@ -16,10 +20,8 @@
 
 
 extern int manche;
-#define STREAM_NUMBER 8
-#include "design.h"
-#include "struct.h"
-#include "utils.h"
+
+// crocodile functions prototypes
 void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]);
 void crocodile(int *pipe_fds, Item *crocodile, int group_pid);
 

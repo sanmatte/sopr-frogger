@@ -37,14 +37,16 @@
 #define RESET_CROCODILE_BULLET -18
 #define BULLET_BEFORE_SHOT -5
 
-#define ESC 27
-#define PAUSE_ID 69
-#define QUIT_ID 55
-
+// define status macro
 #define MANCHE_LOST 0
 #define MANCHE_WON 1
 #define GAME_QUIT 2
 #define BACK_TO_MENU 3
+
+#define ESC 27
+#define PAUSE_ID 69
+#define QUIT_ID 55
+
 // function prototipes
 void startGame(WINDOW *game);
 int play(WINDOW *game);

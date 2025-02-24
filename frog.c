@@ -1,6 +1,11 @@
 #include "frog.h"
 #include "utils.h"
+#include "game.h"
 
+/**
+ * @brief  function that manages the frog movement
+ * @param  pipe_fds: pipe file descriptors
+ */
 void frog_controller(int *pipe_fds){
     close(pipe_fds[0]); 
     int ch;
@@ -61,6 +66,12 @@ void frog_controller(int *pipe_fds){
     }
 }
 
+
+/**
+ * @brief  function that manages the right bullet movement
+ * @param  bullet_right: bullet item
+ * @param  pipe_fds: pipe file descriptors
+ */
 void bullet_right_controller(Item *bullet_right, int *pipe_fds){
     close(pipe_fds[0]);
     bullet_right->extra = 1;
@@ -72,6 +83,12 @@ void bullet_right_controller(Item *bullet_right, int *pipe_fds){
     _exit(0);
 }
 
+
+/**
+ * @brief  function that manages the left bullet movement
+ * @param  bullet_left: bullet item
+ * @param  pipe_fds: pipe file descriptors
+ */
 void bullet_left_controller(Item *bullet_left, int *pipe_fds){
     close(pipe_fds[0]);
     bullet_left->extra = -1;

@@ -8,6 +8,9 @@
 extern int manche;
 extern bool frog_on_crocodile;
 
+// define reset manche
+#define RESET_MANCHE_SIG SIGUSR2
+
 // define frog
 #define FROG_ID 1
 #define FROG_DIM_Y 4
@@ -20,9 +23,9 @@ extern bool frog_on_crocodile;
 #define BULLETS_DIM 1
 #define BULLETS_SPEED 20000
 
+// function prototypes
 void frog_controller(int *pipe_fds);
 void bullet_right_controller(Item *bullet_right, int *pipe_fds);
 void bullet_left_controller(Item *bullet_left, int *pipe_fds);
 
-#define RESET_MANCHE_SIG SIGUSR2
 #endif

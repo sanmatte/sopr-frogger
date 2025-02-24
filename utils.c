@@ -17,7 +17,6 @@ int rand_range(int min, int max) {
  */
 void start_colors(){
     start_color();
-
     // define new colors
     init_color(COLOR_DARKGREEN, 0, 400, 0);
     init_color(COLOR_GREY, 600, 600, 600);

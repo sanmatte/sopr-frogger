@@ -1,10 +1,11 @@
 #include "menu.h"
 #include <stdlib.h>
 
-#define NUM_OPTIONS 4
-
-
-
+/**
+ * @brief  Home menu function
+ * @param  win start window 
+ * @param  menu_options[] array of menu options
+ */
 int showMenu(WINDOW *win, char *menu_options[]) {
     ITEM *items[NUM_OPTIONS + 1]; //+1 for NULL termination
     MENU *menu;
@@ -53,12 +54,13 @@ int showMenu(WINDOW *win, char *menu_options[]) {
     return selected; 
 }
 
-
+/**
+ * @brief  Print the rules of the game
+ * @param  win start window 
+ */
 void print_rules(WINDOW *win){
-
     werase(win); 
     box(win, 0, 0); 
-
     int y = 2; 
     mvwprintw(win, y++, 2, "RULES:");
     mvwprintw(win, y++, 2, "1. Move the frog using arrow keys.");
@@ -78,6 +80,11 @@ void print_rules(WINDOW *win){
     wgetch(win);   
 }
 
+
+/**
+ * @brief  Print a kitten
+ * @param  game game window 
+ */
 void printkitten(WINDOW *game) {
     werase(game);  
     box(game, 0, 0); 
