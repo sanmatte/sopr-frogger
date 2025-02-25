@@ -250,44 +250,77 @@ int play(WINDOW *game) {
     while (TRUE) {
         int bytes_received = read(client_fd, &msg, sizeof(msg));
         if (bytes_received > 0) {
-            // frog movement if it is inside the game window
-            if (frog->x + msg.x >= 0 && frog->x + msg.x <= GAME_WIDTH - FROG_DIM_X && frog->y + msg.y >= 0 && frog->y + msg.y <= GAME_HEIGHT - FROG_DIM_Y) {
-                frog->y += msg.y;
-                frog->x += msg.x;
-                frog->extra = msg.extra;
-                // frog bullet activation
-                if (frog->extra == 1 && is_bullet_frog_active == 0 && (int)thread_bullet_right == -1 && (int)thread_bullet_left == -1) {
-                    is_bullet_frog_active = 1;
-                    // set right bullet properties
-                    bullet_right->x = frog->x + FROG_DIM_X;
-                    bullet_right->y = frog->y + 1;
-                    bullet_right->extra = 1;
-                    void *argr = bullet_right;  
-                    // create right bullet thread
-                    if (pthread_create(&thread_bullet_right, NULL, bullet_right_fun, argr) != 0) {
-                        perror("Errore nella creazione del thread per il proiettile destro");
-                    }
-                    // set right bullet properties
-                    bullet_left->x = frog->x - 1;
-                    bullet_left->y = frog->y + 1;
-                    bullet_left->extra = 1;
-                    void* argl = bullet_left;
-                    // create left bullet thread
-                    if (pthread_create(&thread_bullet_left, NULL, bullet_left_fun, argl) != 0) {
-                        perror("Errore nella creazione del thread per il proiettile destro");
-                    }
-                    
-                }
-                // frog bullet deactivation
-                else
-                    {
-                        if (bullet_left->extra == 0 && bullet_right->extra == 0)
-                        {
-                            is_bullet_frog_active = 0;
-                            thread_bullet_right = -1;
-                            thread_bullet_left = -1;
+            switch (msg.id)
+            {
+            case FROG_ID:
+                // frog movement if it is inside the game window
+                if (frog->x + msg.x >= 0 && frog->x + msg.x <= GAME_WIDTH - FROG_DIM_X && frog->y + msg.y >= 0 && frog->y + msg.y <= GAME_HEIGHT - FROG_DIM_Y) {
+                    frog->y += msg.y;
+                    frog->x += msg.x;
+                    frog->extra = msg.extra;
+                    // frog bullet activation
+                    if (frog->extra == 1 && is_bullet_frog_active == 0 && (int)thread_bullet_right == -1 && (int)thread_bullet_left == -1) {
+                        is_bullet_frog_active = 1;
+                        // set right bullet properties
+                        bullet_right->x = frog->x + FROG_DIM_X;
+                        bullet_right->y = frog->y + 1;
+                        bullet_right->extra = 1;
+                        void *argr = bullet_right;  
+                        // create right bullet thread
+                        if (pthread_create(&thread_bullet_right, NULL, bullet_right_fun, argr) != 0) {
+                            perror("Errore nella creazione del thread per il proiettile destro");
                         }
-                    } 
+                        // set right bullet properties
+                        bullet_left->x = frog->x - 1;
+                        bullet_left->y = frog->y + 1;
+                        bullet_left->extra = 1;
+                        void* argl = bullet_left;
+                        // create left bullet thread
+                        if (pthread_create(&thread_bullet_left, NULL, bullet_left_fun, argl) != 0) {
+                            perror("Errore nella creazione del thread per il proiettile destro");
+                        }
+                        
+                    }
+                    // frog bullet deactivation
+                    else
+                        {
+                            if (bullet_left->extra == 0 && bullet_right->extra == 0)
+                            {
+                                is_bullet_frog_active = 0;
+                                thread_bullet_right = -1;
+                                thread_bullet_left = -1;
+                            }
+                        } 
+                }
+                break;
+            case PAUSE_ID:
+                pthread_mutex_lock(&m_suspend_mutex);
+                pause_flag = 1;
+                pthread_mutex_unlock(&m_suspend_mutex);
+                WINDOW *pause = newwin(7, 28, (GAME_HEIGHT/2) + 3,  (GAME_WIDTH/2) + 8);
+                print_pause(pause, game);
+                int ch = getchar(); 
+                // wait for the user to press a key
+                while (ch != 'p' && ch != 'q' && ch != 'm') {
+                    ch = getchar();
+                }
+                if(ch == 'p'){
+                    resume_threads();
+                }
+                else if(ch == 'q'){
+                    resume_threads();
+                    endwin();
+                    manche_result = GAME_QUIT;
+                }
+                else if(ch == 'm'){
+                    resume_threads();
+                    manche_result = BACK_TO_MENU;
+                }
+                break;
+            case QUIT_ID:
+                endwin();
+                manche_result = GAME_QUIT;
+                break;  
             }
         }
         msg = buffer_pop(&buffer);
@@ -333,34 +366,6 @@ int play(WINDOW *game) {
                     manche_result = MANCHE_LOST;
                 }
                 break;
-            case PAUSE_ID:
-                pthread_mutex_lock(&m_suspend_mutex);
-                pause_flag = 1;
-                pthread_mutex_unlock(&m_suspend_mutex);
-                WINDOW *pause = newwin(7, 28, (GAME_HEIGHT/2) + 3,  (GAME_WIDTH/2) + 8);
-                print_pause(pause, game);
-                int ch = getchar(); 
-                // wait for the user to press a key
-                while (ch != 'p' && ch != 'q' && ch != 'm') {
-                    ch = getchar();
-                }
-                if(ch == 'p'){
-                    resume_threads();
-                }
-                else if(ch == 'q'){
-                    resume_threads();
-                    endwin();
-                    manche_result = GAME_QUIT;
-                }
-                else if(ch == 'm'){
-                    resume_threads();
-                    manche_result = BACK_TO_MENU;
-                }
-                break;
-            case QUIT_ID:
-                endwin();
-                manche_result = GAME_QUIT;
-                break;  
             default:
                 // check if the message is a crocodile
                 if(msg.id >= CROCODILE_MIN_ID && msg.id <= CROCODILE_MAX_ID){
