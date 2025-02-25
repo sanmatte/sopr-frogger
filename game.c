@@ -8,6 +8,11 @@
 #include <errno.h>
 #include <locale.h>
 #include "game.h"
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <fcntl.h>
+
+#define SOCKET_PATH "/tmp/mysocket"
 
 // Define global variables
 bool sigintdetected = FALSE;
@@ -126,6 +131,11 @@ void startGame(WINDOW *game) {
  * @return int return value, 0 if you lose the manche or 1 if you enter a den
  */
 int play(WINDOW *game) {
+
+    int server_fd, client_fd;
+    struct sockaddr_un addr;
+
+
     // frog initialization
     Item *frog = malloc(sizeof(Item));
     frog->id = FROG_ID;
@@ -244,13 +254,53 @@ int play(WINDOW *game) {
         }
     }
 
+    // Create socket
+    server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (server_fd == -1) {
+        perror("socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Bind socket to an address
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, SOCKET_PATH, sizeof(addr.sun_path) - 1);
+    
+    unlink(SOCKET_PATH); // Remove any existing socket file
+
+    if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
+        perror("bind");
+        exit(EXIT_FAILURE);
+    }
+
+    // Listen for incoming connections
+    if (listen(server_fd, 5) == -1) {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
+
+    // Accept client connection
+    client_fd = accept(server_fd, NULL, NULL);
+    if (client_fd == -1) {
+        perror("accept");
+        exit(EXIT_FAILURE);
+    }
+
+    int flags = fcntl(client_fd, F_GETFL, 0);
+    fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
+
     Item msg;
     pid_t bullet_pid_left, bullet_pid_right;     // frog bullets pid
     int manche_result = -1;
     signal(SIGINT, ctrlc_handler);
     while (TRUE) {
-        if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
-            switch (msg.id) {
+        int has_received = FALSE;
+
+        int bytes_received = recv(client_fd, &msg, sizeof(Item), 0);
+        if (bytes_received > 0) {
+            has_received = TRUE;
+            switch (msg.id)
+            {
                 // FROG case
                 case FROG_ID:
                     // frog movement if it is inside the game window
@@ -299,6 +349,34 @@ int play(WINDOW *game) {
                         }
                     }
                     break;
+                case PAUSE_ID:
+                    WINDOW *pause = newwin(5, 23, (GAME_HEIGHT/2) + 4,  (GAME_WIDTH/2) + 10);
+                    print_pause(pause, game);
+                    killpg(group_pid, SIGSTOP);  // pause all child processes
+                    int ch = getchar();          // wait for user input
+                    while (ch != 'p' && ch != 'q' && ch != 'm') {
+                        ch = getchar();
+                    }
+                    if(ch == 'p'){
+                        killpg(group_pid, SIGCONT);  // Resume all child processes
+                    }
+                    else if(ch == 'q'){
+                        endwin();
+                        manche_result = GAME_QUIT;
+                    }
+                    else if(ch == 'm'){
+                        manche_result = BACK_TO_MENU;
+                    }
+                    break;
+                case QUIT_ID:
+                    endwin();
+                    manche_result = GAME_QUIT;
+                    break;  
+            }
+        }
+        if (read(pipe_fds[0], &msg, sizeof(Item)) > 0) {
+            has_received = TRUE;
+            switch (msg.id) {
                 case BULLET_ID_LEFT:
                     if (bullet_pid_left != -1) {
                         *bullet_left = msg;
@@ -327,29 +405,6 @@ int play(WINDOW *game) {
                         manche_result = MANCHE_LOST;
                     }
                     break;
-                case PAUSE_ID:
-                    WINDOW *pause = newwin(5, 23, (GAME_HEIGHT/2) + 4,  (GAME_WIDTH/2) + 10);
-                    print_pause(pause, game);
-                    killpg(group_pid, SIGSTOP);  // pause all child processes
-                    int ch = getchar();          // wait for user input
-                    while (ch != 'p' && ch != 'q' && ch != 'm') {
-                        ch = getchar();
-                    }
-                    if(ch == 'p'){
-                        killpg(group_pid, SIGCONT);  // Resume all child processes
-                    }
-                    else if(ch == 'q'){
-                        endwin();
-                        manche_result = GAME_QUIT;
-                    }
-                    else if(ch == 'm'){
-                        manche_result = BACK_TO_MENU;
-                    }
-                    break;
-                case QUIT_ID:
-                    endwin();
-                    manche_result = GAME_QUIT;
-                    break;  
                 default:
                     // check if the message is a crocodile
                     if(msg.id >= CROCODILE_MIN_ID && msg.id <= CROCODILE_MAX_ID){
@@ -411,11 +466,14 @@ int play(WINDOW *game) {
                     }
                 break;
             }
+        }
 
-            // check if the manche is over
-            if(manche_result != -1){
-                break; //break the while loop
-            }
+        // check if the manche is over
+        if(manche_result != -1){
+            break; //break the while loop
+        }
+
+        if (has_received == TRUE) {
             
             // collision between frog and crocodile
             int frog_on_crocodile = FALSE;
@@ -569,5 +627,9 @@ int play(WINDOW *game) {
     free(bullet_left);
     free(timer);
     free(crocodiles_bullets);
+
+    close(client_fd);
+    close(server_fd);
+    
     return manche_result;
 }

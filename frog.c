@@ -2,12 +2,37 @@
 #include "utils.h"
 #include "game.h"
 
+#define SOCKET_PATH "/tmp/mysocket"
+#include <sys/socket.h>
+#include <sys/un.h>
+
 /**
  * @brief  function that manages the frog movement
  * @param  pipe_fds: pipe file descriptors
  */
 void frog_controller(int *pipe_fds){
-    close(pipe_fds[0]); 
+    int client_fd;
+    struct sockaddr_un addr;
+
+    // Create socket
+    client_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (client_fd == -1) {
+        perror("socket");
+        exit(EXIT_FAILURE);
+    }
+
+
+    // Set up server address
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, SOCKET_PATH, sizeof(addr.sun_path) - 1);
+
+    int is_connected = -1;
+
+    do{
+        is_connected = connect(client_fd, (struct sockaddr*)&addr, sizeof(addr));
+    }while (is_connected == -1);
+
     int ch;
     bool has_moved = TRUE;        // flag to check if the frog has moved
     Item frog = {FROG_ID, 0, 0, 0, 0};
@@ -56,7 +81,7 @@ void frog_controller(int *pipe_fds){
         // write new movement
         if(has_moved){
             if (pipe_fds != NULL) {
-                write(pipe_fds[1], &frog, sizeof(Item));
+                send(client_fd, &frog, sizeof(Item), 0);
             }
         }
         frog.extra = 0;
