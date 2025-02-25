@@ -92,7 +92,7 @@ void* frog_controller() {
         }
         suspend_thread();                // suspend the thread 
         if(has_moved){
-            write(client_fd, &frog, sizeof(frog));
+            send(client_fd, &frog, sizeof(Item), 0);
         }
         frog.extra = 0;
         has_moved = FALSE;

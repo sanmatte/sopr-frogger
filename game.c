@@ -248,7 +248,7 @@ int play(WINDOW *game) {
     Item msg;
     int manche_result = -1;
     while (TRUE) {
-        int bytes_received = read(client_fd, &msg, sizeof(msg));
+        int bytes_received = recv(client_fd, &msg, sizeof(Item), 0);
         if (bytes_received > 0) {
             switch (msg.id)
             {
