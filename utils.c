@@ -16,8 +16,8 @@ int rand_range(int min, int max) {
 
 
 /**
- * @brief  usleep function not interruptible by signal
- * @param  microseconds time to sleep
+ * @brief  sleep to avoid interruption by signals
+ * @param  microseconds time to sleep in microseconds
  */
 void continue_usleep(long microseconds) {
     long elapsed = 0;
@@ -29,13 +29,16 @@ void continue_usleep(long microseconds) {
 }
 
 
+/**
+ * @brief  Init mutex and condition variable
+ */
 void init_suspend_resume() {
     pthread_mutex_init(&m_suspend_mutex, NULL);
     pthread_cond_init(&m_resume_cond, NULL);
 }
 
 /**
- * @brief  Pause threads if pause_flag == 1 (used for game pauses)
+ * @brief  Pause itself if pause_flag == 1 and waits for an event to resume
  */
 void suspend_thread() {
     pthread_mutex_lock(&m_suspend_mutex);
@@ -47,7 +50,7 @@ void suspend_thread() {
 
 
 /**
- * @brief  Resume threads if pause_flag == 0 
+ * @brief  Sets pause to FALSE and resumes all threads broadcasting the event
  */
 void resume_threads() {
     pthread_mutex_lock(&m_suspend_mutex);

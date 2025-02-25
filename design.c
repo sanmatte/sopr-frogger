@@ -645,13 +645,13 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 		else {
 			int temp = (score/10)-10;
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 20, "%s", numbers[1][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 15, "%s", numbers[1][i]);
 			}
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 30, "%s", numbers[temp][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 22, "%s", numbers[temp][i]);
 			}
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 40, "%s", numbers[0][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 32, "%s", numbers[0][i]);
 			}
 		}
 		wattroff(game, COLOR_PAIR(6));
@@ -694,13 +694,13 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 		else {
 			int temp = (score/10)-10;
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 20, "%s", numbers[1][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 15, "%s", numbers[1][i]);
 			}
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 30, "%s", numbers[temp][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 22, "%s", numbers[temp][i]);
 			}
 			for(int i=0; i<5; i++){
-				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 40, "%s", numbers[0][i]);
+				mvwprintw(game, (GAME_HEIGHT/2) + i + 2, GAME_WIDTH/2 + 32, "%s", numbers[0][i]);
 			}
 		}
 		wattroff(game, COLOR_PAIR(15));
