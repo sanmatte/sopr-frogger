@@ -68,9 +68,12 @@ int main(){
             mvwprintw(err_screen, 5, 3, "Dimensione attuale: %d x %d", COLS, LINES);
             wrefresh(err_screen);
         }
-        wclear(err_screen);
-        wrefresh(err_screen);
+        // wclear(err_screen);
+        // wrefresh(err_screen);
+        // delwin(err_screen);
         delwin(err_screen);
+        clear();
+        refresh();
     }
 
     WINDOW *win = newwin(GAME_HEIGHT, GAME_WIDTH, (LINES - GAME_HEIGHT)/2, (COLS - GAME_WIDTH)/2);
