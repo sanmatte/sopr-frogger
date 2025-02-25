@@ -752,32 +752,37 @@ void print_frogger_sprite(WINDOW *win){
  */
 void print_pause(WINDOW *pause, WINDOW *game){
 	// print of the edges of the pause sign
-	for(int i=0; i<25; i++){
+	for(int i=0; i<32; i++){
 		wattron(game, COLOR_PAIR(30));
-		mvwprintw(game, (GAME_HEIGHT/2) -1, (GAME_WIDTH/2) - 12 + i, "▄");
+		mvwprintw(game, (GAME_HEIGHT/2) - 2, (GAME_WIDTH/2) - 15 + i, "█");
 		wattroff(game, COLOR_PAIR(30));
 	}
-	for(int i=0; i<25; i++){
+	for(int i=0; i<30; i++){
 		wattron(game, COLOR_PAIR(30));
-		mvwprintw(game, (GAME_HEIGHT/2) + 5, (GAME_WIDTH/2) - 12 + i, "▀");
+		mvwprintw(game, (GAME_HEIGHT/2) + 6, (GAME_WIDTH/2) - 14 + i, "█");
 		wattroff(game, COLOR_PAIR(30));
 	}
-	for(int i=0; i<7; i++){
-		wattron(game, COLOR_PAIR(30));
-		mvwprintw(game, (GAME_HEIGHT/2) + i, (GAME_WIDTH/2) - 12, "█");
-		wattroff(game, COLOR_PAIR(30));
+	for(int j = 0; j < 2; j++){
+		for(int i=0; i<11; i++){
+			wattron(game, COLOR_PAIR(30));
+			mvwprintw(game, (GAME_HEIGHT/2) - 1 + i, (GAME_WIDTH/2) - 14 - j, "█");
+			wattroff(game, COLOR_PAIR(30));
+		}
 	}
-	for(int i=0; i<7; i++){
-		wattron(game, COLOR_PAIR(30));
-		mvwprintw(game, (GAME_HEIGHT/2) + i, (GAME_WIDTH/2) + 12, "█");
-		wattroff(game, COLOR_PAIR(30));
+	for(int j = 0; j < 2; j++){
+		for(int i=0; i<11; i++){
+			wattron(game, COLOR_PAIR(30));
+			mvwprintw(game, (GAME_HEIGHT/2) - 1 + i, (GAME_WIDTH/2) + 15 + j, "█");
+			wattroff(game, COLOR_PAIR(30));
+		}
 	}
+	
 	// print of the pause sign
 	wbkgd(pause, COLOR_PAIR(29));
 	wattron(pause, COLOR_PAIR(29));
-	mvwprintw(pause, 1, 1 , "Press P to resume");
-	mvwprintw(pause, 2, 1 , "Press M to go to menu");
-	mvwprintw(pause, 3, 1 , "Press Q to quit");
+	mvwprintw(pause, 1, 3 , "Press P to resume");
+	mvwprintw(pause, 3, 3 , "Press M to go to menu");
+	mvwprintw(pause, 5, 3 , "Press Q to quit");
 	wattroff(pause, COLOR_PAIR(29));
 	wrefresh(game);
 	wrefresh(pause);

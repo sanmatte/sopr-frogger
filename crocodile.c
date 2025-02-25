@@ -28,6 +28,25 @@ void bullet_cleanup_function(void *arg) {
     free(arg);
 }
 
+
+/**
+ * @brief  Function to control if the crocodile is on the screen
+ * @param  crocodile crocodile object
+ * @return 1 if the crocodile is on the screen, 0 otherwise
+ */
+int crocodile_on_screen(Item *crocodile){
+    // control of crocodiles going to the right
+    if(crocodile->extra == 1 && crocodile->x + CROCODILE_DIM_X > 0 && crocodile->x < GAME_WIDTH - CROCODILE_DIM_X){
+        return 1;
+    }
+    // control of crocodiles going to the left
+    else if(crocodile->extra == -1 && crocodile->x < GAME_WIDTH - CROCODILE_DIM_X && crocodile->x > 0){
+        return 1;
+    }
+    else return 0;
+}
+
+
 /**
  * @brief  Function for the movement of the crocodile bullets to the right
  * @param  arg bullet_obj
@@ -49,7 +68,7 @@ void* bullet_right_crocodile(void *arg) {
     while (bullet->x < GAME_WIDTH + 1) {
         bullet->x += 1;
         expected = bullet->id;
-        // atomic control (more efficient than mutex) if true exits the loop and sets collided_bullet to -1
+        // atomic control, if true exits the loop and sets collided_bullet to -1
         if ( atomic_compare_exchange_strong(&collided_bullet, &expected, -1) ) {
             break;
         }
@@ -85,7 +104,7 @@ void* bullet_left_crocodile(void *arg) {
     while (bullet->x >= 0) {
         bullet->x -= 1;
         expected = bullet->id;
-        // atomic control (more efficient than mutex) if true exits the loop and sets collided_bullet to -1
+        // atomic control, if true exits the loop and sets collided_bullet to -1
         if ( atomic_compare_exchange_strong(&collided_bullet, &expected, -1) ) {
             break;
         }
@@ -146,7 +165,7 @@ void* crocodile_fun(void *arg) {
         int shot_speed = crocodile.speed - current_difficulty.crocodile_bullet_speed;    // calculate and set the speed of the bullet
         crocodile.x += crocodile.extra;
         // if the random number is 1 and the crocodile is not active, a bullet is shot
-        if(random_shot == 1 && active == FALSE) {
+        if(random_shot == 1 && active == FALSE && crocodile_on_screen(&crocodile)) {
             void *arg;
             Item* bullet = malloc(sizeof(Item));
             int x_offset = current_difficulty.shotload_time / crocodile.speed + 1;

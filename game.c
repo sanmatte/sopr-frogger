@@ -288,7 +288,7 @@ int play(WINDOW *game) {
                 pthread_mutex_lock(&m_suspend_mutex);
                 pause_flag = 1;
                 pthread_mutex_unlock(&m_suspend_mutex);
-                WINDOW *pause = newwin(5, 23, (GAME_HEIGHT/2) + 4,  (GAME_WIDTH/2) + 10);
+                WINDOW *pause = newwin(7, 28, (GAME_HEIGHT/2) + 3,  (GAME_WIDTH/2) + 8);
                 print_pause(pause, game);
                 int ch = getchar(); 
                 // wait for the user to press a key
@@ -341,7 +341,7 @@ int play(WINDOW *game) {
                                 }
                             }
 
-                            //crocodile respawn if it is out of the screen
+                            // crocodile respawn if it is out of the screen
                             if(crocodiles[i][j].extra == 1 && crocodiles[i][j].x == GAME_WIDTH + 1){   
                                 pthread_detach(thread_crocodile[i][j]);
                                 thread_crocodile[i][j] = -1;
@@ -439,29 +439,44 @@ int play(WINDOW *game) {
         if(frog->y < DENS_HEIGHT){
             switch(frog->x){
                 case DENS_1:
-                    compute_score(timer->x);
-                    dens[0] = FALSE;
-                    manche_result = MANCHE_WON;
+                    if(dens[0] == TRUE){
+                        compute_score(timer->x);
+                        dens[0] = FALSE;
+                        manche_result = MANCHE_WON;
+                    }
+                    else manche_result = MANCHE_LOST;
                     break;
                 case DENS_2:
-                    compute_score(timer->x);
-                    dens[1] = FALSE;
-                    manche_result = MANCHE_WON;
+                    if(dens[1]== TRUE){
+                        compute_score(timer->x);
+                        dens[1] = FALSE;
+                        manche_result = MANCHE_WON;
+                    }
+                    else manche_result = MANCHE_LOST;
                     break;
                 case DENS_3:
-                    compute_score(timer->x);
-                    dens[2] = FALSE;
-                    manche_result = MANCHE_WON;
+                    if(dens[2] == TRUE){
+                        compute_score(timer->x);
+                        dens[2] = FALSE;
+                        manche_result = MANCHE_WON;
+                    }
+                    else manche_result = MANCHE_LOST;
                     break;
                 case DENS_4:
-                    compute_score(timer->x);
-                    dens[3] = FALSE;
-                    manche_result = MANCHE_WON;
+                    if(dens[3] == TRUE){
+                        compute_score(timer->x);
+                        dens[3] = FALSE;
+                        manche_result = MANCHE_WON;
+                    }
+                    else manche_result = MANCHE_LOST;
                     break;
                 case DENS_5:
-                    compute_score(timer->x);
-                    dens[4] = FALSE;      
-                    manche_result = MANCHE_WON;
+                    if(dens[4] == TRUE){
+                        compute_score(timer->x);
+                        dens[4] = FALSE;      
+                        manche_result = MANCHE_WON;
+                    }
+                    else manche_result = MANCHE_LOST;
                     break;
                 default: // lost manche if the frog is not in a den and hit the upper edge
                     manche_result = MANCHE_LOST;
