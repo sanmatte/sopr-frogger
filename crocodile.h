@@ -17,6 +17,7 @@ extern pthread_cond_t m_resume_cond;
 #define CROCODILE_SPEED_MAX 200000
 #define CROCODILE_SPEED_MIN 100000
 #define CROCODILE_STREAM_MAX_NUMBER 3
+#define STREAM_NUMBER 8
 
 //crocodiles bullets
 #define CROCODILE_MIN_BULLETS_ID 29
@@ -26,8 +27,6 @@ extern pthread_cond_t m_resume_cond;
 #include <stdatomic.h>
 extern atomic_int collided_bullet;
 extern int manche;
-
-#define STREAM_NUMBER 8
 
 void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]);
 void* crocodile_fun(void* args);

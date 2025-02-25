@@ -18,7 +18,7 @@ char *difficulties[] = {
 
 // difficulty levels and their settings
 const Difficulty EASY = {
-    .bullets_speed = 30000,
+    .bullets_speed = 20000,
     .crocodile_speed_max = 150000,
     .crocodile_speed_min = 100000,
     .crocodile_bullet_speed = 30000,
@@ -28,7 +28,7 @@ const Difficulty EASY = {
     .shotload_time = 1500000
 };
 const Difficulty MEDIUM = {
-    .bullets_speed = 30000,
+    .bullets_speed = 20000,
     .crocodile_speed_max = 120000,
     .crocodile_speed_min = 60000,
     .crocodile_bullet_speed = 40000,
@@ -38,7 +38,7 @@ const Difficulty MEDIUM = {
     .shotload_time = 1200000
 };
 const Difficulty HARD = {
-    .bullets_speed = 30000,
+    .bullets_speed = 20000,
     .crocodile_speed_max = 250000,
     .crocodile_speed_min = 30000,
     .crocodile_bullet_speed = 20000,
@@ -68,9 +68,6 @@ int main(){
             mvwprintw(err_screen, 5, 3, "Dimensione attuale: %d x %d", COLS, LINES);
             wrefresh(err_screen);
         }
-        // wclear(err_screen);
-        // wrefresh(err_screen);
-        // delwin(err_screen);
         delwin(err_screen);
         clear();
         refresh();
@@ -120,6 +117,7 @@ int main(){
             break;
         }
     }while (return_to_menu);
+    
     endwin();
     return 0;
 

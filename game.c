@@ -152,7 +152,7 @@ int play(WINDOW *game) {
     bullet_left->x = -1;
     bullet_left->y = -1;
     bullet_left->speed = 0;
-    bullet_left->extra = -1;
+    bullet_left->extra = 1;
 
     // timer initialization
     Item *timer = malloc(sizeof(Item));
@@ -256,7 +256,7 @@ int play(WINDOW *game) {
                 frog->x += msg.x;
                 frog->extra = msg.extra;
                 // frog bullet activation
-                if (frog->extra == 1 && is_bullet_frog_active == 0) {
+                if (frog->extra == 1 && is_bullet_frog_active == 0 && (int)thread_bullet_right == -1 && (int)thread_bullet_left == -1) {
                     is_bullet_frog_active = 1;
                     // set right bullet properties
                     bullet_right->x = frog->x + FROG_DIM_X;
@@ -270,7 +270,7 @@ int play(WINDOW *game) {
                     // set right bullet properties
                     bullet_left->x = frog->x - 1;
                     bullet_left->y = frog->y + 1;
-                    bullet_left->extra = -1;
+                    bullet_left->extra = 1;
                     void* argl = bullet_left;
                     // create left bullet thread
                     if (pthread_create(&thread_bullet_left, NULL, bullet_left_fun, argl) != 0) {
@@ -284,6 +284,8 @@ int play(WINDOW *game) {
                         if (bullet_left->extra == 0 && bullet_right->extra == 0)
                         {
                             is_bullet_frog_active = 0;
+                            thread_bullet_right = -1;
+                            thread_bullet_left = -1;
                         }
                     } 
             }
@@ -296,9 +298,11 @@ int play(WINDOW *game) {
                     *bullet_right = msg;
                 }
                 else
-                {
-                    pthread_detach(thread_bullet_right);
-                    thread_bullet_right = -1;
+                {   
+                    if((int)thread_bullet_right != -1){
+                        pthread_detach(thread_bullet_right);
+                        thread_bullet_right = -1;
+                    }
                 }
                 break;
             case BULLET_ID_LEFT:
@@ -308,8 +312,10 @@ int play(WINDOW *game) {
                 }
                 else
                 {
-                    pthread_detach(thread_bullet_left);
-                    thread_bullet_left = -1;
+                    if((int)thread_bullet_left != -1){
+                        pthread_detach(thread_bullet_left);
+                        thread_bullet_left = -1;
+                    }
                 }
                 break;
             case TIMER_ID:
@@ -457,21 +463,25 @@ int play(WINDOW *game) {
             if( stream >= 0 && stream < STREAM_NUMBER ) {
                 for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
                     if((crocodiles_bullets[i].x - bullet_right->x) <= 1 && (crocodiles_bullets[i].x - bullet_right->x) >= -1 && crocodiles_bullets[i].y == bullet_right->y){
-                        pthread_cancel(thread_bullet_right);
-                        pthread_join(thread_bullet_right, NULL);
+                        if((int)thread_bullet_right != -1){
+                            pthread_cancel(thread_bullet_right);
+                            pthread_join(thread_bullet_right, NULL);
+                            thread_bullet_right = -1;
+                            bullet_right->x = RESET_FROG_BULLET;
+                            bullet_right->extra = 0;
+                        }
                         atomic_store(&collided_bullet, crocodiles_bullets[i].id);
-                        thread_bullet_right = -1;
-                        bullet_right->x = RESET_FROG_BULLET;
-                        bullet_right->extra = 0;
                         crocodiles_bullets[i].x = RESET_CROCODILE_BULLET;
                     }
                     if((crocodiles_bullets[i].x - bullet_left->x) <= 1 && (crocodiles_bullets[i].x - bullet_left->x) >= -1 && crocodiles_bullets[i].y == bullet_left->y){
-                        pthread_cancel(thread_bullet_left);
-                        pthread_join(thread_bullet_left, NULL);
-                        thread_bullet_left = -1;
+                        if((int)thread_bullet_left != -1){
+                            pthread_cancel(thread_bullet_left);
+                            pthread_join(thread_bullet_left, NULL);
+                            thread_bullet_left = -1;
+                            bullet_left->x = RESET_FROG_BULLET;
+                            bullet_left->extra = 0;
+                        }
                         atomic_store(&collided_bullet, crocodiles_bullets[i].id);
-                        bullet_left->x = RESET_FROG_BULLET;
-                        bullet_left->extra = 0;
                         crocodiles_bullets[i].x = RESET_CROCODILE_BULLET;
                     }
                 }
@@ -547,6 +557,7 @@ int play(WINDOW *game) {
         print_bullets(game, bullet_left, BULLET_ID_LEFT);
         print_bullets(game, bullet_right, BULLET_ID_RIGHT);
         wrefresh(game);
+
     }
     // kill all threads
     pkill_all(thread_timer, thread_frog, thread_crocodile, thread_bullet_left, thread_bullet_right);
@@ -560,10 +571,10 @@ int play(WINDOW *game) {
     free(bullet_left);
     free(timer);
     free(crocodiles_bullets);
-    
     close(client_fd);
     close(server_fd);
 
+    delwin(game);
     return manche_result;
 }
 
