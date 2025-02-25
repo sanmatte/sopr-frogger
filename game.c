@@ -56,7 +56,7 @@ int compute_score(int timer){
 void kill_all(pid_t frog, pid_t pidgroup){
     killpg(pidgroup, SIGKILL);
     pid_t pid;
-    while ((pid = waitpid(-pidgroup, NULL, 0)) > 0) {
+    while ((pid = waitpid(-pidgroup, NULL, 0)) > 0) { // wait for all child processes which process group id is pidgroup
     }
     kill(frog, SIGKILL);
     waitpid(frog, NULL, 0);
@@ -317,7 +317,11 @@ int play(WINDOW *game) {
                     }
                     break;
                 case CROCODILE_MIN_BULLETS_ID ... CROCODILE_MAX_BULLETS_ID:     // crocodile bullets
-                    crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID] = msg;
+                
+                    if(crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x != RESET_CROCODILE_BULLET || msg.extra == 1){
+                        crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID] = msg;
+                    }
+
                     // Ccheck if the bullet hit the frog
                     if(frog->y == (crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].y - 1) && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x >= frog->x && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x <= frog->x + FROG_DIM_X){
                         manche_result = MANCHE_LOST;
@@ -530,6 +534,7 @@ int play(WINDOW *game) {
                 break;
             }
             
+            // curstom ctrl+c signal handler
             if (sigintdetected == TRUE) {
                 endwin();
                 manche_result = GAME_QUIT;

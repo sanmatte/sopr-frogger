@@ -24,5 +24,8 @@ extern int manche;
 // crocodile functions prototypes
 void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]);
 void crocodile(int *pipe_fds, Item *crocodile, int group_pid);
+void crocodile_bullet_right_controller(Item *bullet, int *pipe_fds);
+void crocodile_bullet_left_controller(Item *bullet, int *pipe_fds);
+int crocodile_on_screen(Item *crocodile);
 
 #endif
