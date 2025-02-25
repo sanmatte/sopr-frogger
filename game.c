@@ -300,23 +300,27 @@ int play(WINDOW *game) {
                     }
                     break;
                 case BULLET_ID_LEFT:
-                    *bullet_left = msg;
+                    if (bullet_pid_left != -1) {
+                        *bullet_left = msg;
+                    }
                     break;
                 case BULLET_ID_RIGHT:
-                    *bullet_right = msg;
+                    if (bullet_pid_right != -1) {
+                        *bullet_right = msg;
+                    }
                     break;
                 case TIMER_ID:
                     timer->x -= 1;
                     // check if timer is expired
                     if(timer->x == 0){
-                        manche_result = 0;
+                        manche_result = MANCHE_LOST;
                     }
                     break;
                 case CROCODILE_MIN_BULLETS_ID ... CROCODILE_MAX_BULLETS_ID:     // crocodile bullets
                     crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID] = msg;
                     // Ccheck if the bullet hit the frog
                     if(frog->y == (crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].y - 1) && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x >= frog->x && crocodiles_bullets[msg.id - CROCODILE_MIN_BULLETS_ID].x <= frog->x + FROG_DIM_X){
-                        manche_result = 0;
+                        manche_result = MANCHE_LOST;
                     }
                     break;
                 case PAUSE_ID:
@@ -363,8 +367,6 @@ int play(WINDOW *game) {
                                                 if(frog->x == GAME_WIDTH - FROG_DIM_X) continue;     // check if the frog is at the edge of the screen                                             
                                                 else frog->x += crocodiles[stream][j].extra;
                                             }
-                                            print_frog(game, frog);
-                                            wrefresh(game);
                                         }
                                     }
                                 }
@@ -438,15 +440,26 @@ int play(WINDOW *game) {
                 if( stream >= 0 && stream < STREAM_NUMBER ) {
                     for(int i=stream*CROCODILE_STREAM_MAX_NUMBER; i<stream*CROCODILE_STREAM_MAX_NUMBER+3; i++){
                         if((crocodiles_bullets[i].x - bullet_right->x) <= 1 && (crocodiles_bullets[i].x - bullet_right->x) >= -1 && crocodiles_bullets[i].y == bullet_right->y){
-                            kill(bullet_pid_right, SIGKILL);
-                            kill(child_pids[i+1], SIGUSR1);
-                            bullet_right->x = RESET_FROG_BULLET;
+                            if (bullet_pid_right != -1)
+                            {
+
+                                kill(bullet_pid_right, SIGKILL);
+                                kill(child_pids[i+1], SIGUSR1);
+                                bullet_pid_right = -1;
+
+                                bullet_right->x = RESET_FROG_BULLET;
+                            }
                             crocodiles_bullets[i].x = RESET_CROCODILE_BULLET;
                         }
                         if((crocodiles_bullets[i].x - bullet_left->x) <= 1 && (crocodiles_bullets[i].x - bullet_left->x) >= -1 && crocodiles_bullets[i].y == bullet_left->y){
-                            kill(bullet_pid_left, SIGKILL);
-                            kill(child_pids[i+1], SIGUSR1);
-                            bullet_left->x = RESET_FROG_BULLET;
+                            if(bullet_pid_left != -1){
+
+                                kill(bullet_pid_left, SIGKILL);
+                                kill(child_pids[i+1], SIGUSR1);
+                                bullet_pid_left = -1;
+
+                                bullet_left->x = RESET_FROG_BULLET;
+                            }
                             crocodiles_bullets[i].x = RESET_CROCODILE_BULLET;
                         }
                     }
@@ -516,6 +529,12 @@ int play(WINDOW *game) {
             {
                 break;
             }
+            
+            if (sigintdetected == TRUE) {
+                endwin();
+                manche_result = GAME_QUIT;
+                break;
+            }
 
             // print the game
             print_score(game, manche, timer->x, score);
@@ -532,13 +551,6 @@ int play(WINDOW *game) {
             print_bullets(game, bullet_left, BULLET_ID_LEFT);
             print_bullets(game, bullet_right, BULLET_ID_RIGHT);
             wrefresh(game);
-
-            if (sigintdetected == TRUE) {
-                kill_all(pid_frog, group_pid);  // Kill all relevant processes
-                endwin();
-                system("clear");                // clear the screen
-                exit(0);
-            }
         }
     }
     // kill all processes and free the memory
