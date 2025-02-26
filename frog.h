@@ -24,7 +24,7 @@ extern bool frog_on_crocodile;
 #define BULLETS_SPEED 20000
 
 // function prototypes
-void frog_controller(int *pipe_fds);
+void frog_controller(int *client_fd);
 void bullet_right_controller(Item *bullet_right, int *pipe_fds);
 void bullet_left_controller(Item *bullet_left, int *pipe_fds);
 

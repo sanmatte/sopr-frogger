@@ -84,9 +84,9 @@ int main(){
             mvwprintw(err_screen, 6, 3, "Dimensione attuale: %d x %d", COLS, LINES);
             wrefresh(err_screen);
         }
-        wclear(err_screen);
-        wrefresh(err_screen);
         delwin(err_screen);
+        clear();
+        refresh();
     }
     
     // menu window
@@ -106,7 +106,8 @@ int main(){
         case 0: //play
             startGame(win);
             return_to_menu = 1;
-            werase(win);  
+            werase(win);
+            wclear(win);  
             wrefresh(win);  
             break;
         case 1:

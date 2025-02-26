@@ -10,17 +10,8 @@
  * @brief  function that manages the frog movement
  * @param  pipe_fds: pipe file descriptors
  */
-void frog_controller(int *pipe_fds){
-    int client_fd;
+void frog_controller(int *client_fd){
     struct sockaddr_un addr;
-
-    // Create socket
-    client_fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (client_fd == -1) {
-        perror("socket");
-        exit(EXIT_FAILURE);
-    }
-
 
     // Set up server address
     memset(&addr, 0, sizeof(addr));
@@ -30,7 +21,7 @@ void frog_controller(int *pipe_fds){
     int is_connected = -1;
 
     do{
-        is_connected = connect(client_fd, (struct sockaddr*)&addr, sizeof(addr));
+        is_connected = connect(*client_fd, (struct sockaddr*)&addr, sizeof(addr));
     }while (is_connected == -1);
 
     int ch;
@@ -80,9 +71,7 @@ void frog_controller(int *pipe_fds){
         }
         // write new movement
         if(has_moved){
-            if (pipe_fds != NULL) {
-                send(client_fd, &frog, sizeof(Item), 0);
-            }
+            send(*client_fd, &frog, sizeof(Item), 0);
         }
         frog.extra = 0;
         has_moved = FALSE;

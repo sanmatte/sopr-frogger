@@ -86,6 +86,7 @@ void ctrlc_handler(int signum){
 void startGame(WINDOW *game) {
     setlocale(LC_ALL, "");
     werase(game);  // Clear the window
+    manche = 3;
     while (endgame == FALSE)
     {
         switch (play(game))
@@ -216,13 +217,21 @@ int play(WINDOW *game) {
     setpgid(pid_timer, group_pid);
 
     // create frog process
+    int frog_fd = -1;
+    // Create socket
+    frog_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (frog_fd == -1) {
+        perror("socket frog error");
+        exit(EXIT_FAILURE);
+    }
+
     pid_t pid_frog = fork();
     if (pid_frog < 0) {
         perror("Errore nella fork");
         endwin();
         exit(EXIT_FAILURE);
     } else if (pid_frog == 0) {
-        frog_controller(pipe_fds);
+        frog_controller(&frog_fd);
         _exit(0);
     } else {
         child_pids[0] = pid_frog;
@@ -361,10 +370,12 @@ int play(WINDOW *game) {
                         killpg(group_pid, SIGCONT);  // Resume all child processes
                     }
                     else if(ch == 'q'){
+                        killpg(group_pid, SIGCONT);
                         endwin();
                         manche_result = GAME_QUIT;
                     }
                     else if(ch == 'm'){
+                        killpg(group_pid, SIGCONT);
                         manche_result = BACK_TO_MENU;
                     }
                     break;
@@ -630,6 +641,7 @@ int play(WINDOW *game) {
 
     close(client_fd);
     close(server_fd);
+    close(frog_fd);
     
     return manche_result;
 }
