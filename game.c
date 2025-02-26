@@ -107,6 +107,7 @@ void startGame(WINDOW *game) {
             }
             break;
         case GAME_QUIT:                 // quit the game
+            endwin();
             exit(0);
             break;
         case BACK_TO_MENU:              // back to menu
@@ -372,7 +373,6 @@ int play(WINDOW *game) {
                     }
                     else if(ch == 'q'){
                         killpg(group_pid, SIGCONT);
-                        endwin();
                         manche_result = GAME_QUIT;
                     }
                     else if(ch == 'm'){
@@ -381,7 +381,6 @@ int play(WINDOW *game) {
                     }
                     break;
                 case QUIT_ID:
-                    endwin();
                     manche_result = GAME_QUIT;
                     break;  
             }
@@ -504,7 +503,7 @@ int play(WINDOW *game) {
                 // lost manche if the frog is not on a crocodile
                 if (frog_on_crocodile == FALSE)
                 {
-                    //manche_result = MANCHE_LOST;
+                    manche_result = MANCHE_LOST;
                 }
             }
 
@@ -606,7 +605,6 @@ int play(WINDOW *game) {
             
             // curstom ctrl+c signal handler
             if (sigintdetected == TRUE) {
-                endwin();
                 manche_result = GAME_QUIT;
                 break;
             }
@@ -628,6 +626,26 @@ int play(WINDOW *game) {
             wrefresh(game);
         }
     }
+
+    if(manche_result == MANCHE_LOST){
+        // print the game
+        print_score(game, manche, timer->x, score);
+        print_background(game, dens);
+        for(int i = 0; i < STREAM_NUMBER; i++){
+            for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
+                print_crocodile(game, &crocodiles[i][j], crocodiles_bullets[i * CROCODILE_STREAM_MAX_NUMBER + j].extra);
+            }
+        }
+        for (int i = 0; i < CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1; i++) {
+            print_bullets(game, &crocodiles_bullets[i], -1);
+        }
+        print_frog(game, frog);
+        print_bullets(game, bullet_left, BULLET_ID_LEFT);
+        print_bullets(game, bullet_right, BULLET_ID_RIGHT);
+        wrefresh(game);
+        sleep(1);
+    }
+
     // kill all processes and free the memory
     kill_all(pid_frog, group_pid);
     free(frog);

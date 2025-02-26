@@ -671,7 +671,7 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 		}
 		wattroff(game, COLOR_PAIR(6));
 		wrefresh(game);
-		sleep(30);
+		sleep(3);
 	}
 
 	// win screen
@@ -732,9 +732,8 @@ void print_endgame(WINDOW *game, int manche, bool *dens, int score){
 		}
 		
 		wattroff(game, COLOR_PAIR(15));
-		wrefresh(game);
-		
-		sleep(8);
+		wrefresh(game);	
+		sleep(3);
 	}
 
 }
