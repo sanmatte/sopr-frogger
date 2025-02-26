@@ -17,4 +17,4 @@ $(TARGET):$(SRC) $(HEADERS)
 
 # Clean up build files
 clean:
-	rm -f frogger_resurrection
+	rm -f $(TARGET)
