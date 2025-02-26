@@ -127,6 +127,8 @@ void startGame(WINDOW *game) {
  * @return int return value, 0 if you lose the manche or 1 if you enter a den
  */
 int play(WINDOW *game) {
+    sigintdetected = FALSE;
+
     // frog initialization
     Item *frog = malloc(sizeof(Item));
     frog->id = FROG_ID;
