@@ -80,6 +80,7 @@ void ctrlc_handler(int signum){
  */
 void startGame(WINDOW *game) {
     setlocale(LC_ALL, "");
+    manche = 3;
     werase(game);  // Clear the window
     while (endgame == FALSE)
     {
@@ -328,7 +329,7 @@ int play(WINDOW *game) {
                     }
                     break;
                 case PAUSE_ID:
-                    WINDOW *pause = newwin(7, 28, (GAME_HEIGHT/2) + 3,  (GAME_WIDTH/2) + 8);
+                    WINDOW *pause = newwin(7, 28, (LINES - 7)/2 + 3,  (COLS - 28)/2);
                     print_pause(pause, game);
                     killpg(group_pid, SIGSTOP);  // pause all child processes
                     int ch = getchar();          // wait for user input
