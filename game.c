@@ -297,7 +297,7 @@ int play(WINDOW *game) {
                 pthread_mutex_lock(&m_suspend_mutex);
                 pause_flag = 1;
                 pthread_mutex_unlock(&m_suspend_mutex);
-                WINDOW *pause = newwin(7, 28, (GAME_HEIGHT/2) + 3,  (GAME_WIDTH/2) + 8);
+                WINDOW *pause = newwin(7, 28, (GAME_HEIGHT/2) + 2,  (GAME_WIDTH/2) + 8);
                 print_pause(pause, game);
                 int ch = getchar(); 
                 // wait for the user to press a key
