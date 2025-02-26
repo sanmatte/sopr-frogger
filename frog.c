@@ -37,12 +37,6 @@ void* frog_controller() {
     do{
         is_connected = connect(client_fd, (struct sockaddr*)&addr, sizeof(addr));
     }while (is_connected == -1);
-    
-    // // Connect to server
-    // if (is_connected = connect(client_fd, (struct sockaddr*)&addr, sizeof(addr))) {
-    //     perror("connect");
-    //     exit(EXIT_FAILURE);
-    // }
 
     int ch;
     bool has_moved = TRUE;               // flag to check if the frog has moved
