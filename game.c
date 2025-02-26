@@ -515,6 +515,24 @@ int play(WINDOW *game) {
         print_bullets(game, bullet_right, BULLET_ID_RIGHT);
         wrefresh(game);
     }
+    if(manche_result == MANCHE_LOST){
+        // print the game
+        print_score(game, manche, timer->x, score);
+        print_background(game, dens);
+        for(int i = 0; i < STREAM_NUMBER; i++){
+            for(int j = 0; j < CROCODILE_STREAM_MAX_NUMBER; j++){
+                print_crocodile(game, &crocodiles[i][j], crocodiles_bullets[i * CROCODILE_STREAM_MAX_NUMBER + j].extra);
+            }
+        }
+        for (int i = 0; i < CROCODILE_MAX_BULLETS_ID - CROCODILE_MIN_BULLETS_ID + 1; i++) {
+            print_bullets(game, &crocodiles_bullets[i], -1);
+        }
+        print_frog(game, frog);
+        print_bullets(game, bullet_left, BULLET_ID_LEFT);
+        print_bullets(game, bullet_right, BULLET_ID_RIGHT);
+        wrefresh(game);
+        sleep(1);
+    }
     // kill all threads
     pkill_all(thread_timer, thread_frog, thread_crocodile, thread_bullet_left, thread_bullet_right);
     // free memory

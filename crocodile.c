@@ -120,6 +120,20 @@ void* bullet_left_crocodile(void *arg) {
 }
 
 /**
+ * @brief  Uniforms shot speed based on crocodile speed
+ * @param  crocodile_speed speed of the crocodile
+ * @return speed of the bullet
+ */
+int uniform_shot_speed(int crocodile_speed){
+    if(current_difficulty.crocodile_speed_max <= 120000){
+        if (crocodile_speed - current_difficulty.crocodile_bullet_speed > current_difficulty.crocodile_speed_min){
+            return current_difficulty.crocodile_speed_min;
+        } 
+    }
+    return crocodile_speed - current_difficulty.crocodile_bullet_speed;
+}
+
+/**
  * @brief  cleanup for the crocodile thread which kills the bullet thread if it is not terminated
  * @param  arg arguments
  */
@@ -162,7 +176,7 @@ void* crocodile_fun(void *arg) {
     // movement of the crocodile
     while ( (crocodile.extra == 1) ? crocodile.x < GAME_WIDTH + 1 : crocodile.x > -CROCODILE_DIM_X-1 ) {
         random_shot = rand_range(0, current_difficulty.shot_range);                      // generate a random number to shoot
-        int shot_speed = crocodile.speed - current_difficulty.crocodile_bullet_speed;    // calculate and set the speed of the bullet
+        int shot_speed = uniform_shot_speed(crocodile.speed);                            // calculate and set the speed of the bullet
         crocodile.x += crocodile.extra;
         // if the random number is 1 and the crocodile is not active, a bullet is shot
         if(random_shot == 1 && active == FALSE && crocodile_on_screen(&crocodile)) {

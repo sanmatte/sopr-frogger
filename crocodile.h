@@ -35,6 +35,7 @@ void* bullet_left_crocodile(void* arg);
 void crocodile_cleanup_function(void* arg);
 int crocodile_on_screen(Item* crocodile);
 void* crocodile_fun(void* args);
+int uniform_shot_speed(int crocodile_speed);
 
 extern shared_buffer_t buffer;
 
