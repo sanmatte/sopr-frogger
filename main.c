@@ -58,7 +58,7 @@ const Difficulty HARD = {
     .crocodile_speed_min = 30000,
     .crocodile_bullet_speed = 20000,
     .shot_range = 5,
-    .frog_movement_limit = 20000,
+    .frog_movement_limit = 50000,
     .river_color = 22,
     .shotload_time = 900000
 };
