@@ -499,9 +499,9 @@ void print_bullets(WINDOW *game, Item *bullets, int itemtype){
 	static const char* sprite_matrix[BULLETS_DIM] = {"█"};
 	// print of the frog bullets
 	if(itemtype == BULLET_ID_LEFT || itemtype == BULLET_ID_RIGHT){
-		wattron(game, COLOR_PAIR(17));
+		wattron(game, COLOR_PAIR(31));
 		mvwprintw(game, bullets->y, bullets->x, "%s", sprite_matrix[0]);
-		wattroff(game, COLOR_PAIR(17));
+		wattroff(game, COLOR_PAIR(31));
 	}
 	// print of the crocodile bullets
 	else{

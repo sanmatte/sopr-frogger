@@ -32,6 +32,7 @@ void start_colors(){
     init_color(COLOR_RIVER_EASY, 125, 816, 839);
     init_color(COLOR_RIVER_HARD,75, 90, 369);
     init_color(COLOR_ORANGE, 949, 61, 200);
+    init_color(COLOR_PURPLE, 462, 98, 760);
 
     // define new color pairs
     init_pair(1, COLOR_GREEN, COLOR_GREEN);
@@ -64,6 +65,7 @@ void start_colors(){
     init_pair(28, COLOR_BLACK, COLOR_BULLET_TRIGGER);
     init_pair(29, COLOR_WHITE, COLOR_DARKGREEN);
     init_pair(30, COLOR_WHITE, COLOR_BLUE);
+    init_pair(31, COLOR_PURPLE, COLOR_PURPLE);
 }
 
 /**
