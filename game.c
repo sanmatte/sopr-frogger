@@ -93,7 +93,6 @@ void startGame(WINDOW *game) {
         werase(game);
         refresh();
     }
-    buffer_destroy(&buffer);
     print_endgame(game, manche, dens, score);
     // reset the game
     manche = 3;
@@ -297,7 +296,7 @@ int play(WINDOW *game) {
                 pthread_mutex_lock(&m_suspend_mutex);
                 pause_flag = 1;
                 pthread_mutex_unlock(&m_suspend_mutex);
-                WINDOW *pause = newwin(7, 28, (GAME_HEIGHT/2) + 2,  (GAME_WIDTH/2) + 8);
+                WINDOW *pause = newwin(7, 28, (LINES - 7)/2 + 3,  (COLS - 28)/2);
                 print_pause(pause, game);
                 int ch = getchar(); 
                 // wait for the user to press a key
@@ -576,8 +575,11 @@ int play(WINDOW *game) {
     free(bullet_left);
     free(timer);
     free(crocodiles_bullets);
+    
     close(client_fd);
     close(server_fd);
+
+    buffer_destroy(&buffer);
 
     delwin(game);
     return manche_result;
