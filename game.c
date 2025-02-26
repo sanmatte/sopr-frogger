@@ -359,7 +359,7 @@ int play(WINDOW *game) {
                     }
                     break;
                 case PAUSE_ID:
-                    WINDOW *pause = newwin(7, 28, (GAME_HEIGHT/2) + 2,  (GAME_WIDTH/2) + 8);
+                    WINDOW *pause = newwin(7, 28, (GAME_HEIGHT/2) + 3,  (GAME_WIDTH/2) + 8);
                     print_pause(pause, game);
                     killpg(group_pid, SIGSTOP);  // pause all child processes
                     int ch = getchar();          // wait for user input
