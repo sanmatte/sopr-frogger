@@ -108,8 +108,8 @@ void startGame(WINDOW *game) {
             break;
         case GAME_QUIT:                 // quit the game
             endwin();
+            system("clear");
             exit(0);
-            break;
         case BACK_TO_MENU:              // back to menu
             return;
             break;
