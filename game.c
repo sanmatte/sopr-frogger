@@ -62,6 +62,7 @@ int is_thread_active(pthread_t thread) {
  */
 void startGame(WINDOW *game) {
     werase(game);
+    manche = 3;
     // play until the game is over
     while (endgame == FALSE)
     {
