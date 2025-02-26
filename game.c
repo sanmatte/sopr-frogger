@@ -103,8 +103,8 @@ void startGame(WINDOW *game) {
             break;
         case GAME_QUIT:                 // quit the game
             endwin();
-            exit(0);
-            break;
+            system("clear");
+            exit(0);                    // exit the game
         case BACK_TO_MENU:              // back to menu
             return;
             break;
@@ -348,6 +348,7 @@ int play(WINDOW *game) {
                     else if(ch == 'm'){
                         manche_result = BACK_TO_MENU;
                     }
+                    delwin(pause);
                     break;
                 case QUIT_ID:
                     manche_result = GAME_QUIT;

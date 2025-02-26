@@ -137,6 +137,7 @@ int main(){
             break;
         }
     }while (return_to_menu);
+    delwin(win);
     endwin();
     return 0;
 }
