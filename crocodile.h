@@ -29,6 +29,11 @@ extern atomic_int collided_bullet;
 extern int manche;
 
 void initializeCrocodile(Item **crocodiles, int stream_speed[STREAM_NUMBER]);
+void* bullet_left_crocodile(void *arg);
+void* bullet_right_crocodile(void *arg);
+void crocodile_cleanup_function(void *arg);
+int crocodile_on_screen(Item *crocodile);
+int uniform_shot_speed(int crocodile_speed);
 void* crocodile_fun(void* args);
 
 extern shared_buffer_t buffer;

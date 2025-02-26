@@ -55,21 +55,45 @@ int showMenu(WINDOW *win, char *menu_options[]) {
 void print_rules(WINDOW *win){
     werase(win); 
     box(win, 0, 0); 
-    int y = 2; // Start position
-    mvwprintw(win, y++, 2, "RULES:");
+    int y = 2; 
+    wattron(win, A_BOLD);
+    mvwprintw(win, y++, 2, "RULES");
+    y++;
+    wattroff(win, A_BOLD);
     mvwprintw(win, y++, 2, "1. Move the frog using arrow keys.");
     mvwprintw(win, y++, 2, "2. Reach the other side without getting hit.");
     mvwprintw(win, y++, 2, "3. Water and Bullets are dangerous!");
     mvwprintw(win, y++, 2, "4. You can ride on the crocodiles.");
     mvwprintw(win, y++, 2, "5. Press SPACE to shoot.");
     mvwprintw(win, y++, 2, "6. You can shoot only 2 bullets at a time.");
-    mvwprintw(win, y++, 2, "7. Change the difficultty level from the main menu.");
+    mvwprintw(win, y++, 2, "7. Change the difficulty level from the main menu.");
     mvwprintw(win, y++, 2, "8. The higher the difficulty, the faster the enemies will be, and the slower you will be.");
     mvwprintw(win, y++, 2, "9. Everyone loves cats, right?.");
-    mvwprintw(win, y++, 2, "10. Press 'q' to quit at any time to quit the game.");
-    mvwprintw(win, y + 2, 2, "Press any key to return...");
+    mvwprintw(win, y++, 2, "10. Press 'q' to quit or 'p' to pause.");
+    y += 2;
+    wattron(win, A_BOLD);
+    mvwprintw(win, y++, 2, "DIFFICULTIES");
+    wattroff(win, A_BOLD);
+    y++;
+    mvwprintw(win, y++, 2, "EASY");
+    mvwprintw(win, y++, 2, "- Stable enemies speed");
+    mvwprintw(win, y++, 2, "- Rare enemy fire");
+    mvwprintw(win, y++, 2, "- Fast frog bullets");
+    mvwprintw(win, y++, 2, "- No limit on frog movement");
+    y++;
+    mvwprintw(win, y++, 2, "MEDIUM");
+    mvwprintw(win, y++, 2, "- Enemies speed is vary");
+    mvwprintw(win, y++, 2, "- Medium enemy fire");
+    mvwprintw(win, y++, 2, "- Moderate frog bullets speed");
+    mvwprintw(win, y++, 2, "- No limit on frog movement");
+    y++;
+    mvwprintw(win, y++, 2, "HARD");
+    mvwprintw(win, y++, 2, "- Enemies speed is unstable and varies more");
+    mvwprintw(win, y++, 2, "- Frequent enemy fire");
+    mvwprintw(win, y++, 2, "- Slow frog bullets");
+    mvwprintw(win, y++, 2, "- Limited frog movement");
     wrefresh(win); 
-    wgetch(win);  
+    wgetch(win);   
 }
 
 

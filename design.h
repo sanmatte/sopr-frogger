@@ -31,6 +31,7 @@
 #define COLOR_RIVER_EASY 21
 #define COLOR_RIVER_HARD 22
 #define COLOR_ORANGE 23
+#define COLOR_PURPLE 24
 
 // function prototipes
 void print_score(WINDOW *game, int manche, int timer, int score);
