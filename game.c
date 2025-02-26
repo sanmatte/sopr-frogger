@@ -132,6 +132,7 @@ void startGame(WINDOW *game) {
  * @return int return value, 0 if you lose the manche or 1 if you enter a den
  */
 int play(WINDOW *game) {
+    sigintdetected = FALSE;
 
     int server_fd, client_fd;
     struct sockaddr_un addr;
@@ -503,7 +504,7 @@ int play(WINDOW *game) {
                 // lost manche if the frog is not on a crocodile
                 if (frog_on_crocodile == FALSE)
                 {
-                    manche_result = MANCHE_LOST;
+                    //manche_result = MANCHE_LOST;
                 }
             }
 
