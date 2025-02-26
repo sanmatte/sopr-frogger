@@ -100,7 +100,8 @@ int main(){
         return_to_menu = 0;
         print_frogger_sprite(win);
         int selection = showMenu(win, menu_options);
-
+        erase();
+        refresh();
         switch (selection)
         {
         case 0: //play
