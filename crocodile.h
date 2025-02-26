@@ -27,5 +27,6 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid);
 void crocodile_bullet_right_controller(Item *bullet, int *pipe_fds);
 void crocodile_bullet_left_controller(Item *bullet, int *pipe_fds);
 int crocodile_on_screen(Item *crocodile);
+int uniform_shot_speed(int crocodile_speed);
 
 #endif
