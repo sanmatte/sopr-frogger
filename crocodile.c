@@ -76,6 +76,16 @@ void handlesignal(int signum) {
 }
 
 
+int uniform_shot_speed(int crocodile_speed){
+    if(current_difficulty.crocodile_speed_max <= 120000){
+        if (crocodile_speed - current_difficulty.crocodile_bullet_speed > current_difficulty.crocodile_speed_min){
+            return current_difficulty.crocodile_speed_min;
+        } 
+    }
+    return crocodile_speed - current_difficulty.crocodile_bullet_speed;
+}
+
+
 /**
  * @brief  Function to control if the crocodile is on the screen
  * @param  crocodile crocodile object
@@ -112,7 +122,7 @@ void crocodile(int *pipe_fds, Item *crocodile, int group_pid) {
     while ((crocodile->extra == 1) ? crocodile->x < GAME_WIDTH + 1 : crocodile->x > -CROCODILE_DIM_X-1) {
 
         random_shot = rand_range(0, current_difficulty.shot_range); 
-        int shot_speed = crocodile->speed - current_difficulty.crocodile_bullet_speed;
+        int shot_speed = uniform_shot_speed(crocodile->speed);
 
         // Check if the bullet process has exited
         if (active) {
